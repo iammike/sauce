@@ -56,6 +56,20 @@ The same review puts the optimal fructose-to-glucose ratio at **0.6–1.0**,
 which maps directly onto this calculator's `carbRatio`. The tested house
 recipe at 0.65 sits inside that band; the classic 2:1 (0.5) sits just below.
 
+### Why the targets aren't per-kilogram
+
+Unlike daily carbohydrate intake, intake *during* exercise is prescribed in
+absolute g/hr rather than g/kg. The limiting step is absorption across the
+intestinal wall, not delivery to muscle, and transporter capacity doesn't
+scale meaningfully with body size — so a 60 kg and a 90 kg athlete reach a
+similar ceiling. Jeukendrup states there is no rationale for expressing
+during-exercise carbohydrate recommendations per kilogram of body weight.
+
+Exercise intensity does modulate the target somewhat: easier efforts shift
+fuel use toward fat, so a long easy ride sits at the low end of its duration
+band and race pace at the high end. The effect is real but secondary to
+duration, which is why the guidance is organised by time.
+
 Sodium: 500–1000 mg/hr for an average sweater (sweat rate 0.75–1.5 L/hr ×
 sweat sodium 500–1300 mg/L), up to ~1500 mg/hr hot/heavy-sweat.
 

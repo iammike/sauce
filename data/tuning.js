@@ -39,14 +39,26 @@ export const TUNING = [
   {
     id: 'gi-distress',
     symptom: 'Bloating, sloshing, or GI distress',
-    fix: 'First dilute — more water per scoop, which is usually the actual problem. If that does not fix it, drop the fructose ratio toward 0.5 (the Steady recipe), then lower total carbs/hr.',
+    fix: 'First dilute — more water per scoop, which is usually the actual problem. If that does not fix it, drop the fructose ratio toward 0.5, then lower total carbs/hr.',
     why: 'A too-concentrated drink empties from the stomach slowly and sits there sloshing; concentration is the more common culprit than the ratio. If dilution does not help, fructose is the next suspect — malabsorption is common and dose-dependent. Gut tolerance is trainable: raise carbs/hr gradually in training rather than on race day.',
+  },
+  {
+    id: 'body-weight',
+    symptom: 'You expected to scale this to your body weight',
+    fix: 'Don\'t. Use the absolute g/hr targets as published, whatever you weigh.',
+    why: 'This is the one place in sports nutrition where per-kilogram advice does not apply. Daily carbohydrate intake is prescribed per kg of body mass, but intake during exercise is not, because the limiting step is different: absorption across the gut wall, not delivery to muscle. Intestinal transporter capacity does not scale meaningfully with body size, so a 60 kg rider and a 90 kg rider hit roughly the same ceiling. Bigger athletes burn more total fuel, but they cannot absorb proportionally more of it mid-effort.',
+  },
+  {
+    id: 'intensity',
+    symptom: 'Your ride was long but easy, or short but brutal',
+    fix: 'Sit at the low end of the band for easy efforts and the high end for hard ones. Duration picks the band; intensity picks where you land inside it.',
+    why: 'The tiers are built around moderate-to-hard endurance effort. Riding easier shifts you toward fat as a fuel and away from carbohydrate, so a five-hour social ride genuinely needs less per hour than a five-hour race. The effect is real but smaller than the duration effect, which is why the guidance is organised by time rather than by power.',
   },
   {
     id: 'bonking',
     symptom: 'Running out of energy despite drinking',
-    fix: 'Raise carbs/hr before touching the ratio — most people under-fuel. Work up toward 90 g/hr, and only then move to the Big Day ratio (0.8).',
-    why: 'The ceiling on glucose alone is about 60 g/hr; adding fructose lifts it toward 90 and beyond because the two use separate intestinal transporters. But most people fall short of even the lower number, so the fix is usually volume, not formulation. Above roughly 90 g/hr the ratio starts to matter, and that is when Big Day earns its keep.',
+    fix: 'Raise carbs/hr before touching the ratio — most people under-fuel. Work up toward 90 g/hr first, and only then consider raising the fructose ratio toward 0.8.',
+    why: 'The ceiling on glucose alone is about 60 g/hr; adding fructose lifts it toward 90, and toward 120 for trained athletes, because the two use separate intestinal transporters. But most people fall short of even the lower number, so the fix is usually volume rather than formulation. The ratio only becomes the limiting factor once you are reliably fuelling above about 90 g/hr.',
   },
   {
     id: 'flavor-weak',

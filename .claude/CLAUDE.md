@@ -16,6 +16,7 @@
 - Prefer anchored links over tooltips: mouseover doesn't exist on touch and is awkward for screen readers
 - Current tier guidance is Morton et al. 2026 (J Nutr), which revised the 2016 ≤90 g/hr cap to 90–120 g/hr for trained athletes. The 2016 statement and Jeukendrup 2014 are kept for context, marked as superseded on the upper end
 - Verify citations before publishing them. These were checked against the literature, not recalled
+- Intake targets are absolute g/hr and must NOT be turned into per-kg inputs. Absorption is the limiter, not muscle mass, and transporter capacity barely varies with body size — this is the one sports-nutrition number that isn't per-kilogram. `data/tuning.js#body-weight` explains it on the page
 
 ## Grams are the unit, scoops are a conversion
 - There is no standard scoop, so anything a user acts on is expressed in grams first. Scoop counts appear only as a labelled convenience ("of your 46 g scoops")
