@@ -1,5 +1,11 @@
 // Shareable recipe links.
 //
+// NOT CURRENTLY WIRED INTO THE UI. Sharing formulations only makes sense once
+// there is more than one genuinely tested recipe to share; until then the
+// calculator's own ratio/salt/flavouring controls cover the same ground. Kept
+// here, with its tests, so re-enabling is a matter of calling it again rather
+// than rebuilding it.
+//
 // A formulation encodes into a query string so people can trade recipes on
 // forums, Strava, wherever — no accounts, no backend, nothing stored.
 //
@@ -11,10 +17,11 @@
 
 import { SALT_PROFILES, DEFAULT_CARB_RATIO } from './calculator.js';
 import { FLAVORINGS } from '../data/flavorings.js';
+import { DEFAULT_TARGET_CARBS } from './hourly.js';
 
 export const CARB_RATIO_BOUNDS = { min: 0, max: 1.5 };
 export const TARGET_CARB_BOUNDS = { min: 10, max: 200 };
-export const DEFAULT_TARGET_CARBS = 75;
+export { DEFAULT_TARGET_CARBS };
 export const DEFAULT_FLAVORING_ID = 'strawberry';
 export const DEFAULT_SALT_PROFILE = 'endurance';
 

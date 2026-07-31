@@ -1,9 +1,5 @@
-// Per-hour fueling recommendation, built on top of a computed recipe's
-// per-scoop nutrition (see calculator.js).
-//
-// Research targets (see docs/recipe-source.md for sources):
-//   - Carbs: 60-90 g/hr for efforts long/hard enough to need dual-transporter fueling
-//   - Sodium: 500-1000 mg/hr for an average sweater, up to ~1500 mg/hr hot/heavy
+// Per-hour fueling math and the intake guidance behind it.
+// Sources in data/research.js; derivation in docs/recipe-source.md.
 
 // Established carbohydrate intake guidance is framed by effort duration, not
 // as one number — the right target for a 90-minute ride is not the right
@@ -41,6 +37,8 @@ export const CARB_INTAKE_TIERS = [
     aggressive: true,
   },
 ];
+
+export const DEFAULT_TARGET_CARBS = 75;
 
 // Glucose alone saturates SGLT1 around 60 g/hr. Adding fructose opens a
 // second transporter (GLUT5) and lifts the ceiling toward 90 and beyond.

@@ -1,13 +1,11 @@
 import { computeRecipe } from './calculator.js';
 import { planForCarbTarget, CARB_INTAKE_TIERS, absorptionCeiling, tierFor,
-  GLUCOSE_ONLY_CEILING, DUAL_TRANSPORT_CEILING } from './hourly.js';
+  GLUCOSE_ONLY_CEILING, DUAL_TRANSPORT_CEILING, DEFAULT_TARGET_CARBS } from './hourly.js';
 import { formatGrams, formatMg, formatCalories, formatCount } from './format.js';
 import { FLAVORINGS, findFlavoring } from '../data/flavorings.js';
-import { RECIPES, findRecipe } from '../data/recipes.js';
 import { TUNING } from '../data/tuning.js';
 import { PRODUCTS } from '../data/products.js';
 import { RESEARCH } from '../data/research.js';
-import { encodeFormulation, decodeFormulation, hasFormulation, DEFAULT_TARGET_CARBS } from './share.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -150,76 +148,6 @@ function recalculate() {
   renderRecipeGrid(recipe);
   renderHourlyGrid(recipe);
   renderLabel(recipe);
-}
-
-// Applying a recipe sets the formulation only. Pantry amounts and scoop size
-// are the user's kitchen, not the recipe's business, so they survive.
-function applyRecipe(id) {
-  const preset = findRecipe(id);
-  if (!preset) return;
-  applyFormulation(preset);
-  document.querySelectorAll('.recipe-card').forEach((el) => {
-    el.classList.toggle('card--active', el.dataset.recipeId === id);
-  });
-  recalculate();
-}
-
-function currentFormulation() {
-  return {
-    carbRatio: Number($('in-carb-ratio').value) || 0,
-    saltProfile: $('in-salt-profile').value,
-    flavoringId: $('in-flavor-preset').value,
-    targetCarbsPerHour: Number($('in-target-carbs').value) || DEFAULT_TARGET_CARBS,
-  };
-}
-
-// Apply a formulation to the form. Used by both recipe presets and inbound
-// share links; the values are already validated by the time they arrive here.
-function applyFormulation({ carbRatio, saltProfile, flavoringId, targetCarbsPerHour }) {
-  $('in-carb-ratio').value = carbRatio;
-  $('in-salt-profile').value = saltProfile;
-  $('in-flavor-preset').value = flavoringId;
-  $('in-target-carbs').value = targetCarbsPerHour;
-}
-
-function initShare() {
-  $('share-btn').addEventListener('click', async () => {
-    const url = `${location.origin}${location.pathname}?${encodeFormulation(currentFormulation(), RECIPES)}`;
-    const status = $('share-status');
-    try {
-      await navigator.clipboard.writeText(url);
-      status.textContent = 'Link copied.';
-    } catch {
-      // Clipboard access can be denied or unavailable; put the URL in the bar
-      // so it is still copyable by hand rather than failing silently.
-      history.replaceState(null, '', url);
-      status.textContent = 'Copy the URL from your address bar.';
-    }
-  });
-}
-
-// A shared link should land on the recipe it describes, not the default one.
-function applyIncomingShareLink() {
-  if (!hasFormulation(location.search)) return;
-  applyFormulation(decodeFormulation(location.search, RECIPES));
-  $('share-status').textContent = 'Loaded from a shared link.';
-}
-
-function initRecipes() {
-  $('recipes-grid').innerHTML = RECIPES.map((r) => `
-    <button type="button" class="card recipe-card" data-recipe-id="${r.id}">
-      <span class="card__eyebrow">${r.tagline}${r.confidence === 'tested' ? ' · tested' : ''}</span>
-      <span class="recipe-card__name">${r.name}</span>
-      <span class="recipe-card__specs data">${r.carbRatio > 0 ? `${(1 / r.carbRatio).toFixed(2)}:1` : 'glucose only'} · ${r.saltProfile} salt · ${r.targetCarbsPerHour} g/hr</span>
-      <span class="recipe-card__best">${r.bestFor}</span>
-      <span class="recipe-card__why">${r.why}</span>
-    </button>
-  `).join('');
-
-  $('recipes-grid').addEventListener('click', (e) => {
-    const card = e.target.closest('.recipe-card');
-    if (card) applyRecipe(card.dataset.recipeId);
-  });
 }
 
 function initTuning() {
@@ -366,13 +294,10 @@ function initLabel() {
 
 function init() {
   initFlavorPresets();
-  initRecipes();
-  initShare();
   initTuning();
   initProducts();
   initResearch();
   initLabel();
-  applyIncomingShareLink();
 
   document.getElementById('calc-form').addEventListener('input', recalculate);
   $('in-flavor-preset').addEventListener('change', recalculate);

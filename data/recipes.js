@@ -1,4 +1,10 @@
-// Recommended recipe presets.
+// Recipe presets.
+//
+// NOT CURRENTLY WIRED INTO THE UI. Only 'classic' and 'bare-bones' have
+// actually been made and ridden on; the rest are research-backed
+// extrapolations, and presenting them as a curated collection claimed more
+// authority than that warrants. Kept here, with its tests, for when there are
+// enough genuinely tested variants to be worth surfacing.
 //
 // Each preset sets the *formulation* (glucose:fructose ratio, salt profile,
 // flavoring, intended intake rate). It deliberately does NOT touch the "on

@@ -15,7 +15,12 @@
 - Per-hour fueling math must be built on `recipe.perGram`, never `recipe.perScoop` — how much mix an hour takes is a property of the formulation and must not change because someone owns a bigger scoop. There are regression tests for this in `tests/hourly.test.js`
 - Recipe presets deliberately don't set scoop size or pantry amounts
 
-## Share links come in three forms
+## Parked features — don't re-wire without a reason
+- `data/recipes.js` and `src/share.js` are complete and tested but deliberately NOT imported by `src/app.js`. Only `classic` and `bare-bones` were ever actually made; the rest are research-backed extrapolations, and shipping them as a recipe collection (plus a way to share untested variants) claimed more authority than the evidence supports
+- The calculator's ratio/salt/flavouring controls already cover everything a preset did, in one field edit
+- Re-wire when there are several genuinely tested variants. Until then, leave them out of the bundle
+
+## Share links come in three forms (parked — see above)
 - `?p=<slug>` a preset (preferred, readable), `?c=<token>` a packed custom formulation, and the original `?r=&s=&f=&t=` long form which is still parsed so links already shared keep working
 - The packed token's field order and slot sizes in `src/share.js` are FROZEN. Changing them silently changes what existing tokens mean — bump `TOKEN_VERSION` instead. `tests/share.test.js` pins a known token/value pair to catch this
 - Flavorings carry an explicit append-only `shareId`; never derive the packing from array position
