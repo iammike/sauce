@@ -18,6 +18,9 @@
 export const FLAVORINGS = [
   {
     id: 'strawberry',
+    pricePerGram: 26 / 499,
+    priceBasis: '$26 / 1.1 lb (499 g)',
+    priceConfidence: 'actual',
     shareId: 0,
     name: 'Strawberry (freeze-dried powder)',
     ratio: 0.2,
@@ -28,6 +31,9 @@ export const FLAVORINGS = [
   },
   {
     id: 'other-freeze-dried-fruit',
+    pricePerGram: 26 / 500,
+    priceBasis: '~$26 / 500 g, as for strawberry',
+    priceConfidence: 'estimated',
     shareId: 1,
     name: 'Other freeze-dried fruit powder (raspberry, mango, etc.)',
     ratio: 0.2,
@@ -38,6 +44,9 @@ export const FLAVORINGS = [
   },
   {
     id: 'unsweetened-drink-mix',
+    pricePerGram: 10 / 80,
+    priceBasis: '~$10 / 100 packets (~0.8 g each)',
+    priceConfidence: 'estimated',
     shareId: 2,
     name: 'Unsweetened drink-mix packet (True Lemon / True Lime style)',
     ratio: 0.02,
@@ -48,6 +57,9 @@ export const FLAVORINGS = [
   },
   {
     id: 'kool-aid-unsweetened',
+    pricePerGram: 0.25 / 3.9,
+    priceBasis: '~$0.25 / 3.9 g packet',
+    priceConfidence: 'estimated',
     shareId: 3,
     name: 'Unsweetened powdered drink mix (Kool-Aid style)',
     ratio: 0.03,
@@ -58,6 +70,9 @@ export const FLAVORINGS = [
   },
   {
     id: 'zero-sugar-flavor-drops',
+    pricePerGram: 0,
+    priceBasis: 'Negligible by mass — dose to taste',
+    priceConfidence: 'estimated',
     shareId: 4,
     name: 'Zero-sugar liquid flavor drops (sucralose/stevia-based)',
     ratio: 0.01,
@@ -68,6 +83,9 @@ export const FLAVORINGS = [
   },
   {
     id: 'unflavored',
+    pricePerGram: 0,
+    priceBasis: 'No flavoring',
+    priceConfidence: 'actual',
     shareId: 5,
     name: 'Unflavored / plain',
     ratio: 0,

@@ -1,10 +1,9 @@
 // Amazon Associates product links.
 //
-// Specific products haven't been picked yet, so `url` points at an Amazon
-// search rather than a guessed ASIN/product page — the link is honest (if
-// generic) in the meantime. Replace each with the exact product page once
-// it's decided, keeping the same tag param, and drop that entry's
-// `placeholder` flag.
+// Real product pages use the canonical /dp/<ASIN> form with our tag; the
+// ref_=/th= cruft a browser session appends is stripped. Anything still
+// marked `placeholder: true` points at an Amazon search rather than a guessed
+// ASIN — honest, if generic, until a specific product is chosen.
 
 // Store ID is `mikeylikesit-20`; `sauce-calc-20` is a tracking ID under it,
 // created specifically for this site so its earnings stay segmented in
@@ -19,30 +18,28 @@ function searchUrl(query) {
 export const PRODUCTS = [
   {
     id: 'maltodextrin',
-    name: 'Maltodextrin powder',
-    note: 'Primary carb — complex, low sweetness. Look for a plain, unflavored food-grade powder.',
-    url: searchUrl('maltodextrin powder food grade'),
-    placeholder: true,
+    name: 'Nutricost Maltodextrin Powder, 4 lb',
+    note: 'Primary carb — complex, low sweetness. This is the one the recipe costs are based on.',
+    // Canonical /dp/ form with our tag; the referrer cruft from a browser
+    // session (ref_=, th=) is deliberately stripped.
+    url: `https://www.amazon.com/dp/B079V9KD8T?tag=${ASSOCIATES_TAG}`,
   },
   {
     id: 'fructose',
-    name: 'Fructose powder',
+    name: 'Now Foods Fructose Fruit Sugar, 3 lb (2-pack)',
     note: 'Second carb transporter (glucose/fructose co-transport). Plain crystalline fructose, not high-fructose corn syrup.',
-    url: searchUrl('fructose powder'),
-    placeholder: true,
+    url: `https://www.amazon.com/dp/B00HTO3ZKM?tag=${ASSOCIATES_TAG}`,
   },
   {
     id: 'flavoring',
-    name: 'Flavoring (freeze-dried strawberry powder)',
-    note: 'The tested default — swap for anything in the flavorings table.',
-    url: searchUrl('freeze dried strawberry powder'),
-    placeholder: true,
+    name: 'Gya Tea Co Organic Freeze-Dried Strawberry Powder, 1.1 lb',
+    note: 'The tested default, and the biggest cost lever in the mix — swap it or drop it to cut the price per hour.',
+    url: `https://www.amazon.com/dp/B0DZX5QTJ4?tag=${ASSOCIATES_TAG}`,
   },
   {
     id: 'sodium-citrate',
-    name: 'Sodium citrate (dihydrate)',
-    note: 'Electrolyte source — ~235 mg Na/g. Not table salt.',
-    url: searchUrl('sodium citrate dihydrate food grade'),
-    placeholder: true,
+    name: 'Sodium Citrate Powder, 14 oz',
+    note: 'Electrolyte source — ~235 mg Na/g. Food grade, and not the same thing as table salt.',
+    url: `https://www.amazon.com/dp/B07NF4B3Y7?tag=${ASSOCIATES_TAG}`,
   },
 ];

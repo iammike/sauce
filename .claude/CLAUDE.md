@@ -47,6 +47,12 @@
 - Artwork is read with `FileReader` into a data URL and never uploaded — there is no server to upload to. Keep it that way
 - The `accept` attribute is a hint, not a control: MIME type and size are re-checked in `loadArtwork()`. Don't add SVG to the allowlist (it can carry script)
 
+## Cost data is dated and approximate
+- `data/costs.js` carries `PRICED_AS_OF` and a `basis` string per ingredient; flavoring prices live on the flavorings themselves since that slot varies hugely. Every price is labelled `actual` or `estimated` and the page says so
+- Comparisons are normalised per gram of **carbohydrate**, never per gram of powder — otherwise the most diluted product looks cheapest
+- Don't rig the comparison. Regular Gatorade is genuinely cheaper per carb than making it yourself, and the page says so; there's a test asserting it (`tests/cost.test.js`)
+- Prices drift. Re-check and bump `PRICED_AS_OF` rather than silently leaving stale numbers behind a confident-looking table
+
 ## Amazon Associate links
 - `ASSOCIATES_TAG` in `data/products.js` is `sauce-calc-20`, a site-specific tracking ID under store `mikeylikesit-20`. Don't reuse it on other sites — the point is per-site attribution
 - Product `url`s still point at Amazon search results, not guessed ASINs. Replace with the exact product page once picked, keep the `tag` param, and drop that entry's `placeholder: true`

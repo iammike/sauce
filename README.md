@@ -20,8 +20,12 @@ Supplement Facts panel. From there:
   the jar holds. Ingredients are derived from the batch and ordered by
   descending weight, as food labels require. Optional artwork never leaves the
   browser, and print rules isolate the label at true size.
-- **Where to buy** — Amazon Associate links for the ingredients. The tracking
-  tag is live; specific products are still to be picked (see open issues).
+- **Cost** — what an hour of fueling costs to make, against Gatorade
+  Endurance, Maurten 320, and regular Gatorade, normalised per gram of
+  carbohydrate. Plus where the money actually goes: flavoring is ~10% of the
+  weight but ~32% of the spend.
+- **Where to buy** — Amazon Associate links for the exact products the costs
+  are based on.
 - **References** — the research behind the ratios and hourly targets.
 
 ## How it works
@@ -33,6 +37,7 @@ Supplement Facts panel. From there:
   recipe isn't tied to strawberry, any flavoring type plugs in here
 - `data/products.js` / `data/research.js` — Where to Buy / References content
 - `data/tuning.js` — symptom-driven tuning guidance
+- `src/cost.js` / `data/costs.js` — batch cost and commercial comparison
 - `src/share.js` / `data/recipes.js` — **not wired into the UI.** Recipe
   presets and shareable formulation links, built then parked: only one recipe
   has genuinely been made and tested, so a curated collection and a way to

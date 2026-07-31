@@ -7,6 +7,8 @@ import { FLAVORINGS, findFlavoring } from '../data/flavorings.js';
 import { TUNING } from '../data/tuning.js';
 import { PRODUCTS } from '../data/products.js';
 import { RESEARCH, findResearch } from '../data/research.js';
+import { batchCost, costPerGramCarb, compareAtCarbTarget } from './cost.js';
+import { PRICED_AS_OF, INGREDIENT_COSTS } from '../data/costs.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -73,6 +75,55 @@ function renderFactsPanel(recipe, serving, targetCarbs) {
   $('fp-scoop-note').textContent = serving.scoops !== null
     ? `≈ ${formatCount(serving.scoops, 1)} of your scoops`
     : '';
+}
+
+const money = (v) => `$${v.toFixed(2)}`;
+
+function renderCost(recipe, flavor, targetCarbs) {
+  const cost = batchCost(recipe.recipeGrams, flavor.pricePerGram);
+  const perGramCarb = costPerGramCarb(cost.total, recipe.totals.carbsG);
+  const { mine, commercial } = compareAtCarbTarget(perGramCarb, targetCarbs);
+
+  const rows = [
+    { name: 'The Sauce', perHour: mine, mine: true, note: `Your current mix, at ${money(cost.total)} for the whole ${formatGrams(recipe.actualBatch)} batch.`, confidence: 'actual' },
+    ...commercial,
+  ].sort((a, b) => a.perHour - b.perHour);
+
+  $('cost-grid').innerHTML = rows.map((r) => `
+    <div class="card${r.mine ? ' card--active' : ''}">
+      <p class="card__eyebrow">${r.name}${r.confidence === 'estimated' ? ' · estimated' : ''}</p>
+      <p class="card__value data">${money(r.perHour)}<span class="card__unit"> / hour</span></p>
+      ${!r.mine && r.multiple ? `<p class="field-hint"><strong>${r.multiple >= 1
+        ? `${r.multiple.toFixed(1)}× the cost of making it`
+        : `${(1 / r.multiple).toFixed(1)}× cheaper than making it`}</strong></p>` : ''}
+      <p class="field-hint">${r.note ?? ''}</p>
+    </div>
+  `).join('');
+
+  // Share of spend rarely matches share of weight — that contrast is the
+  // actually useful thing here.
+  const labels = {
+    maltodextrin: 'Maltodextrin', fructose: 'Fructose',
+    flavoring: flavor.name, salt: 'Sodium citrate',
+  };
+  $('cost-breakdown').innerHTML = Object.entries(cost.perIngredient)
+    .filter(([, v]) => v > 0)
+    .sort((a, b) => b[1] - a[1])
+    .map(([key, value]) => {
+      const weightShare = recipe.actualBatch > 0 ? recipe.recipeGrams[key] / recipe.actualBatch : 0;
+      const costShare = cost.share[key];
+      const skew = weightShare > 0 ? costShare / weightShare : 0;
+      return `
+        <div class="card">
+          <p class="card__eyebrow">${labels[key]}</p>
+          <p class="card__value data">${(costShare * 100).toFixed(0)}%<span class="card__unit"> of cost</span></p>
+          <p class="field-hint">${(weightShare * 100).toFixed(0)}% of the weight${skew >= 1.5 ? ` — <span class="warn">${skew.toFixed(1)}× its share</span>` : ''}</p>
+          <p class="field-hint">${money(value)} per batch</p>
+        </div>
+      `;
+    }).join('');
+
+  $('cost-note').textContent = `Ingredient prices as of ${PRICED_AS_OF} (${INGREDIENT_COSTS.maltodextrin.basis}, ${INGREDIENT_COSTS.fructose.basis}, ${INGREDIENT_COSTS.salt.basis}, flavoring ${flavor.priceBasis}). Prices move — treat these as ballpark, not quotes.`;
 }
 
 function renderRecipeGrid(recipe) {
@@ -189,6 +240,7 @@ function recalculate() {
   renderRecipeGrid(recipe);
   renderHourlyGrid(recipe);
   renderLabel(recipe, serving, targetCarbs);
+  renderCost(recipe, findFlavoring($('in-flavor-preset').value) ?? FLAVORINGS[0], targetCarbs);
 }
 
 function initTuning() {
