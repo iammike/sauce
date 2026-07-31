@@ -14,6 +14,15 @@
 - Sodium is always sodium citrate dihydrate at 235 mg Na/g — never table salt's ~393 mg Na/g. An earlier version of the source spreadsheet used the NaCl figure and overstated sodium by ~40%; don't reintroduce that
 - See `docs/recipe-source.md` for the full ratio derivation and the source spreadsheet link
 
+## Share links are untrusted input
+- `src/share.js` decodes recipe formulations from the query string. Anyone can hand-edit a link, so every value is validated against a known set (`hasOwnProperty`, not `in` — otherwise `constructor`/`__proto__` pass) or clamped to a range, with per-field fallback
+- Decoded values are assigned to form inputs only, never interpolated into `innerHTML`
+- Note `Number(null)` is `0`, not `NaN` — a missing param must be rejected before conversion or it silently clamps to the minimum instead of falling back. There's a regression test for this
+
+## Label artwork stays client-side
+- Artwork is read with `FileReader` into a data URL and never uploaded — there is no server to upload to. Keep it that way
+- The `accept` attribute is a hint, not a control: MIME type and size are re-checked in `loadArtwork()`. Don't add SVG to the allowlist (it can carry script)
+
 ## Amazon Associate links
 - `data/products.js` — `TODO_TAG` is a placeholder; links point at Amazon search results, not guessed ASINs, until real products are picked. Replace `url` with the exact product page once decided, keeping the same `tag` param
 

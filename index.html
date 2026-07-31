@@ -75,6 +75,10 @@
       <h2 class="panel__title">Start from a recipe</h2>
       <p>Each one sets the formulation — the glucose:fructose ratio, salt level, and flavoring. Your pantry amounts and scoop size stay as you have them, since those describe your kitchen, not the recipe.</p>
       <div class="card-grid" id="recipes-grid"></div>
+      <div class="share-bar">
+        <button type="button" class="btn btn--outline" id="share-btn">Copy link to this recipe</button>
+        <span class="field-hint" id="share-status" role="status">Shares the formulation only — not your pantry or scoop.</span>
+      </div>
     </section>
 
     <section class="panel panel--calculator" id="calculator">
@@ -178,6 +182,15 @@
           <label for="in-label-date">Batch date</label>
           <input type="date" id="in-label-date">
         </div>
+        <div class="field">
+          <label for="in-label-note">Note <span class="field-hint">optional</span></label>
+          <input type="text" id="in-label-note" maxlength="60" placeholder="Mix 1 scoop per 500ml">
+        </div>
+        <div class="field">
+          <label for="in-label-art">Artwork <span class="field-hint">optional</span></label>
+          <input type="file" id="in-label-art" accept="image/png,image/jpeg,image/webp,image/gif">
+          <span class="field-hint" id="art-status">Stays in your browser — never uploaded.</span>
+        </div>
       </div>
 
       <div class="label-actions no-print">
@@ -213,6 +226,12 @@
               <dt>Sodium</dt><dd id="lb-sodium">— mg</dd>
             </div>
           </dl>
+
+          <figure class="label-sheet__art" id="lb-art-wrap" hidden>
+            <img id="lb-art" alt="">
+          </figure>
+
+          <p class="label-sheet__note" id="lb-note" hidden></p>
 
           <p class="label-sheet__ingredients"><strong>Ingredients:</strong> <span id="lb-ingredients">—</span></p>
 

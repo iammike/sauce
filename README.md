@@ -10,9 +10,17 @@ just strawberry — see `data/flavorings.js`), and the calculator finds the
 limiting ingredient, scales the rest of the batch, and fills out a live
 Supplement Facts panel. From there:
 
+- **Recipes** — five formulation presets (`data/recipes.js`) that set the
+  glucose:fructose ratio, salt level, and flavoring. They leave pantry amounts
+  and scoop size alone, since those describe your kitchen, not the recipe.
+  Any formulation encodes into a shareable link.
 - **Per hour** — pick a carb target and get the scoops/hr it takes, checked
   against research sodium/carb targets.
-- **Label** — print the live Supplement Facts panel as a batch label.
+- **Dial it in** — symptom-driven tuning guidance (`data/tuning.js`): what to
+  change when it's too sweet, too salty, or sitting in your stomach.
+- **Label** — a real 3x4in label with a derived ingredients list (ordered by
+  descending weight, as food labels require), optional artwork, and print
+  rules that isolate it at true size. Artwork never leaves the browser.
 - **Where to buy** — Amazon Associate links for the ingredients (placeholder
   tag/products until real ones are picked — see open issues).
 - **References** — the research behind the ratios and hourly targets.
@@ -25,6 +33,8 @@ Supplement Facts panel. From there:
 - `data/flavorings.js` — flavoring presets (ratio, carb/sugar fraction); the
   recipe isn't tied to strawberry, any flavoring type plugs in here
 - `data/products.js` / `data/research.js` — Where to Buy / References content
+- `src/share.js` — encode/decode recipe links, treating the URL as untrusted
+- `data/recipes.js` / `data/tuning.js` — recipe presets and tuning guidance
 - `src/app.js` — DOM wiring, no framework
 
 ## Develop

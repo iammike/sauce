@@ -6,6 +6,7 @@ import { RECIPES, findRecipe } from '../data/recipes.js';
 import { TUNING } from '../data/tuning.js';
 import { PRODUCTS } from '../data/products.js';
 import { RESEARCH } from '../data/research.js';
+import { encodeFormulation, decodeFormulation, hasFormulation, DEFAULT_TARGET_CARBS } from './share.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -139,14 +140,52 @@ function recalculate() {
 function applyRecipe(id) {
   const preset = findRecipe(id);
   if (!preset) return;
-  $('in-carb-ratio').value = preset.carbRatio;
-  $('in-salt-profile').value = preset.saltProfile;
-  $('in-flavor-preset').value = preset.flavoringId;
-  $('in-target-carbs').value = preset.targetCarbsPerHour;
+  applyFormulation(preset);
   document.querySelectorAll('.recipe-card').forEach((el) => {
     el.classList.toggle('card--active', el.dataset.recipeId === id);
   });
   recalculate();
+}
+
+function currentFormulation() {
+  return {
+    carbRatio: Number($('in-carb-ratio').value) || 0,
+    saltProfile: $('in-salt-profile').value,
+    flavoringId: $('in-flavor-preset').value,
+    targetCarbsPerHour: Number($('in-target-carbs').value) || DEFAULT_TARGET_CARBS,
+  };
+}
+
+// Apply a formulation to the form. Used by both recipe presets and inbound
+// share links; the values are already validated by the time they arrive here.
+function applyFormulation({ carbRatio, saltProfile, flavoringId, targetCarbsPerHour }) {
+  $('in-carb-ratio').value = carbRatio;
+  $('in-salt-profile').value = saltProfile;
+  $('in-flavor-preset').value = flavoringId;
+  $('in-target-carbs').value = targetCarbsPerHour;
+}
+
+function initShare() {
+  $('share-btn').addEventListener('click', async () => {
+    const url = `${location.origin}${location.pathname}?${encodeFormulation(currentFormulation())}`;
+    const status = $('share-status');
+    try {
+      await navigator.clipboard.writeText(url);
+      status.textContent = 'Link copied.';
+    } catch {
+      // Clipboard access can be denied or unavailable; put the URL in the bar
+      // so it is still copyable by hand rather than failing silently.
+      history.replaceState(null, '', url);
+      status.textContent = 'Copy the URL from your address bar.';
+    }
+  });
+}
+
+// A shared link should land on the recipe it describes, not the default one.
+function applyIncomingShareLink() {
+  if (!hasFormulation(location.search)) return;
+  applyFormulation(decodeFormulation(location.search));
+  $('share-status').textContent = 'Loaded from a shared link.';
 }
 
 function initRecipes() {
@@ -239,16 +278,66 @@ function renderLabel(recipe) {
   $('lb-sodium').textContent = formatMg(recipe.perScoop.sodiumMg);
   $('lb-ingredients').textContent = ingredientList(recipe);
 
+  const note = $('in-label-note').value.trim();
+  const noteEl = $('lb-note');
+  noteEl.textContent = note;
+  noteEl.hidden = note === '';
+
   const date = $('in-label-date').value;
   $('lb-batch').textContent = date ? `BATCH ${date.replace(/-/g, '')}` : '';
+}
+
+// Artwork is read with FileReader and rendered from a data URL, so the image
+// never leaves the browser — there is no upload and no server to upload to.
+// Still worth bounding: a huge file turns into a huge base64 string and makes
+// the page sluggish, and the accept="" attribute alone is trivially bypassed.
+const MAX_ART_BYTES = 2 * 1024 * 1024;
+const ALLOWED_ART_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
+
+function loadArtwork(file) {
+  const status = $('art-status');
+  const wrap = $('lb-art-wrap');
+
+  if (!file) {
+    wrap.hidden = true;
+    $('lb-art').removeAttribute('src');
+    status.textContent = 'Stays in your browser — never uploaded.';
+    return;
+  }
+
+  if (!ALLOWED_ART_TYPES.includes(file.type)) {
+    status.textContent = 'That file type is not supported — use PNG, JPEG, WebP, or GIF.';
+    wrap.hidden = true;
+    return;
+  }
+
+  if (file.size > MAX_ART_BYTES) {
+    status.textContent = `That image is ${(file.size / 1024 / 1024).toFixed(1)} MB — keep it under 2 MB.`;
+    wrap.hidden = true;
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    $('lb-art').src = reader.result;
+    wrap.hidden = false;
+    status.textContent = `${file.name} — stays in your browser.`;
+  };
+  reader.onerror = () => {
+    status.textContent = 'Could not read that file.';
+    wrap.hidden = true;
+  };
+  reader.readAsDataURL(file);
 }
 
 function initLabel() {
   const dateInput = $('in-label-date');
   if (!dateInput.value) dateInput.value = new Date().toISOString().slice(0, 10);
 
-  ['in-label-name', 'in-label-flavor', 'in-label-maker', 'in-label-date']
+  ['in-label-name', 'in-label-flavor', 'in-label-maker', 'in-label-date', 'in-label-note']
     .forEach((id) => $(id).addEventListener('input', recalculate));
+
+  $('in-label-art').addEventListener('change', (e) => loadArtwork(e.target.files[0]));
 
   $('print-label-btn').addEventListener('click', () => {
     const title = document.title;
@@ -261,10 +350,12 @@ function initLabel() {
 function init() {
   initFlavorPresets();
   initRecipes();
+  initShare();
   initTuning();
   initProducts();
   initResearch();
   initLabel();
+  applyIncomingShareLink();
 
   document.getElementById('calc-form').addEventListener('input', recalculate);
   $('in-flavor-preset').addEventListener('change', recalculate);

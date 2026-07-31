@@ -323,7 +323,17 @@ main {
   color: var(--ink-soft);
 }
 
-.field input,
+.field input[type="file"] {
+  background: transparent;
+  border: 2px dashed var(--input-yellow-border);
+  padding: 0.45rem 0.5rem;
+  font-family: 'Karla', sans-serif;
+  font-size: 0.82rem;
+  color: var(--ink);
+  border-radius: 2px;
+}
+
+.field input:not([type="file"]),
 .field select {
   background: var(--input-yellow);
   border: 2px solid var(--input-yellow-border);
@@ -431,6 +441,16 @@ main {
   font-size: 0.82rem;
   color: var(--ink-soft);
   line-height: 1.45;
+}
+
+/* ---------- Share bar ---------- */
+
+.share-bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 1.5rem;
 }
 
 /* ---------- Tuning accordion ---------- */
@@ -671,6 +691,29 @@ main {
 .label-facts__row dt, .label-facts__row dd { margin: 0; font-weight: inherit; }
 .label-facts__row dd { font-family: 'IBM Plex Mono', monospace; }
 .label-facts .data { font-family: 'IBM Plex Mono', monospace; }
+
+.label-sheet__art {
+  margin: 0;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.label-sheet__art img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.label-sheet__note {
+  margin: 0;
+  font-size: 0.09in;
+  font-weight: 700;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
 
 .label-sheet__ingredients {
   font-size: 0.082in;
