@@ -1,0 +1,476 @@
+/* The Sauce — visual identity: an interactive supplement-facts label.
+   The whole page borrows the FDA Nutrition/Supplement Facts panel vernacular
+   (thick black rules, condensed bold numerals, right-aligned data) because
+   the product itself IS a nutrition label — the calculator's job is to fill
+   one out live. Yellow input cells mirror the "yellow cells are inputs you
+   change" convention from the source spreadsheet. */
+
+@import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=Karla:ital,wght@0,400;0,500;0,700;1,400&family=IBM+Plex+Mono:wght@500;600&display=swap');
+
+:root {
+  --paper: #f7f3ea;
+  --paper-raised: #ffffff;
+  --ink: #171512;
+  --ink-soft: #4a453d;
+  --rule: #171512;
+  --strawberry: #c8375a;
+  --strawberry-dark: #9c2a45;
+  --malto: #b3803f;
+  --sodium: #2f6f68;
+  --input-yellow: #f7d354;
+  --input-yellow-border: #a6821f;
+  --focus: #1f7a86;
+  --shadow: rgba(23, 21, 18, 0.16);
+}
+
+:root[data-theme="dark"] {
+  --paper: #17140f;
+  --paper-raised: #221e17;
+  --ink: #f2ede1;
+  --ink-soft: #c9c1b0;
+  --rule: #f2ede1;
+  --strawberry: #ef6b87;
+  --strawberry-dark: #f79cb0;
+  --malto: #e0b169;
+  --sodium: #6fc4bb;
+  --input-yellow: #caa62e;
+  --input-yellow-border: #f7d354;
+  --focus: #6fd6e6;
+  --shadow: rgba(0, 0, 0, 0.5);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #17140f;
+    --paper-raised: #221e17;
+    --ink: #f2ede1;
+    --ink-soft: #c9c1b0;
+    --rule: #f2ede1;
+    --strawberry: #ef6b87;
+    --strawberry-dark: #f79cb0;
+    --malto: #e0b169;
+    --sodium: #6fc4bb;
+    --input-yellow: #caa62e;
+    --input-yellow-border: #f7d354;
+    --focus: #6fd6e6;
+    --shadow: rgba(0, 0, 0, 0.5);
+  }
+}
+
+* { box-sizing: border-box; }
+
+html { color-scheme: light dark; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Karla', system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--strawberry); }
+a:hover { color: var(--strawberry-dark); }
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.display {
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+}
+
+.data {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Header ---------- */
+
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1.25rem 1.5rem;
+  max-width: 72rem;
+  margin: 0 auto;
+}
+
+.wordmark {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  text-decoration: none;
+  color: var(--ink);
+}
+
+.wordmark__the {
+  font-family: 'Karla', sans-serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 1rem;
+  color: var(--ink-soft);
+}
+
+.wordmark__sauce {
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-weight: 900;
+  font-size: 1.9rem;
+  letter-spacing: 0.01em;
+  color: var(--strawberry);
+}
+
+.site-nav {
+  display: flex;
+  gap: 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.site-nav a {
+  text-decoration: none;
+  color: var(--ink);
+  border-bottom: 2px solid transparent;
+  padding-bottom: 2px;
+}
+
+.site-nav a:hover { border-color: var(--strawberry); }
+
+/* ---------- Hero / brand block ---------- */
+
+.hero-band {
+  background: var(--strawberry);
+  color: #fff9f0;
+  padding: 2.5rem 1.5rem 3.5rem;
+}
+
+.hero-inner {
+  max-width: 72rem;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 2.5rem;
+  align-items: end;
+}
+
+@media (max-width: 860px) {
+  .hero-inner { grid-template-columns: 1fr; }
+}
+
+.kicker {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.85;
+  margin: 0 0 0.5rem;
+}
+
+.headline {
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-weight: 900;
+  font-size: clamp(2.4rem, 5vw, 4.2rem);
+  line-height: 0.95;
+  margin: 0 0 1rem;
+  text-transform: uppercase;
+}
+
+.headline em {
+  font-style: normal;
+  color: #171512;
+  background: #fff9f0;
+  padding: 0 0.3rem;
+}
+
+.dek {
+  font-size: 1.05rem;
+  max-width: 34rem;
+  margin: 0;
+  color: #fff2e4;
+}
+
+/* ---------- Supplement Facts panel (the signature element) ---------- */
+
+.facts-panel {
+  background: var(--paper-raised);
+  color: var(--ink);
+  border: 3px solid var(--rule);
+  max-width: 24rem;
+  margin-left: auto;
+  box-shadow: 0 12px 28px var(--shadow);
+}
+
+.facts-panel__title {
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-weight: 900;
+  font-size: 1.6rem;
+  text-transform: uppercase;
+  padding: 0.6rem 0.9rem 0.3rem;
+  border-bottom: 8px solid var(--rule);
+  margin: 0;
+}
+
+.facts-panel__servings {
+  padding: 0.4rem 0.9rem;
+  font-size: 0.85rem;
+  border-bottom: 4px solid var(--rule);
+  display: flex;
+  justify-content: space-between;
+}
+
+.facts-panel__amount {
+  padding: 0.4rem 0.9rem 0.2rem;
+  border-bottom: 8px solid var(--rule);
+}
+
+.facts-panel__amount-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.facts-panel__calories {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-weight: 900;
+  font-size: 2.1rem;
+}
+
+.facts-panel__calories span:last-child {
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.facts-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.3rem 0.9rem;
+  border-bottom: 1px solid var(--rule);
+  font-size: 0.92rem;
+}
+
+.facts-row--bold { font-weight: 700; }
+.facts-row--indent { padding-left: 1.5rem; font-size: 0.85rem; }
+.facts-row dt { margin: 0; font-weight: inherit; }
+.facts-row dd { margin: 0; font-family: 'IBM Plex Mono', monospace; }
+
+.facts-panel__thick { border-bottom-width: 8px; }
+
+.facts-panel__footnote {
+  padding: 0.6rem 0.9rem 0.8rem;
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+  line-height: 1.4;
+}
+
+/* ---------- Panels (Supplement Facts / Directions / Where to Buy / References) ---------- */
+
+main {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 0 1.5rem 4rem;
+}
+
+.panel {
+  padding: 3rem 0;
+  border-bottom: 3px solid var(--rule);
+}
+
+.panel:last-of-type { border-bottom: none; }
+
+.panel__eyebrow {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--strawberry);
+  margin: 0 0 0.4rem;
+}
+
+.panel__title {
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  margin: 0 0 1.25rem;
+}
+
+/* ---------- Forms / inputs (yellow-cell convention) ---------- */
+
+.input-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.field label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+
+.field input,
+.field select {
+  background: var(--input-yellow);
+  border: 2px solid var(--input-yellow-border);
+  border-radius: 2px;
+  padding: 0.5rem 0.6rem;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 1rem;
+  color: var(--ink);
+}
+
+.field--select select { font-family: 'Karla', sans-serif; }
+
+.field-hint {
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+}
+
+/* ---------- Cards (hourly recommendation, products, research) ---------- */
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 1.25rem;
+}
+
+.card {
+  background: var(--paper-raised);
+  border: 2px solid var(--rule);
+  padding: 1.25rem;
+}
+
+.card--active {
+  border-color: var(--sodium);
+  box-shadow: 0 0 0 2px var(--sodium) inset;
+}
+
+.card__eyebrow {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+  margin: 0 0 0.2rem;
+}
+
+.card__value {
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-weight: 900;
+  font-size: 2.4rem;
+  line-height: 1;
+  margin: 0 0 0.4rem;
+}
+
+.status-pill {
+  display: inline-block;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+}
+
+.status-pill--in-range { color: var(--sodium); }
+.status-pill--low { color: var(--malto); }
+.status-pill--high { color: var(--strawberry); }
+
+/* ---------- Buttons ---------- */
+
+.btn {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: var(--ink);
+  color: var(--paper);
+  border: 2px solid var(--ink);
+  padding: 0.6rem 1.1rem;
+  cursor: pointer;
+}
+
+.btn:hover { background: transparent; color: var(--ink); }
+
+.btn--outline {
+  background: transparent;
+  color: var(--ink);
+}
+
+.btn--outline:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* ---------- Product / research lists ---------- */
+
+.product-card, .research-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.product-card__name, .research-card__name {
+  font-weight: 700;
+  margin: 0;
+}
+
+.product-card__note, .research-card__note {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+.todo-badge {
+  display: inline-block;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.68rem;
+  background: var(--input-yellow);
+  border: 1px solid var(--input-yellow-border);
+  padding: 0.1rem 0.4rem;
+  align-self: flex-start;
+}
+
+/* ---------- Footer ---------- */
+
+.site-footer {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 3rem;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+/* ---------- Print label ---------- */
+
+@media print {
+  .site-header, .site-footer, .hero-band, .panel--calculator .input-grid,
+  .no-print { display: none !important; }
+  body { background: #fff; }
+  .facts-panel { box-shadow: none; margin: 2rem auto; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}

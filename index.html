@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Sauce — homemade endurance fuel calculator</title>
+  <meta name="description" content="Build a batch of homemade endurance hydration mix from what you have on hand, get an hourly fueling recommendation, and print a nutrition label.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="dist/app.min.css">
+</head>
+<body>
+  <header class="site-header">
+    <a href="/" class="wordmark" aria-label="The Sauce">
+      <span class="wordmark__the">the</span>
+      <span class="wordmark__sauce display">Sauce</span>
+    </a>
+    <nav class="site-nav" aria-label="Primary">
+      <a href="#calculator">Calculator</a>
+      <a href="#hourly">Per hour</a>
+      <a href="#label">Label</a>
+      <a href="#buy">Where to buy</a>
+      <a href="#research">Research</a>
+    </nav>
+  </header>
+
+  <section class="hero-band">
+    <div class="hero-inner">
+      <div>
+        <p class="kicker">Homemade endurance hydration mix</p>
+        <h1 class="headline">Fuel you <em>mix yourself</em>.</h1>
+        <p class="dek">Maltodextrin and fructose in a tested 2:1-ish ratio for dual-transporter carb absorption, plus sodium citrate and any flavoring you like. Enter what's in your pantry — the panel on the right fills itself out.</p>
+      </div>
+
+      <dl class="facts-panel" id="facts-panel" aria-label="Live nutrition facts, per scoop">
+        <p class="facts-panel__title">Supplement Facts</p>
+        <div class="facts-panel__servings">
+          <span>Batch size</span>
+          <span class="data" id="fp-batch">— g</span>
+        </div>
+        <div class="facts-panel__servings facts-panel__thick">
+          <span>Servings per batch</span>
+          <span class="data" id="fp-servings">—</span>
+        </div>
+        <div class="facts-panel__amount">
+          <span class="facts-panel__amount-label">Amount per scoop</span>
+          <div class="facts-panel__calories">
+            <span>Calories</span>
+            <span id="fp-calories">—</span>
+          </div>
+        </div>
+        <div class="facts-row facts-row--bold">
+          <dt>Total Carbohydrate</dt>
+          <dd id="fp-carbs">— g</dd>
+        </div>
+        <div class="facts-row facts-row--indent">
+          <dt>Sugars</dt>
+          <dd id="fp-sugars">— g</dd>
+        </div>
+        <div class="facts-row facts-row--bold facts-panel__thick">
+          <dt>Sodium</dt>
+          <dd id="fp-sodium">— mg</dd>
+        </div>
+        <p class="facts-panel__footnote">Sodium from sodium citrate dihydrate (~235 mg Na/g). Flavoring: <span id="fp-flavor-name">Strawberry</span>. Recipe basis: <a href="https://docs.google.com/spreadsheets/d/1ynXY85EZxoiSmAzm9cJSymFrC8IUvmYh5mTmx6V6oKU/edit" target="_blank" rel="noopener">source spreadsheet</a>.</p>
+      </dl>
+    </div>
+  </section>
+
+  <main>
+    <section class="panel panel--calculator" id="calculator">
+      <p class="panel__eyebrow">01 — Mix calculator</p>
+      <h2 class="panel__title">What's in the pantry?</h2>
+      <p>Enter what you have on hand (yellow cells are inputs, same convention as the original spreadsheet). The calculator finds the limiting ingredient and scales the rest of the batch to match.</p>
+
+      <form id="calc-form" novalidate>
+        <div class="input-grid">
+          <div class="field">
+            <label for="in-malto">Maltodextrin on hand (g)</label>
+            <input type="number" id="in-malto" min="0" step="1" value="2300" inputmode="decimal">
+          </div>
+          <div class="field">
+            <label for="in-fructose">Fructose on hand (g)</label>
+            <input type="number" id="in-fructose" min="0" step="1" value="2000" inputmode="decimal">
+          </div>
+          <div class="field field--select">
+            <label for="in-flavor-preset">Flavoring</label>
+            <select id="in-flavor-preset"></select>
+          </div>
+          <div class="field">
+            <label for="in-flavoring">Flavoring on hand (g)</label>
+            <input type="number" id="in-flavoring" min="0" step="1" value="500" inputmode="decimal">
+          </div>
+          <div class="field">
+            <label for="in-salt">Sodium citrate on hand (g)</label>
+            <input type="number" id="in-salt" min="0" step="1" value="400" inputmode="decimal">
+          </div>
+          <div class="field field--select">
+            <label for="in-salt-profile">Salt profile</label>
+            <select id="in-salt-profile">
+              <option value="moderate">Moderate — ~147 mg Na/scoop</option>
+              <option value="endurance" selected>Endurance — ~206 mg Na/scoop</option>
+              <option value="hot">Hot / heavy sweat — ~264 mg Na/scoop</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="in-scoop">Scoop size (g)</label>
+            <input type="number" id="in-scoop" min="1" step="1" value="46" inputmode="decimal">
+          </div>
+          <div class="field">
+            <label for="in-cap">Max batch size (g) <span class="field-hint">optional cap</span></label>
+            <input type="number" id="in-cap" min="0" step="1" placeholder="no cap" inputmode="decimal">
+          </div>
+        </div>
+        <p class="field-hint" id="calc-limiting"></p>
+      </form>
+
+      <h3 class="display" style="font-size:1.1rem;margin:2rem 0 0.75rem;">Weigh out</h3>
+      <div class="card-grid" id="recipe-grid" aria-live="polite"></div>
+    </section>
+
+    <section class="panel" id="hourly">
+      <p class="panel__eyebrow">02 — Per hour</p>
+      <h2 class="panel__title">How much, how often?</h2>
+      <p>Target carb ranges for hard/long efforts run 60–90 g/hr; sodium 500–1000 mg/hr (up to ~1500 mg/hr hot or heavy-sweat). Pick a carb target and see the scoops/hr it takes with your current batch.</p>
+
+      <div class="input-grid" style="max-width:20rem;">
+        <div class="field">
+          <label for="in-target-carbs">Target carbs (g/hr)</label>
+          <input type="number" id="in-target-carbs" min="10" max="150" step="5" value="75">
+        </div>
+      </div>
+
+      <div class="card-grid" id="hourly-grid" aria-live="polite"></div>
+    </section>
+
+    <section class="panel" id="label">
+      <p class="panel__eyebrow">03 — Label creator</p>
+      <h2 class="panel__title">Print a label</h2>
+      <p>The Supplement Facts panel above always reflects your current batch. Fill in a batch label, then print — the page's print styles strip everything but the label.</p>
+
+      <div class="input-grid" style="max-width:26rem;">
+        <div class="field">
+          <label for="in-label-name">Batch name</label>
+          <input type="text" id="in-label-name" value="The Sauce" style="background:var(--paper-raised);border:2px solid var(--rule);">
+        </div>
+        <div class="field">
+          <label for="in-label-date">Batch date</label>
+          <input type="date" id="in-label-date" style="background:var(--paper-raised);border:2px solid var(--rule);">
+        </div>
+      </div>
+      <button type="button" class="btn" id="print-label-btn">Print label</button>
+    </section>
+
+    <section class="panel" id="buy">
+      <p class="panel__eyebrow">04 — Where to buy</p>
+      <h2 class="panel__title">Ingredients</h2>
+      <p>Amazon Associate links — buying through these costs you nothing extra and supports this site. <span class="todo-badge">Placeholder tag — swap before launch</span></p>
+      <div class="card-grid" id="products-grid"></div>
+    </section>
+
+    <section class="panel" id="research">
+      <p class="panel__eyebrow">05 — References</p>
+      <h2 class="panel__title">The science</h2>
+      <p>Sources behind the ratios and targets used above.</p>
+      <div class="card-grid" id="research-grid"></div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <span>The Sauce — manufactured by Daddy Pig Industries, LLC (a joke, mostly)</span>
+    <a href="https://github.com/iammike/sauce" target="_blank" rel="noopener">Source</a>
+  </footer>
+
+  <script src="dist/app.min.js"></script>
+</body>
+</html>
