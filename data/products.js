@@ -1,15 +1,15 @@
 // Amazon Associates product links.
 //
-// TODO_TAG is a placeholder — swap in the real Associates tracking ID
-// (tag=xxxx-20) before launch. Until specific products are picked, `url`
-// points at an Amazon search rather than a guessed ASIN/product page, so the
-// link is honest (if generic) in the meantime. Replace each with the exact
-// product page once it's decided, keeping the same tag param.
+// Specific products haven't been picked yet, so `url` points at an Amazon
+// search rather than a guessed ASIN/product page — the link is honest (if
+// generic) in the meantime. Replace each with the exact product page once
+// it's decided, keeping the same tag param, and drop that entry's
+// `placeholder` flag.
 
-export const TODO_TAG = 'TODO-ASSOCIATE-TAG-20';
+export const ASSOCIATES_TAG = 'reftag00-20';
 
 function searchUrl(query) {
-  return `https://www.amazon.com/s?k=${encodeURIComponent(query)}&tag=${TODO_TAG}`;
+  return `https://www.amazon.com/s?k=${encodeURIComponent(query)}&tag=${ASSOCIATES_TAG}`;
 }
 
 export const PRODUCTS = [
