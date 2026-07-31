@@ -10,6 +10,10 @@
 // confidence: 'tested' (measured in a real batch) | 'estimated' (typical
 // composition for the category, not lab-verified for this recipe)
 //
+// `shortName` is what the dropdown shows — a native select can't ellipsize,
+// so a long label just runs under the arrow. `name` is the full descriptive
+// form used on the recipe cards and the printed ingredients list.
+//
 // `shareId` is a permanent numeric handle used by the compact share-link
 // encoder (src/share.js). It is deliberately explicit rather than derived
 // from array position, so reordering or removing an entry can never silently
@@ -18,6 +22,7 @@
 export const FLAVORINGS = [
   {
     id: 'strawberry',
+    shortName: 'Strawberry',
     pricePerGram: 26 / 499,
     priceBasis: '$26 / 1.1 lb (499 g)',
     priceConfidence: 'actual',
@@ -31,6 +36,7 @@ export const FLAVORINGS = [
   },
   {
     id: 'other-freeze-dried-fruit',
+    shortName: 'Other fruit powder',
     pricePerGram: 26 / 500,
     priceBasis: '~$26 / 500 g, as for strawberry',
     priceConfidence: 'estimated',
@@ -44,6 +50,7 @@ export const FLAVORINGS = [
   },
   {
     id: 'unsweetened-drink-mix',
+    shortName: 'Drink-mix packet',
     pricePerGram: 10 / 80,
     priceBasis: '~$10 / 100 packets (~0.8 g each)',
     priceConfidence: 'estimated',
@@ -57,6 +64,7 @@ export const FLAVORINGS = [
   },
   {
     id: 'kool-aid-unsweetened',
+    shortName: 'Kool-Aid style',
     pricePerGram: 0.25 / 3.9,
     priceBasis: '~$0.25 / 3.9 g packet',
     priceConfidence: 'estimated',
@@ -70,6 +78,7 @@ export const FLAVORINGS = [
   },
   {
     id: 'zero-sugar-flavor-drops',
+    shortName: 'Zero-sugar drops',
     pricePerGram: 0,
     priceBasis: 'Negligible by mass — dose to taste',
     priceConfidence: 'estimated',
@@ -83,6 +92,7 @@ export const FLAVORINGS = [
   },
   {
     id: 'unflavored',
+    shortName: 'Unflavored',
     pricePerGram: 0,
     priceBasis: 'No flavoring',
     priceConfidence: 'actual',

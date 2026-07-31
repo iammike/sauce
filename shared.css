@@ -364,12 +364,11 @@ main {
 
 .field--select select { font-family: 'Karla', sans-serif; }
 
-/* Reserve room for the native dropdown arrow — without this the option text
-   runs underneath it on the longer labels. */
-.field select {
-  padding-right: 2rem;
-  text-overflow: ellipsis;
-}
+/* Reserve room for the native dropdown arrow. Note this alone isn't enough —
+   a native select won't ellipsize, it just runs its label under the arrow, so
+   option labels have to be short enough to fit. Detail belongs in the hint
+   under the control, not in the option text. */
+.field select { padding-right: 2rem; }
 
 .field-hint {
   font-size: 0.72rem;
@@ -643,8 +642,8 @@ html { scroll-behavior: smooth; }
   padding: 1.1rem 0;
   border-bottom: 1px solid var(--rule);
   display: grid;
-  grid-template-columns: 11rem minmax(14rem, 20rem) 1fr;
-  gap: 0.3rem 2rem;
+  grid-template-columns: 11rem minmax(20rem, 25rem) 1fr;
+  gap: 0.3rem 1.75rem;
   align-items: start;
 }
 

@@ -55,6 +55,11 @@
 - **A batch that's already mixed is fixed.** Conditions change ride to ride; the jar doesn't. So when sodium falls short, the advice is how much to add *today* — a salt tab alongside — not how to reformulate. Solving the salt level is for a batch about to be made, and the fixed presets exist so someone can describe a batch they already have
 - Say it in numbers the reader can act on ("carries 438 mg/hr, add 829") rather than explaining the mechanism. Don't warn about trivial gaps; `MEANINGFUL_GAP` is 10% of target
 
+## Select labels must fit the control
+- A native `<select>` does not ellipsize — a long option label just renders underneath the dropdown arrow. `padding-right` reserves room for the arrow but does nothing about the text, so labels have to be genuinely short
+- Flavourings carry a `shortName` for the dropdown; `name` stays the full descriptive form used on recipe cards and the printed ingredients list. Detail belongs in the hint under the control, not in the option text
+- Measure rather than eyeball: compare the widest option's rendered text width against the select's content box
+
 ## Cost data is dated and approximate
 - `data/costs.js` carries `PRICED_AS_OF` and a `basis` string per ingredient; flavoring prices live on the flavorings themselves since that slot varies hugely. Every price is labelled `actual` or `estimated` and the page says so
 - Comparisons are normalised per gram of **carbohydrate**, never per gram of powder — otherwise the most diluted product looks cheapest

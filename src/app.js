@@ -327,6 +327,8 @@ function renderSodiumSolve(inputs, recipe, targetCarbs) {
 function renderSweatCue() {
   const level = findSweatSodium($('in-sweat-sodium').value);
   $('sweat-sodium-cue').textContent = level ? level.cue : '';
+  const rate = SWEAT_RATES.find((r) => r.id === $('in-sweat-rate').value);
+  $('sweat-rate-hint').textContent = rate ? `≈ ${rate.litresPerHour} L/hr of sweat` : '';
   $('salt-profile-note').textContent = $('in-salt-profile').value === 'solved'
     ? 'Solved from your conditions above.'
     : 'A fixed percentage. Set this to match a batch you already made.';
@@ -334,7 +336,7 @@ function renderSweatCue() {
 
 function initConditions() {
   $('in-sweat-rate').innerHTML = SWEAT_RATES
-    .map((r) => `<option value="${r.id}">${r.label} — ~${r.litresPerHour} L/hr sweat</option>`).join('');
+    .map((r) => `<option value="${r.id}">${r.label}</option>`).join('');
   $('in-sweat-rate').value = 'moderate';
 
   $('in-sweat-sodium').innerHTML = SWEAT_SODIUM_LEVELS
@@ -379,7 +381,7 @@ function initTuning() {
 
 function initFlavorPresets() {
   const select = $('in-flavor-preset');
-  select.innerHTML = FLAVORINGS.map((f) => `<option value="${f.id}">${f.name}</option>`).join('');
+  select.innerHTML = FLAVORINGS.map((f) => `<option value="${f.id}">${f.shortName ?? f.name}</option>`).join('');
   select.value = 'strawberry';
 }
 
