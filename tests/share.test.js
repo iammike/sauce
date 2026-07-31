@@ -1,6 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import {
   encodeFormulation,
+  encodeLongForm,
+  encodeToken,
+  decodeToken,
   decodeFormulation,
   hasFormulation,
   DEFAULT_TARGET_CARBS,
@@ -8,6 +11,7 @@ import {
   DEFAULT_SALT_PROFILE,
 } from '../src/share.js';
 import { DEFAULT_CARB_RATIO } from '../src/calculator.js';
+import { RECIPES } from '../data/recipes.js';
 
 const FORMULATION = {
   carbRatio: 0.8,
@@ -16,13 +20,13 @@ const FORMULATION = {
   targetCarbsPerHour: 100,
 };
 
-describe('encode/decode round trip', () => {
+describe('long-form encode/decode round trip', () => {
   it('preserves a formulation exactly', () => {
-    expect(decodeFormulation(encodeFormulation(FORMULATION))).toEqual(FORMULATION);
+    expect(decodeFormulation(encodeLongForm(FORMULATION))).toEqual(FORMULATION);
   });
 
   it('tolerates a leading question mark', () => {
-    expect(decodeFormulation('?' + encodeFormulation(FORMULATION))).toEqual(FORMULATION);
+    expect(decodeFormulation('?' + encodeLongForm(FORMULATION))).toEqual(FORMULATION);
   });
 });
 
@@ -88,5 +92,103 @@ describe('hasFormulation', () => {
   it('ignores unrelated query strings', () => {
     expect(hasFormulation('')).toBe(false);
     expect(hasFormulation('utm_source=strava')).toBe(false);
+  });
+});
+
+
+describe('compact token', () => {
+  it('round-trips every recipe preset', () => {
+    for (const r of RECIPES) {
+      const f = {
+        carbRatio: r.carbRatio,
+        saltProfile: r.saltProfile,
+        flavoringId: r.flavoringId,
+        targetCarbsPerHour: r.targetCarbsPerHour,
+      };
+      expect(decodeToken(encodeToken(f))).toEqual(f);
+    }
+  });
+
+  it('round-trips arbitrary in-range formulations', () => {
+    for (const carbRatio of [0, 0.5, 0.65, 0.8, 1.5]) {
+      for (const saltProfile of ['moderate', 'endurance', 'hot']) {
+        for (const targetCarbsPerHour of [10, 75, 110, 200]) {
+          const f = { carbRatio, saltProfile, flavoringId: 'unflavored', targetCarbsPerHour };
+          expect(decodeToken(encodeToken(f))).toEqual(f);
+        }
+      }
+    }
+  });
+
+  it('stays short', () => {
+    for (const r of RECIPES) {
+      expect(encodeToken(r).length).toBeLessThanOrEqual(6);
+    }
+  });
+
+  it('rejects a token from an unknown version', () => {
+    expect(decodeToken('9zzz')).toBeNull();
+  });
+
+  it('rejects malformed tokens rather than guessing', () => {
+    expect(decodeToken('')).toBeNull();
+    expect(decodeToken(null)).toBeNull();
+    expect(decodeToken('1')).toBeNull();
+    expect(decodeToken('1!!!')).toBeNull();
+    expect(decodeToken('1-5')).toBeNull();
+  });
+
+  it('rejects a tampered token that decodes out of range', () => {
+    expect(decodeToken('1zzzzzzz')).toBeNull();
+  });
+
+  it('is stable — a token minted today must keep decoding the same', () => {
+    // Frozen expectations, computed by hand from the packing above:
+    //   r=13, s=1, f=0, t=13 -> 13 + 31*(1 + 8*(0 + 32*13)) = 103212 -> '27n0'
+    // If these fail, the packing changed and every link already shared has
+    // silently started meaning something else. Bump TOKEN_VERSION instead.
+    expect(encodeToken({ carbRatio: 0.65, saltProfile: 'endurance', flavoringId: 'strawberry', targetCarbsPerHour: 75 })).toBe('127n0');
+    expect(decodeToken('127n0')).toEqual({
+      carbRatio: 0.65, saltProfile: 'endurance', flavoringId: 'strawberry', targetCarbsPerHour: 75,
+    });
+  });
+});
+
+describe('encodeFormulation picks the best form', () => {
+  it('uses a readable slug when the formulation matches a preset', () => {
+    const classic = RECIPES.find((r) => r.id === 'classic');
+    expect(encodeFormulation(classic, RECIPES)).toBe('p=classic');
+  });
+
+  it('falls back to a packed token for a custom formulation', () => {
+    const custom = { carbRatio: 0.35, saltProfile: 'hot', flavoringId: 'unflavored', targetCarbsPerHour: 85 };
+    const q = encodeFormulation(custom, RECIPES);
+    expect(q.startsWith('c=')).toBe(true);
+    expect(decodeFormulation(q, RECIPES)).toEqual(custom);
+  });
+
+  it('round-trips presets through the slug form', () => {
+    for (const r of RECIPES) {
+      const f = {
+        carbRatio: r.carbRatio, saltProfile: r.saltProfile,
+        flavoringId: r.flavoringId, targetCarbsPerHour: r.targetCarbsPerHour,
+      };
+      expect(decodeFormulation(encodeFormulation(f, RECIPES), RECIPES)).toEqual(f);
+    }
+  });
+
+  it('ignores an unknown slug instead of erroring', () => {
+    expect(decodeFormulation('p=not-a-recipe', RECIPES).carbRatio).toBe(DEFAULT_CARB_RATIO);
+  });
+
+  it('does not let a slug reach into object prototypes', () => {
+    expect(decodeFormulation('p=__proto__', RECIPES).carbRatio).toBe(DEFAULT_CARB_RATIO);
+    expect(decodeFormulation('p=constructor', RECIPES).carbRatio).toBe(DEFAULT_CARB_RATIO);
+  });
+
+  it('prefers a valid slug over other params in the same URL', () => {
+    const result = decodeFormulation('p=steady&r=1.5&s=hot', RECIPES);
+    const steady = RECIPES.find((r) => r.id === 'steady');
+    expect(result.carbRatio).toBe(steady.carbRatio);
   });
 });

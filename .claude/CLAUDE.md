@@ -10,6 +10,16 @@
 - Only the strawberry preset is `confidence: 'tested'` (measured in a real batch); everything else is `'estimated'` — don't upgrade a preset's confidence without an actual measured batch behind it
 - When adding a flavoring preset, add it to `data/flavorings.js` and the existing `tests/flavorings.test.js` loop picks it up automatically — no new test needed unless the preset needs special-case behavior
 
+## Grams are the unit, scoops are a conversion
+- There is no standard scoop, so anything a user acts on is expressed in grams first. Scoop counts appear only as a labelled convenience ("of your 46 g scoops")
+- Per-hour fueling math must be built on `recipe.perGram`, never `recipe.perScoop` — how much mix an hour takes is a property of the formulation and must not change because someone owns a bigger scoop. There are regression tests for this in `tests/hourly.test.js`
+- Recipe presets deliberately don't set scoop size or pantry amounts
+
+## Share links come in three forms
+- `?p=<slug>` a preset (preferred, readable), `?c=<token>` a packed custom formulation, and the original `?r=&s=&f=&t=` long form which is still parsed so links already shared keep working
+- The packed token's field order and slot sizes in `src/share.js` are FROZEN. Changing them silently changes what existing tokens mean — bump `TOKEN_VERSION` instead. `tests/share.test.js` pins a known token/value pair to catch this
+- Flavorings carry an explicit append-only `shareId`; never derive the packing from array position
+
 ## Nutrition math
 - Sodium is always sodium citrate dihydrate at 235 mg Na/g — never table salt's ~393 mg Na/g. An earlier version of the source spreadsheet used the NaCl figure and overstated sodium by ~40%; don't reintroduce that
 - See `docs/recipe-source.md` for the full ratio derivation and the source spreadsheet link

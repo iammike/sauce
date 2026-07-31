@@ -9,10 +9,16 @@
 //
 // confidence: 'tested' (measured in a real batch) | 'estimated' (typical
 // composition for the category, not lab-verified for this recipe)
+//
+// `shareId` is a permanent numeric handle used by the compact share-link
+// encoder (src/share.js). It is deliberately explicit rather than derived
+// from array position, so reordering or removing an entry can never silently
+// change what an existing shared link decodes to. Only ever append new ids.
 
 export const FLAVORINGS = [
   {
     id: 'strawberry',
+    shareId: 0,
     name: 'Strawberry (freeze-dried powder)',
     ratio: 0.2,
     carbFraction: 1,
@@ -22,6 +28,7 @@ export const FLAVORINGS = [
   },
   {
     id: 'other-freeze-dried-fruit',
+    shareId: 1,
     name: 'Other freeze-dried fruit powder (raspberry, mango, etc.)',
     ratio: 0.2,
     carbFraction: 1,
@@ -31,6 +38,7 @@ export const FLAVORINGS = [
   },
   {
     id: 'unsweetened-drink-mix',
+    shareId: 2,
     name: 'Unsweetened drink-mix packet (True Lemon / True Lime style)',
     ratio: 0.02,
     carbFraction: 0.9,
@@ -40,6 +48,7 @@ export const FLAVORINGS = [
   },
   {
     id: 'kool-aid-unsweetened',
+    shareId: 3,
     name: 'Unsweetened powdered drink mix (Kool-Aid style)',
     ratio: 0.03,
     carbFraction: 0.5,
@@ -49,6 +58,7 @@ export const FLAVORINGS = [
   },
   {
     id: 'zero-sugar-flavor-drops',
+    shareId: 4,
     name: 'Zero-sugar liquid flavor drops (sucralose/stevia-based)',
     ratio: 0.01,
     carbFraction: 0,
@@ -58,6 +68,7 @@ export const FLAVORINGS = [
   },
   {
     id: 'unflavored',
+    shareId: 5,
     name: 'Unflavored / plain',
     ratio: 0,
     carbFraction: 0,

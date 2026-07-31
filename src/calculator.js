@@ -109,6 +109,18 @@ export function computeRecipe({
       }
     : { carbsG: 0, sugarsG: 0, sodiumMg: 0, calories: 0 };
 
+  // Nutrition per gram of finished mix. This is a property of the formulation
+  // alone — it does not depend on scoop size, which is why per-hour fueling
+  // math should be built on it rather than on per-scoop values.
+  const perGram = actualBatch > 0
+    ? {
+        carbsG: carbsG / actualBatch,
+        sugarsG: sugarsG / actualBatch,
+        sodiumMg: sodiumMg / actualBatch,
+        calories: calories / actualBatch,
+      }
+    : { carbsG: 0, sugarsG: 0, sodiumMg: 0, calories: 0 };
+
   return {
     flavorName,
     ratios,
@@ -119,5 +131,6 @@ export function computeRecipe({
     totalScoops,
     totals: { carbsG, sugarsG, sodiumMg, calories },
     perScoop,
+    perGram,
   };
 }

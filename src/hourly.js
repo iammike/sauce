@@ -39,6 +39,32 @@ export function recommendScoopsPerHour(perScoop, targetCarbsPerHour = CARB_TARGE
   };
 }
 
+/**
+ * Fueling plan for a carb target, expressed in grams of mix per hour.
+ *
+ * Built on per-gram nutrition (see computeRecipe) rather than per-scoop,
+ * because how much mix an hour of riding takes is a property of the
+ * formulation — it must not change just because someone owns a bigger scoop.
+ * Scoop size is used only for the optional scoops-per-hour convenience
+ * conversion, and a missing scoop size leaves the rest of the plan intact.
+ */
+export function planForCarbTarget(perGram, scoopGrams, targetCarbsPerHour) {
+  const mixGramsPerHour = perGram.carbsG > 0 ? targetCarbsPerHour / perGram.carbsG : 0;
+  const sodiumMg = perGram.sodiumMg * mixGramsPerHour;
+
+  return {
+    targetCarbsPerHour,
+    mixGramsPerHour,
+    scoopsPerHour: scoopGrams > 0 ? mixGramsPerHour / scoopGrams : null,
+    carbsG: perGram.carbsG * mixGramsPerHour,
+    sugarsG: perGram.sugarsG * mixGramsPerHour,
+    sodiumMg,
+    calories: perGram.calories * mixGramsPerHour,
+    carbStatus: rangeStatus(targetCarbsPerHour, CARB_TARGET_RANGE),
+    sodiumStatus: rangeStatus(sodiumMg, SODIUM_TARGET_RANGE),
+  };
+}
+
 /** Total scoops (and batches) needed to fuel a ride/run of a given duration. */
 export function scoopsForDuration(scoopsPerHour, durationHours, actualBatchGrams, scoopGrams) {
   const totalScoops = scoopsPerHour * durationHours;

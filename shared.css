@@ -379,6 +379,13 @@ main {
   margin: 0 0 0.2rem;
 }
 
+.card__unit {
+  font-family: 'Karla', sans-serif;
+  font-weight: 400;
+  font-size: 0.95rem;
+  letter-spacing: 0;
+}
+
 .card__value {
   font-family: 'Big Shoulders Display', sans-serif;
   font-weight: 900;

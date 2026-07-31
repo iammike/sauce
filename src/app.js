@@ -1,5 +1,5 @@
 import { computeRecipe } from './calculator.js';
-import { hourlyTotals, recommendScoopsPerHour } from './hourly.js';
+import { planForCarbTarget, CARB_TARGET_RANGE } from './hourly.js';
 import { formatGrams, formatMg, formatCalories, formatCount } from './format.js';
 import { FLAVORINGS, findFlavoring } from '../data/flavorings.js';
 import { RECIPES, findRecipe } from '../data/recipes.js';
@@ -79,38 +79,36 @@ function statusPillClass(status) {
   return `status-pill status-pill--${status}`;
 }
 
+// Grams of mix per hour is the headline number — it's the same for everyone.
+// The scoop equivalent is shown underneath as a convenience, clearly tied to
+// the scoop size the user measured rather than an assumed one.
 function renderHourlyGrid(recipe) {
   const grid = $('hourly-grid');
-  const targetCarbs = Number($('in-target-carbs').value) || 75;
-  const recommended = recommendScoopsPerHour(recipe.perScoop, targetCarbs);
+  const scoopGrams = Number($('in-scoop').value) || 0;
+  const targetCarbs = Number($('in-target-carbs').value) || DEFAULT_TARGET_CARBS;
 
-  const cards = [
-    {
-      eyebrow: 'Recommended',
-      value: `${formatCount(recommended.scoopsPerHour, 1)} scoops/hr`,
-      lines: [
-        `${formatGrams(recommended.carbsG)} carbs/hr <span class="${statusPillClass(recommended.carbStatus)}">${recommended.carbStatus}</span>`,
-        `${formatMg(recommended.sodiumMg)} sodium/hr <span class="${statusPillClass(recommended.sodiumStatus)}">${recommended.sodiumStatus}</span>`,
-      ],
-      active: true,
-    },
-    ...[2, 3].map((n) => {
-      const t = hourlyTotals(recipe.perScoop, n);
-      return {
-        eyebrow: `${n} scoops/hr`,
-        value: `${formatGrams(t.carbsG)} carbs`,
-        lines: [`${formatMg(t.sodiumMg)} sodium/hr`, `${formatCalories(t.calories)} cal/hr`],
-      };
-    }),
-  ];
+  // The user's target, bracketed by the research range so they can see where
+  // it sits rather than just being told "in-range".
+  const targets = [...new Set([CARB_TARGET_RANGE.min, targetCarbs, CARB_TARGET_RANGE.max])]
+    .sort((a, b) => a - b);
 
-  grid.innerHTML = cards.map((c) => `
-    <div class="card${c.active ? ' card--active' : ''}">
-      <p class="card__eyebrow">${c.eyebrow}</p>
-      <p class="card__value data">${c.value}</p>
-      ${c.lines.map((l) => `<p class="field-hint">${l}</p>`).join('')}
-    </div>
-  `).join('');
+  grid.innerHTML = targets.map((t) => {
+    const plan = planForCarbTarget(recipe.perGram, scoopGrams, t);
+    const isTarget = t === targetCarbs;
+    const scoopNote = plan.scoopsPerHour !== null
+      ? `≈ ${formatCount(plan.scoopsPerHour, 1)} of your ${formatCount(scoopGrams, 0)} g scoops`
+      : 'Enter your scoop size for a scoop count';
+
+    return `
+      <div class="card${isTarget ? ' card--active' : ''}">
+        <p class="card__eyebrow">${isTarget ? 'Your target' : 'Reference'} · ${t} g carbs/hr</p>
+        <p class="card__value data">${formatGrams(plan.mixGramsPerHour)}<span class="card__unit"> of mix/hr</span></p>
+        <p class="field-hint">${scoopNote}</p>
+        <p class="field-hint">${formatMg(plan.sodiumMg)} sodium/hr <span class="${statusPillClass(plan.sodiumStatus)}">${plan.sodiumStatus}</span></p>
+        <p class="field-hint">${formatCalories(plan.calories)} cal/hr</p>
+      </div>
+    `;
+  }).join('');
 }
 
 // Express the fructose ratio the way the research talks about it, as
@@ -167,7 +165,7 @@ function applyFormulation({ carbRatio, saltProfile, flavoringId, targetCarbsPerH
 
 function initShare() {
   $('share-btn').addEventListener('click', async () => {
-    const url = `${location.origin}${location.pathname}?${encodeFormulation(currentFormulation())}`;
+    const url = `${location.origin}${location.pathname}?${encodeFormulation(currentFormulation(), RECIPES)}`;
     const status = $('share-status');
     try {
       await navigator.clipboard.writeText(url);
@@ -184,7 +182,7 @@ function initShare() {
 // A shared link should land on the recipe it describes, not the default one.
 function applyIncomingShareLink() {
   if (!hasFormulation(location.search)) return;
-  applyFormulation(decodeFormulation(location.search));
+  applyFormulation(decodeFormulation(location.search, RECIPES));
   $('share-status').textContent = 'Loaded from a shared link.';
 }
 
