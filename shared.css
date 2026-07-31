@@ -453,6 +453,31 @@ main {
 .card--muted { opacity: 0.58; }
 
 .warn { color: var(--strawberry); font-weight: 700; }
+.ok { color: var(--sodium); font-weight: 700; }
+
+.card__cite {
+  margin: 0.4rem 0 0;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.research-card__cite {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Highlight a reference when linked to from a tier card. */
+.research-card:target {
+  border-color: var(--sodium);
+  box-shadow: 0 0 0 2px var(--sodium) inset;
+}
+
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 
 .callout {
   border-left: 4px solid var(--strawberry);

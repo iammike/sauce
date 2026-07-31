@@ -1,11 +1,12 @@
 import { computeRecipe } from './calculator.js';
-import { planForCarbTarget, CARB_INTAKE_TIERS, absorptionCeiling, tierFor,
-  GLUCOSE_ONLY_CEILING, DUAL_TRANSPORT_CEILING, DEFAULT_TARGET_CARBS } from './hourly.js';
+import { planForCarbTarget, CARB_INTAKE_TIERS, absorptionCeiling, tierFor, ratioStatus,
+  GLUCOSE_ONLY_CEILING, DUAL_TRANSPORT_TYPICAL, DUAL_TRANSPORT_TRAINED,
+  FRUCTOSE_RATIO_OPTIMAL, DEFAULT_TARGET_CARBS } from './hourly.js';
 import { formatGrams, formatMg, formatCalories, formatCount } from './format.js';
 import { FLAVORINGS, findFlavoring } from '../data/flavorings.js';
 import { TUNING } from '../data/tuning.js';
 import { PRODUCTS } from '../data/products.js';
-import { RESEARCH } from '../data/research.js';
+import { RESEARCH, findResearch } from '../data/research.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -104,15 +105,16 @@ function renderHourlyGrid(recipe) {
     return `
       <div class="card${isActive ? ' card--active' : ''}${unreachable ? ' card--muted' : ''}">
         <p class="card__eyebrow">${tier.duration}${isActive ? ' · your target' : ''}</p>
-        <p class="card__value data">${tier.gramsPerHour}<span class="card__unit"> g carbs/hr</span></p>
+        <p class="card__value data">${tier.range[0]}–${tier.range[1]}<span class="card__unit"> g carbs/hr</span></p>
         <p class="field-hint"><strong>${formatGrams(plan.mixGramsPerHour)} of mix</strong> — ${scoopNote}</p>
         <p class="field-hint">${formatMg(plan.sodiumMg)} sodium/hr <span class="${statusPillClass(plan.sodiumStatus)}">${plan.sodiumStatus}</span> · ${formatCalories(plan.calories)} cal/hr</p>
         <p class="field-hint">${!unreachable ? tier.note
           : carbRatio > 0.05
             // Has fructose, but this tier is past what most people absorb.
-            ? `<span class="warn">Above the ~${DUAL_TRANSPORT_CEILING} g/hr most people absorb — needs gut training.</span>`
+            ? `<span class="warn">Above the ~${DUAL_TRANSPORT_TYPICAL} g/hr most people manage — needs gut training.</span>`
             // No fructose at all: a hard transporter limit, not a training one.
             : `<span class="warn">Not reachable without fructose — glucose alone tops out near ${GLUCOSE_ONLY_CEILING} g/hr.</span>`}</p>
+        ${tier.sourceId ? `<p class="card__cite"><a href="#ref-${tier.sourceId}">Source</a></p>` : ''}
       </div>
     `;
   }).join('');
@@ -121,7 +123,7 @@ function renderHourlyGrid(recipe) {
   if (targetCarbs > ceiling) {
     warning.hidden = false;
     warning.textContent = carbRatio > 0.05
-      ? `You're targeting ${targetCarbs} g/hr, above the ~${DUAL_TRANSPORT_CEILING} g/hr most people absorb. Reachable, but it takes deliberate gut training — build up in training, not on race day.`
+      ? `You're targeting ${targetCarbs} g/hr. Above ${DUAL_TRANSPORT_TRAINED} g/hr is experimental territory — people do fuel that high, but the efficacy evidence doesn't back it yet.`
       : `You're targeting ${targetCarbs} g/hr with no fructose in the mix. Glucose alone saturates its transporter near ${GLUCOSE_ONLY_CEILING} g/hr, so drinking more won't deliver more — raise the fructose ratio to go higher.`;
   } else {
     warning.hidden = true;
@@ -134,11 +136,20 @@ function renderHourlyGrid(recipe) {
 function renderRatioReadout() {
   const ratio = Number($('in-carb-ratio').value) || 0;
   const readout = $('ratio-readout');
-  if (ratio <= 0) {
-    readout.textContent = 'Glucose only — no fructose';
+  const status = ratioStatus(ratio);
+
+  if (status === 'none') {
+    readout.innerHTML = '<span class="warn">Glucose only — caps you near 60 g/hr</span>';
     return;
   }
-  readout.textContent = `${(1 / ratio).toFixed(2)}:1 glucose:fructose`;
+
+  const shape = `${(1 / ratio).toFixed(2)}:1 glucose:fructose`;
+  const verdict = {
+    optimal: '<span class="ok">in the optimal band</span>',
+    below: `below the optimal ${FRUCTOSE_RATIO_OPTIMAL.min}–${FRUCTOSE_RATIO_OPTIMAL.max}`,
+    above: `above the optimal ${FRUCTOSE_RATIO_OPTIMAL.min}–${FRUCTOSE_RATIO_OPTIMAL.max}`,
+  }[status];
+  readout.innerHTML = `${shape} — ${verdict}`;
 }
 
 function recalculate() {
@@ -184,11 +195,12 @@ function initProducts() {
 
 function initResearch() {
   $('research-grid').innerHTML = RESEARCH.map((r) => `
-    <div class="card research-card">
+    <div class="card research-card" id="ref-${r.id}">
+      ${r.backsTiers ? '<span class="card__eyebrow">Backs the intake tiers</span>' : ''}
       <p class="research-card__name">${r.name}</p>
-      <p class="field-hint">${r.source}</p>
+      <p class="research-card__cite">${r.source}</p>
       <p class="research-card__note">${r.note}</p>
-      <a href="${r.url}" target="_blank" rel="noopener">Read more →</a>
+      <a href="${r.url}" target="_blank" rel="noopener">Read the paper →</a>
     </div>
   `).join('');
 }

@@ -10,6 +10,13 @@
 - Only the strawberry preset is `confidence: 'tested'` (measured in a real batch); everything else is `'estimated'` — don't upgrade a preset's confidence without an actual measured batch behind it
 - When adding a flavoring preset, add it to `data/flavorings.js` and the existing `tests/flavorings.test.js` loop picks it up automatically — no new test needed unless the preset needs special-case behavior
 
+## Health claims need a citation on the page
+- Every intake tier in `src/hourly.js` carries a `sourceId` into `data/research.js`, rendered as a "Source" anchor link on the card. Don't add a tier or change a number without a source that backs it
+- Cite in the page, not in a code comment — an earlier version claimed "ACSM/ISSN" in a comment when the actual body is ACSM + Academy of Nutrition and Dietetics + Dietitians of Canada, and nothing on the site said so
+- Prefer anchored links over tooltips: mouseover doesn't exist on touch and is awkward for screen readers
+- Current tier guidance is Morton et al. 2026 (J Nutr), which revised the 2016 ≤90 g/hr cap to 90–120 g/hr for trained athletes. The 2016 statement and Jeukendrup 2014 are kept for context, marked as superseded on the upper end
+- Verify citations before publishing them. These were checked against the literature, not recalled
+
 ## Grams are the unit, scoops are a conversion
 - There is no standard scoop, so anything a user acts on is expressed in grams first. Scoop counts appear only as a labelled convenience ("of your 46 g scoops")
 - Per-hour fueling math must be built on `recipe.perGram`, never `recipe.perScoop` — how much mix an hour takes is a property of the formulation and must not change because someone owns a bigger scoop. There are regression tests for this in `tests/hourly.test.js`

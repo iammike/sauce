@@ -34,9 +34,29 @@ and how to add more.
 
 ## Hourly targets
 
-- Carbs: 60–90 g/hr, the range where the maltodextrin:fructose dual-transporter
-  ratio pays off over glucose-only fueling (~60 g/hr ceiling).
-- Sodium: 500–1000 mg/hr for an average sweater (sweat rate 0.75–1.5 L/hr ×
-  sweat sodium 500–1300 mg/L), up to ~1500 mg/hr hot/heavy-sweat.
+Carbohydrate intake is tiered by effort duration, per Morton et al. 2026
+(*J Nutr*), which revisits the 2016 ACSM/AND/DC position statement:
+
+| Duration | Carbs |
+|---|---|
+| Under 1 hour | 0–30 g/hr (often unnecessary) |
+| 1–2.5 hours | 30–60 g/hr |
+| 2.5–4 hours | 60–90 g/hr |
+| 4+ hours, trained | 90–120 g/hr |
+
+The headline change from the older guidance: 90 g/hr is no longer the ceiling.
+90–120 g/hr is the contemporary upper range for trained athletes on a
+glucose/fructose blend. Above 120 g/hr is experimental — field intakes go
+higher, but the efficacy evidence doesn't support it yet.
+
+Anything past ~60 g/hr requires both glucose and fructose; glucose alone
+saturates SGLT1 there regardless of how much you drink.
+
+The same review puts the optimal fructose-to-glucose ratio at **0.6–1.0**,
+which maps directly onto this calculator's `carbRatio`. The tested house
+recipe at 0.65 sits inside that band; the classic 2:1 (0.5) sits just below.
+
+Sodium: 500–1000 mg/hr for an average sweater (sweat rate 0.75–1.5 L/hr ×
+sweat sodium 500–1300 mg/L), up to ~1500 mg/hr hot/heavy-sweat.
 
 Full citations in `data/research.js` / the References section of the site.

@@ -1,8 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { computeRecipe } from '../src/calculator.js';
+import { findResearch } from '../data/research.js';
 import { hourlyTotals, recommendScoopsPerHour, scoopsForDuration, planForCarbTarget,
-  CARB_INTAKE_TIERS, absorptionCeiling, tierFor, GLUCOSE_ONLY_CEILING,
-  DUAL_TRANSPORT_CEILING, CARB_TARGET_RANGE } from '../src/hourly.js';
+  CARB_INTAKE_TIERS, absorptionCeiling, tierFor, ratioStatus, GLUCOSE_ONLY_CEILING,
+  DUAL_TRANSPORT_TYPICAL, DUAL_TRANSPORT_TRAINED, FRUCTOSE_RATIO_OPTIMAL,
+  CARB_TARGET_RANGE } from '../src/hourly.js';
 
 const recipe = computeRecipe({
   onHand: { maltodextrin: 2300, fructose: 2000, flavoring: 500, salt: 400 },
@@ -86,8 +88,21 @@ describe('planForCarbTarget', () => {
 });
 
 describe('carb intake tiers', () => {
-  it('follows the established duration-based guidance', () => {
+  it('follows the current duration-based guidance (Morton et al. 2026)', () => {
     expect(CARB_INTAKE_TIERS.map((t) => t.gramsPerHour)).toEqual([30, 60, 90, 120]);
+    expect(CARB_INTAKE_TIERS.map((t) => t.range)).toEqual([[0, 30], [30, 60], [60, 90], [90, 120]]);
+  });
+
+  it('cites a source for every tier', () => {
+    for (const tier of CARB_INTAKE_TIERS) {
+      expect(findResearch(tier.sourceId)).toBeDefined();
+    }
+  });
+
+  it('has contiguous bands with no gaps', () => {
+    for (let i = 1; i < CARB_INTAKE_TIERS.length; i += 1) {
+      expect(CARB_INTAKE_TIERS[i].range[0]).toBe(CARB_INTAKE_TIERS[i - 1].range[1]);
+    }
   });
 
   it('marks the tiers that require fructose', () => {
@@ -98,7 +113,7 @@ describe('carb intake tiers', () => {
     }
   });
 
-  it('flags 120 g/hr as beyond the classic guidance', () => {
+  it('flags the 90-120 band as needing gut training', () => {
     expect(CARB_INTAKE_TIERS.find((t) => t.gramsPerHour === 120).aggressive).toBe(true);
   });
 });
@@ -109,8 +124,8 @@ describe('absorptionCeiling', () => {
   });
 
   it('lifts the ceiling once there is meaningful fructose', () => {
-    expect(absorptionCeiling(0.5)).toBe(DUAL_TRANSPORT_CEILING);
-    expect(absorptionCeiling(0.8)).toBe(DUAL_TRANSPORT_CEILING);
+    expect(absorptionCeiling(0.5)).toBe(DUAL_TRANSPORT_TRAINED);
+    expect(absorptionCeiling(0.8)).toBe(DUAL_TRANSPORT_TRAINED);
   });
 
   it('treats a trace of fructose as glucose-only', () => {
@@ -128,5 +143,32 @@ describe('tierFor', () => {
 
   it('floors below the lowest tier rather than returning nothing', () => {
     expect(tierFor(5).gramsPerHour).toBe(30);
+  });
+});
+
+
+describe('ratioStatus', () => {
+  it('recognises the evidence-backed optimal fructose band', () => {
+    expect(ratioStatus(FRUCTOSE_RATIO_OPTIMAL.min)).toBe('optimal');
+    expect(ratioStatus(FRUCTOSE_RATIO_OPTIMAL.max)).toBe('optimal');
+    expect(ratioStatus(0.8)).toBe('optimal');
+  });
+
+  it('places the tested house ratio inside the optimal band', () => {
+    // 0.65 is the ratio from the original recipe — worth knowing it holds up.
+    expect(ratioStatus(0.65)).toBe('optimal');
+  });
+
+  it('marks the classic 2:1 ratio as just below optimal', () => {
+    expect(ratioStatus(0.5)).toBe('below');
+  });
+
+  it('distinguishes no fructose from merely low fructose', () => {
+    expect(ratioStatus(0)).toBe('none');
+    expect(ratioStatus(0.3)).toBe('below');
+  });
+
+  it('flags ratios past the optimal band', () => {
+    expect(ratioStatus(1.4)).toBe('above');
   });
 });
