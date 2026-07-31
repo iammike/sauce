@@ -17,8 +17,10 @@
       <span class="wordmark__sauce display">Sauce</span>
     </a>
     <nav class="site-nav" aria-label="Primary">
+      <a href="#recipes">Recipes</a>
       <a href="#calculator">Calculator</a>
       <a href="#hourly">Per hour</a>
+      <a href="#tuning">Dial it in</a>
       <a href="#label">Label</a>
       <a href="#buy">Where to buy</a>
       <a href="#research">Research</a>
@@ -68,8 +70,15 @@
   </section>
 
   <main>
+    <section class="panel" id="recipes">
+      <p class="panel__eyebrow">01 — Recommended recipes</p>
+      <h2 class="panel__title">Start from a recipe</h2>
+      <p>Each one sets the formulation — the glucose:fructose ratio, salt level, and flavoring. Your pantry amounts and scoop size stay as you have them, since those describe your kitchen, not the recipe.</p>
+      <div class="card-grid" id="recipes-grid"></div>
+    </section>
+
     <section class="panel panel--calculator" id="calculator">
-      <p class="panel__eyebrow">01 — Mix calculator</p>
+      <p class="panel__eyebrow">02 — Mix calculator</p>
       <h2 class="panel__title">What's in the pantry?</h2>
       <p>Enter what you have on hand (yellow cells are inputs, same convention as the original spreadsheet). The calculator finds the limiting ingredient and scales the rest of the batch to match.</p>
 
@@ -104,8 +113,14 @@
             </select>
           </div>
           <div class="field">
-            <label for="in-scoop">Scoop size (g)</label>
+            <label for="in-scoop">Your scoop size (g)</label>
             <input type="number" id="in-scoop" min="1" step="1" value="46" inputmode="decimal">
+            <span class="field-hint">Weigh your own — scoops vary. <a href="#tuning">How to measure</a></span>
+          </div>
+          <div class="field">
+            <label for="in-carb-ratio">Fructose ratio <span class="field-hint">per 1g malto</span></label>
+            <input type="number" id="in-carb-ratio" min="0" max="1.5" step="0.05" value="0.65" inputmode="decimal">
+            <span class="field-hint" id="ratio-readout"></span>
           </div>
           <div class="field">
             <label for="in-cap">Max batch size (g) <span class="field-hint">optional cap</span></label>
@@ -120,7 +135,7 @@
     </section>
 
     <section class="panel" id="hourly">
-      <p class="panel__eyebrow">02 — Per hour</p>
+      <p class="panel__eyebrow">03 — Per hour</p>
       <h2 class="panel__title">How much, how often?</h2>
       <p>Target carb ranges for hard/long efforts run 60–90 g/hr; sodium 500–1000 mg/hr (up to ~1500 mg/hr hot or heavy-sweat). Pick a carb target and see the scoops/hr it takes with your current batch.</p>
 
@@ -134,26 +149,83 @@
       <div class="card-grid" id="hourly-grid" aria-live="polite"></div>
     </section>
 
-    <section class="panel" id="label">
-      <p class="panel__eyebrow">03 — Label creator</p>
-      <h2 class="panel__title">Print a label</h2>
-      <p>The Supplement Facts panel above always reflects your current batch. Fill in a batch label, then print — the page's print styles strip everything but the label.</p>
+    <section class="panel" id="tuning">
+      <p class="panel__eyebrow">04 — Dial it in</p>
+      <h2 class="panel__title">Adjusting to taste</h2>
+      <p>The recipes are starting points. Sweetness, salt, and gut tolerance are personal, and the only way to find yours is to make a batch and pay attention. Here is what to change when something is off.</p>
+      <div class="tuning-list" id="tuning-list"></div>
+    </section>
 
-      <div class="input-grid" style="max-width:26rem;">
+    <section class="panel" id="label">
+      <p class="panel__eyebrow">05 — Label creator</p>
+      <h2 class="panel__title">Make a label</h2>
+      <p>A real 3&Prime; &times; 4&Prime; label for the jar, built from the batch you just calculated. Ingredients are listed by descending weight, the way a food label is supposed to be.</p>
+
+      <div class="input-grid" style="max-width:40rem;">
         <div class="field">
-          <label for="in-label-name">Batch name</label>
-          <input type="text" id="in-label-name" value="The Sauce" style="background:var(--paper-raised);border:2px solid var(--rule);">
+          <label for="in-label-name">Product name</label>
+          <input type="text" id="in-label-name" value="The Sauce" maxlength="28">
+        </div>
+        <div class="field">
+          <label for="in-label-flavor">Flavor line</label>
+          <input type="text" id="in-label-flavor" value="Strawberry" maxlength="32">
+        </div>
+        <div class="field">
+          <label for="in-label-maker">Made by</label>
+          <input type="text" id="in-label-maker" value="Daddy Pig Industries, LLC" maxlength="40">
         </div>
         <div class="field">
           <label for="in-label-date">Batch date</label>
-          <input type="date" id="in-label-date" style="background:var(--paper-raised);border:2px solid var(--rule);">
+          <input type="date" id="in-label-date">
         </div>
       </div>
-      <button type="button" class="btn" id="print-label-btn">Print label</button>
+
+      <div class="label-actions no-print">
+        <button type="button" class="btn" id="print-label-btn">Print label</button>
+        <span class="field-hint">Prints at actual size on one sheet — nothing else on the page comes with it.</span>
+      </div>
+
+      <div class="label-stage">
+        <article class="label-sheet" id="label-sheet" aria-label="Printable batch label">
+          <header class="label-sheet__head">
+            <p class="label-sheet__name" id="lb-name">The Sauce</p>
+            <p class="label-sheet__flavor" id="lb-flavor">Strawberry</p>
+          </header>
+
+          <dl class="label-facts">
+            <p class="label-facts__title">Supplement Facts</p>
+            <div class="label-facts__meta">
+              <span>Serving size</span><span class="data" id="lb-serving">— g</span>
+            </div>
+            <div class="label-facts__meta label-facts__thick">
+              <span>Servings per container</span><span class="data" id="lb-servings">—</span>
+            </div>
+            <div class="label-facts__cal">
+              <span>Calories</span><span id="lb-calories">—</span>
+            </div>
+            <div class="label-facts__row label-facts__row--bold">
+              <dt>Total Carbohydrate</dt><dd id="lb-carbs">— g</dd>
+            </div>
+            <div class="label-facts__row label-facts__row--indent">
+              <dt>Total Sugars</dt><dd id="lb-sugars">— g</dd>
+            </div>
+            <div class="label-facts__row label-facts__row--bold">
+              <dt>Sodium</dt><dd id="lb-sodium">— mg</dd>
+            </div>
+          </dl>
+
+          <p class="label-sheet__ingredients"><strong>Ingredients:</strong> <span id="lb-ingredients">—</span></p>
+
+          <footer class="label-sheet__foot">
+            <span id="lb-maker">Daddy Pig Industries, LLC</span>
+            <span class="data" id="lb-batch">—</span>
+          </footer>
+        </article>
+      </div>
     </section>
 
     <section class="panel" id="buy">
-      <p class="panel__eyebrow">04 — Where to buy</p>
+      <p class="panel__eyebrow">06 — Where to buy</p>
       <h2 class="panel__title">Ingredients</h2>
       <p>As an Amazon Associate I earn from qualifying purchases. Buying through these links costs you nothing extra.</p>
       <p class="field-hint">Specific products aren't picked yet — these go to Amazon search results for now.</p>
@@ -161,7 +233,7 @@
     </section>
 
     <section class="panel" id="research">
-      <p class="panel__eyebrow">05 — References</p>
+      <p class="panel__eyebrow">07 — References</p>
       <h2 class="panel__title">The science</h2>
       <p>Sources behind the ratios and targets used above.</p>
       <div class="card-grid" id="research-grid"></div>

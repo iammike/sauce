@@ -2,6 +2,8 @@ import { computeRecipe } from './calculator.js';
 import { hourlyTotals, recommendScoopsPerHour } from './hourly.js';
 import { formatGrams, formatMg, formatCalories, formatCount } from './format.js';
 import { FLAVORINGS, findFlavoring } from '../data/flavorings.js';
+import { RECIPES, findRecipe } from '../data/recipes.js';
+import { TUNING } from '../data/tuning.js';
 import { PRODUCTS } from '../data/products.js';
 import { RESEARCH } from '../data/research.js';
 
@@ -19,6 +21,7 @@ function readInputs() {
     },
     saltProfile: $('in-salt-profile').value,
     scoopGrams: Number($('in-scoop').value) || 1,
+    carbRatio: Number($('in-carb-ratio').value) || 0,
     maxBatchGrams: capRaw === '' ? undefined : Number(capRaw),
     flavorName: flavor.name,
     flavorRatio: flavor.ratio,
@@ -109,11 +112,73 @@ function renderHourlyGrid(recipe) {
   `).join('');
 }
 
+// Express the fructose ratio the way the research talks about it, as
+// glucose:fructose — maltodextrin digests to glucose, so 0.5 is the classic
+// 2:1 and 0.8 is the ~1.25:1 used by modern high-carb products.
+function renderRatioReadout() {
+  const ratio = Number($('in-carb-ratio').value) || 0;
+  const readout = $('ratio-readout');
+  if (ratio <= 0) {
+    readout.textContent = 'Glucose only — no fructose';
+    return;
+  }
+  readout.textContent = `${(1 / ratio).toFixed(2)}:1 glucose:fructose`;
+}
+
 function recalculate() {
   const recipe = computeRecipe(readInputs());
+  renderRatioReadout();
   renderFactsPanel(recipe);
   renderRecipeGrid(recipe);
   renderHourlyGrid(recipe);
+  renderLabel(recipe);
+}
+
+// Applying a recipe sets the formulation only. Pantry amounts and scoop size
+// are the user's kitchen, not the recipe's business, so they survive.
+function applyRecipe(id) {
+  const preset = findRecipe(id);
+  if (!preset) return;
+  $('in-carb-ratio').value = preset.carbRatio;
+  $('in-salt-profile').value = preset.saltProfile;
+  $('in-flavor-preset').value = preset.flavoringId;
+  $('in-target-carbs').value = preset.targetCarbsPerHour;
+  document.querySelectorAll('.recipe-card').forEach((el) => {
+    el.classList.toggle('card--active', el.dataset.recipeId === id);
+  });
+  recalculate();
+}
+
+function initRecipes() {
+  $('recipes-grid').innerHTML = RECIPES.map((r) => `
+    <button type="button" class="card recipe-card" data-recipe-id="${r.id}">
+      <span class="card__eyebrow">${r.tagline}${r.confidence === 'tested' ? ' · tested' : ''}</span>
+      <span class="recipe-card__name">${r.name}</span>
+      <span class="recipe-card__specs data">${r.carbRatio > 0 ? `${(1 / r.carbRatio).toFixed(2)}:1` : 'glucose only'} · ${r.saltProfile} salt · ${r.targetCarbsPerHour} g/hr</span>
+      <span class="recipe-card__best">${r.bestFor}</span>
+      <span class="recipe-card__why">${r.why}</span>
+    </button>
+  `).join('');
+
+  $('recipes-grid').addEventListener('click', (e) => {
+    const card = e.target.closest('.recipe-card');
+    if (card) applyRecipe(card.dataset.recipeId);
+  });
+}
+
+function initTuning() {
+  $('tuning-list').innerHTML = TUNING.map((t) => `
+    <details class="tuning-item" id="tune-${t.id}">
+      <summary>
+        ${t.tag ? `<span class="tuning-item__tag">${t.tag}</span>` : ''}
+        <span class="tuning-item__symptom">${t.symptom}</span>
+      </summary>
+      <div class="tuning-item__body">
+        <p class="tuning-item__fix"><strong>Do this:</strong> ${t.fix}</p>
+        <p class="tuning-item__why">${t.why}</p>
+      </div>
+    </details>
+  `).join('');
 }
 
 function initFlavorPresets() {
@@ -144,22 +209,62 @@ function initResearch() {
   `).join('');
 }
 
-function initLabelPrint() {
+// Food labels list ingredients in descending order by weight, so derive the
+// order from the batch rather than hardcoding it — changing the flavoring
+// ratio or salt profile can genuinely reorder them.
+function ingredientList(recipe) {
+  const names = {
+    maltodextrin: 'Maltodextrin',
+    fructose: 'Fructose',
+    flavoring: recipe.flavorName,
+    salt: 'Sodium citrate',
+  };
+  return Object.entries(recipe.recipeGrams)
+    .filter(([, grams]) => grams > 0)
+    .sort((a, b) => b[1] - a[1])
+    .map(([key]) => names[key])
+    .join(', ');
+}
+
+function renderLabel(recipe) {
+  const scoopGrams = Number($('in-scoop').value) || 0;
+  $('lb-name').textContent = $('in-label-name').value || 'The Sauce';
+  $('lb-flavor').textContent = $('in-label-flavor').value;
+  $('lb-maker').textContent = $('in-label-maker').value;
+  $('lb-serving').textContent = `${formatCount(scoopGrams, 0)} g (1 scoop)`;
+  $('lb-servings').textContent = formatCount(recipe.totalScoops, 0);
+  $('lb-calories').textContent = formatCalories(recipe.perScoop.calories);
+  $('lb-carbs').textContent = formatGrams(recipe.perScoop.carbsG);
+  $('lb-sugars').textContent = formatGrams(recipe.perScoop.sugarsG);
+  $('lb-sodium').textContent = formatMg(recipe.perScoop.sodiumMg);
+  $('lb-ingredients').textContent = ingredientList(recipe);
+
+  const date = $('in-label-date').value;
+  $('lb-batch').textContent = date ? `BATCH ${date.replace(/-/g, '')}` : '';
+}
+
+function initLabel() {
+  const dateInput = $('in-label-date');
+  if (!dateInput.value) dateInput.value = new Date().toISOString().slice(0, 10);
+
+  ['in-label-name', 'in-label-flavor', 'in-label-maker', 'in-label-date']
+    .forEach((id) => $(id).addEventListener('input', recalculate));
+
   $('print-label-btn').addEventListener('click', () => {
     const title = document.title;
-    document.title = `${$('in-label-name').value || 'The Sauce'} — Nutrition Label`;
+    document.title = `${$('in-label-name').value || 'The Sauce'} label`;
     window.print();
     document.title = title;
   });
-  const dateInput = $('in-label-date');
-  if (!dateInput.value) dateInput.value = new Date().toISOString().slice(0, 10);
 }
 
 function init() {
   initFlavorPresets();
+  initRecipes();
+  initTuning();
   initProducts();
   initResearch();
-  initLabelPrint();
+  initLabel();
 
   document.getElementById('calc-form').addEventListener('input', recalculate);
   $('in-flavor-preset').addEventListener('change', recalculate);

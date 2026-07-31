@@ -392,6 +392,107 @@ main {
 .status-pill--low { color: var(--malto); }
 .status-pill--high { color: var(--strawberry); }
 
+/* ---------- Recipe preset cards ---------- */
+
+.recipe-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  text-align: left;
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  cursor: pointer;
+  background: var(--paper-raised);
+}
+
+.recipe-card:hover { border-color: var(--strawberry); }
+
+.recipe-card__name {
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-weight: 900;
+  font-size: 1.8rem;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.recipe-card__specs {
+  font-size: 0.75rem;
+  color: var(--sodium);
+  letter-spacing: 0.02em;
+}
+
+.recipe-card__best {
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.recipe-card__why {
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  line-height: 1.45;
+}
+
+/* ---------- Tuning accordion ---------- */
+
+.tuning-list {
+  display: grid;
+  gap: 0.5rem;
+  max-width: 46rem;
+}
+
+.tuning-item {
+  border: 2px solid var(--rule);
+  background: var(--paper-raised);
+}
+
+.tuning-item summary {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  font-weight: 700;
+  list-style: none;
+}
+
+.tuning-item summary::-webkit-details-marker { display: none; }
+
+.tuning-item summary::after {
+  content: '+';
+  margin-left: auto;
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 500;
+  color: var(--strawberry);
+}
+
+.tuning-item[open] summary::after { content: '–'; }
+
+.tuning-item[open] summary { border-bottom: 1px solid var(--rule); }
+
+.tuning-item__tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.64rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: var(--input-yellow);
+  color: #171512;
+  border: 1px solid var(--input-yellow-border);
+  padding: 0.1rem 0.4rem;
+  white-space: nowrap;
+}
+
+.tuning-item__body { padding: 0.9rem 1rem 1rem; }
+
+.tuning-item__fix { margin: 0 0 0.6rem; font-size: 0.92rem; }
+
+.tuning-item__why {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
 /* ---------- Buttons ---------- */
 
 .btn {
@@ -462,13 +563,159 @@ main {
   gap: 1rem;
 }
 
-/* ---------- Print label ---------- */
+/* ---------- Label creator ----------
+   A real label at real dimensions (3in x 4in), not a styled page. Sized in
+   inches so what you see is what comes out of the printer. */
+
+.label-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.75rem;
+}
+
+.label-stage {
+  display: flex;
+  justify-content: center;
+  padding: 1.5rem;
+  background: repeating-conic-gradient(var(--paper-raised) 0% 25%, transparent 0% 50%) 50% / 16px 16px;
+  border: 2px solid var(--rule);
+  overflow-x: auto;
+}
+
+.label-sheet {
+  width: 3in;
+  height: 4in;
+  flex: 0 0 auto;
+  background: #ffffff;
+  color: #111111;
+  border: 1px solid #111111;
+  padding: 0.16in;
+  display: flex;
+  flex-direction: column;
+  gap: 0.07in;
+  font-family: 'Karla', sans-serif;
+  box-shadow: 0 8px 20px var(--shadow);
+}
+
+.label-sheet__head {
+  border-bottom: 3px solid #111;
+  padding-bottom: 0.05in;
+}
+
+.label-sheet__name {
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: 0.34in;
+  line-height: 0.9;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.label-sheet__flavor {
+  font-size: 0.11in;
+  font-style: italic;
+  margin: 0.02in 0 0;
+  overflow-wrap: anywhere;
+}
+
+.label-facts {
+  border: 1.5px solid #111;
+  padding: 0.05in 0.07in;
+  margin: 0;
+  font-size: 0.093in;
+  line-height: 1.25;
+}
+
+.label-facts__title {
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: 0.17in;
+  margin: 0 0 0.02in;
+  border-bottom: 4px solid #111;
+}
+
+.label-facts__meta {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #111;
+  padding: 0.012in 0;
+}
+
+.label-facts__thick { border-bottom-width: 4px; }
+
+.label-facts__cal {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-weight: 900;
+  font-size: 0.17in;
+  border-bottom: 3px solid #111;
+  padding: 0.02in 0;
+}
+
+.label-facts__row {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #111;
+  padding: 0.012in 0;
+}
+
+.label-facts__row:last-child { border-bottom: none; }
+.label-facts__row--bold { font-weight: 700; }
+.label-facts__row--indent { padding-left: 0.09in; }
+.label-facts__row dt, .label-facts__row dd { margin: 0; font-weight: inherit; }
+.label-facts__row dd { font-family: 'IBM Plex Mono', monospace; }
+.label-facts .data { font-family: 'IBM Plex Mono', monospace; }
+
+.label-sheet__ingredients {
+  font-size: 0.082in;
+  line-height: 1.3;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.label-sheet__foot {
+  margin-top: auto;
+  border-top: 1.5px solid #111;
+  padding-top: 0.04in;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.08in;
+  font-size: 0.075in;
+}
+
+/* Print: the label only, at true size. */
+@page { margin: 0.4in; }
 
 @media print {
-  .site-header, .site-footer, .hero-band, .panel--calculator .input-grid,
-  .no-print { display: none !important; }
+  body > *:not(main),
+  main > .panel:not(#label),
+  #label > *:not(.label-stage),
+  .no-print {
+    display: none !important;
+  }
+
   body { background: #fff; }
-  .facts-panel { box-shadow: none; margin: 2rem auto; }
+
+  #label { padding: 0; border: none; }
+
+  .label-stage {
+    background: none;
+    border: none;
+    padding: 0;
+    display: block;
+    overflow: visible;
+  }
+
+  .label-sheet {
+    box-shadow: none;
+    break-inside: avoid;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -4,10 +4,11 @@
 // fixed menu; flavoring is a free slot — any powder, any ratio, any sugar
 // content — since the recipe isn't tied to strawberry specifically.
 
-export const BASE_RATIOS = {
-  maltodextrin: 1,
-  fructose: 0.65,
-};
+// Maltodextrin is the reference unit (always 1). Fructose is expressed
+// relative to it and is a caller-supplied input, because the glucose:fructose
+// ratio is the main lever for how many carbs/hr the gut can absorb — see
+// data/recipes.js and docs/recipe-source.md.
+export const DEFAULT_CARB_RATIO = 0.65; // g fructose per 1g maltodextrin
 
 // Defaults match the tested recipe's strawberry powder, but every one of
 // these is a caller-supplied input, not a fixed constant.
@@ -30,10 +31,15 @@ export const CALORIES_PER_G_CARB = 4;
 
 const INGREDIENTS = ['maltodextrin', 'fructose', 'flavoring', 'salt'];
 
-function ratiosFor(saltProfile, flavorRatio) {
+function ratiosFor(saltProfile, carbRatio, flavorRatio) {
   const profile = SALT_PROFILES[saltProfile];
   if (!profile) throw new Error(`Unknown salt profile: ${saltProfile}`);
-  return { ...BASE_RATIOS, flavoring: flavorRatio, salt: profile.ratio };
+  return {
+    maltodextrin: 1,
+    fructose: carbRatio,
+    flavoring: flavorRatio,
+    salt: profile.ratio,
+  };
 }
 
 /**
@@ -45,6 +51,7 @@ function ratiosFor(saltProfile, flavorRatio) {
  * @param {string} saltProfile - one of SALT_PROFILES keys
  * @param {number} [maxBatchGrams] - optional hard cap on total batch weight
  * @param {number} scoopGrams - grams per scoop
+ * @param {number} [carbRatio] - g fructose per 1g maltodextrin; the glucose:fructose lever
  * @param {string} [flavorName] - display name for the flavoring in use (e.g. "Strawberry", "Fruit punch", "Unflavored")
  * @param {number} [flavorRatio] - g flavoring per 1g maltodextrin; varies by product concentration
  * @param {number} [flavorCarbFraction] - fraction of flavoring mass that's carbohydrate (0 for a non-caloric flavor/color powder)
@@ -55,12 +62,13 @@ export function computeRecipe({
   saltProfile,
   maxBatchGrams,
   scoopGrams,
+  carbRatio = DEFAULT_CARB_RATIO,
   flavorName = 'Flavoring',
   flavorRatio = DEFAULT_FLAVOR_RATIO,
   flavorCarbFraction = DEFAULT_FLAVOR_CARB_FRACTION,
   flavorSugarFraction = DEFAULT_FLAVOR_SUGAR_FRACTION,
 }) {
-  const ratios = ratiosFor(saltProfile, flavorRatio);
+  const ratios = ratiosFor(saltProfile, carbRatio, flavorRatio);
   const sumRatio = INGREDIENTS.reduce((sum, key) => sum + ratios[key], 0);
 
   const candidates = INGREDIENTS
