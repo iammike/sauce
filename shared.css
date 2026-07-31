@@ -526,8 +526,18 @@ html { scroll-behavior: smooth; }
   max-width: 46rem;
 }
 
+/* Four abreast on one line — this is a comparison, and it only works if you
+   can see all four at once. auto-fit was dropping the fourth to its own row. */
 #cost-grid {
-  grid-template-columns: repeat(auto-fit, minmax(21rem, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+@media (max-width: 1080px) {
+  #cost-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 620px) {
+  #cost-grid { grid-template-columns: minmax(0, 1fr); }
 }
 
 /* ---------- Share bar ---------- */
@@ -702,6 +712,15 @@ html { scroll-behavior: smooth; }
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+}
+
+/* Notes vary in length, so without this the buy buttons land at whatever
+   height their card's text happens to end — a ragged row of identical
+   controls. Cards are already equal height from the grid; this pins the
+   button to the bottom of each. */
+.product-card .btn {
+  margin-top: auto;
+  text-align: center;
 }
 
 .product-card__name, .research-card__name {
