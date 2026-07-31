@@ -497,6 +497,12 @@ html { scroll-behavior: smooth; }
 
 .hourly-note { margin: 1.25rem 0 0; }
 
+.cost-card__note {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
 .cost-card__limitation {
   border-top: 1px solid var(--rule);
   padding-top: 0.5rem;
@@ -510,6 +516,10 @@ html { scroll-behavior: smooth; }
   margin: 0 0 1.5rem;
   font-size: 0.9rem;
   max-width: 46rem;
+}
+
+#cost-grid {
+  grid-template-columns: repeat(auto-fit, minmax(21rem, 1fr));
 }
 
 /* ---------- Share bar ---------- */
@@ -639,6 +649,11 @@ html { scroll-behavior: smooth; }
 }
 
 /* ---------- Footer ---------- */
+
+.site-footer__fine {
+  opacity: 0.75;
+  font-size: 0.75rem;
+}
 
 .site-footer {
   max-width: 72rem;

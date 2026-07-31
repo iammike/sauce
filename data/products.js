@@ -1,9 +1,12 @@
 // Amazon Associates product links.
 //
-// Real product pages use the canonical /dp/<ASIN> form with our tag; the
-// ref_=/th= cruft a browser session appends is stripped. Anything still
-// marked `placeholder: true` points at an Amazon search rather than a guessed
-// ASIN — honest, if generic, until a specific product is chosen.
+// Real product pages, canonical /dp/<ASIN> form with our tag; the ref_=/th=
+// cruft a browser session appends is stripped. These are the specific
+// products the cost figures in data/costs.js are priced from, so changing one
+// means re-checking the corresponding price there.
+//
+// `searchUrl` remains for any ingredient added later that doesn't yet have a
+// chosen product — a search link is honest where a guessed ASIN wouldn't be.
 
 // Store ID is `mikeylikesit-20`; `sauce-calc-20` is a tracking ID under it,
 // created specifically for this site so its earnings stay segmented in

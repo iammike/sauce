@@ -31,14 +31,21 @@ export const CALORIES_PER_G_CARB = 4;
 
 const INGREDIENTS = ['maltodextrin', 'fructose', 'flavoring', 'salt'];
 
-function ratiosFor(saltProfile, carbRatio, flavorRatio) {
-  const profile = SALT_PROFILES[saltProfile];
-  if (!profile) throw new Error(`Unknown salt profile: ${saltProfile}`);
+// An explicit saltRatio wins over the named profile. That's how a solved
+// formulation (see src/sodium.js) gets in — the profiles become presets
+// rather than the only available salt levels.
+function ratiosFor(saltProfile, carbRatio, flavorRatio, saltRatio) {
+  let salt = saltRatio;
+  if (typeof salt !== 'number' || !Number.isFinite(salt) || salt < 0) {
+    const profile = SALT_PROFILES[saltProfile];
+    if (!profile) throw new Error(`Unknown salt profile: ${saltProfile}`);
+    salt = profile.ratio;
+  }
   return {
     maltodextrin: 1,
     fructose: carbRatio,
     flavoring: flavorRatio,
-    salt: profile.ratio,
+    salt,
   };
 }
 
@@ -49,6 +56,7 @@ function ratiosFor(saltProfile, carbRatio, flavorRatio) {
  *
  * @param {object} onHand - grams available: { maltodextrin, fructose, flavoring, salt }
  * @param {string} saltProfile - one of SALT_PROFILES keys
+ * @param {number} [saltRatio] - explicit g salt per 1g maltodextrin; overrides saltProfile
  * @param {number} [maxBatchGrams] - optional hard cap on total batch weight
  * @param {number} scoopGrams - grams per scoop
  * @param {number} [carbRatio] - g fructose per 1g maltodextrin; the glucose:fructose lever
@@ -60,6 +68,7 @@ function ratiosFor(saltProfile, carbRatio, flavorRatio) {
 export function computeRecipe({
   onHand,
   saltProfile,
+  saltRatio,
   maxBatchGrams,
   scoopGrams,
   carbRatio = DEFAULT_CARB_RATIO,
@@ -68,7 +77,7 @@ export function computeRecipe({
   flavorCarbFraction = DEFAULT_FLAVOR_CARB_FRACTION,
   flavorSugarFraction = DEFAULT_FLAVOR_SUGAR_FRACTION,
 }) {
-  const ratios = ratiosFor(saltProfile, carbRatio, flavorRatio);
+  const ratios = ratiosFor(saltProfile, carbRatio, flavorRatio, saltRatio);
   const sumRatio = INGREDIENTS.reduce((sum, key) => sum + ratios[key], 0);
 
   const candidates = INGREDIENTS

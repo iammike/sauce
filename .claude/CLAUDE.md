@@ -47,6 +47,12 @@
 - Artwork is read with `FileReader` into a data URL and never uploaded — there is no server to upload to. Keep it that way
 - The `accept` attribute is a hint, not a control: MIME type and size are re-checked in `loadArtwork()`. Don't add SVG to the allowlist (it can carry script)
 
+## Sodium drives the formulation, not a preset
+- `src/sodium.js` estimates a sodium target from sweat rate + sweat sodium, then solves the salt ratio that delivers it at the user's carb intake. Closed form — batch size cancels; see the derivation comment on `solveSaltRatio`
+- The reason this exists: carb need scales with duration/intensity, sodium need with sweat rate/heat. A fixed salt percentage welds them together, which is the exact criticism levelled at Gatorade Endurance on the cost panel. Don't reintroduce that coupling
+- `MAX_PRACTICAL_SALT_RATIO` is a taste limit, not a math one. Past it the tool must refuse and say "take salt separately" rather than emit an undrinkable formulation. There are tests on the refusal
+- The sodium estimate is genuinely uncertain (sweat sodium varies 500–1300 mg/L). Present it as a range to adjust from, never as a prescription
+
 ## Cost data is dated and approximate
 - `data/costs.js` carries `PRICED_AS_OF` and a `basis` string per ingredient; flavoring prices live on the flavorings themselves since that slot varies hugely. Every price is labelled `actual` or `estimated` and the page says so
 - Comparisons are normalised per gram of **carbohydrate**, never per gram of powder — otherwise the most diluted product looks cheapest

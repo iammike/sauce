@@ -84,6 +84,8 @@ export function tierFor(gramsPerHour) {
     (gramsPerHour >= tier.gramsPerHour ? tier : best), CARB_INTAKE_TIERS[0]);
 }
 
+// Every tier currently cites the same review. If that ever stops being true,
+// src/app.js starts rendering a per-tier citation automatically.
 // Kept as a coarse sanity band for the status pills. The tiers above are the
 // real guidance; this is just "is the number broadly sensible".
 export const CARB_TARGET_RANGE = { min: 30, max: 120 };

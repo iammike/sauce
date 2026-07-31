@@ -54,8 +54,10 @@ export function compareAtCarbTarget(mixCostPerGramCarb, targetCarbsPerHour) {
       ...product,
       perGramCarb,
       perHour,
-      // Fluid you'd have to get down per hour at the label's own dilution.
-      // The number that separates a fuel from a hydration drink.
+      // Computed but deliberately not displayed: a bare "1.8 L/hr" means
+      // nothing unless you already know what's a lot. The fluid problem is
+      // stated in words in each product's `limitation` instead. Kept here
+      // because the tests use it to assert those words stay true.
       litresPerHour: litresPerHour(product, targetCarbsPerHour),
       sodiumMgPerHour: product.sodiumMgPerGramCarb * targetCarbsPerHour,
       // How many times more expensive than making it yourself. Below 1 means

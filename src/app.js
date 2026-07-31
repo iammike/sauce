@@ -8,23 +8,63 @@ import { TUNING } from '../data/tuning.js';
 import { PRODUCTS } from '../data/products.js';
 import { RESEARCH, findResearch } from '../data/research.js';
 import { batchCost, costPerGramCarb, compareAtCarbTarget } from './cost.js';
-import { PRICED_AS_OF, INGREDIENT_COSTS, HOMEMADE_LIMITATION, OSMOLALITY_NOTE } from '../data/costs.js';
+import {
+  SWEAT_RATES, SWEAT_SODIUM_LEVELS, MAX_PRACTICAL_SALT_RATIO,
+  estimateSodiumNeed, solveSaltRatio, findSweatSodium,
+} from './sodium.js';
+import { PRICED_AS_OF, INGREDIENT_COSTS, HOMEMADE_LIMITATION } from '../data/costs.js';
 
 const $ = (id) => document.getElementById(id);
+
+// The formulation follows from the targets, not the other way round: when the
+// salt level is "solved", the salt ratio is whatever delivers the estimated
+// sodium need at the carb intake actually being fuelled at.
+function resolveSalt(carbRatio, flavor) {
+  const mode = $('in-salt-profile').value;
+  const targetCarbs = Number($('in-target-carbs').value) || DEFAULT_TARGET_CARBS;
+  const estimate = estimateSodiumNeed({
+    sweatRateId: $('in-sweat-rate').value,
+    sweatSodiumId: $('in-sweat-sodium').value,
+  });
+
+  if (mode !== 'solved') {
+    return { mode, estimate, saltRatio: undefined, saltProfile: mode, solved: null };
+  }
+
+  const solved = solveSaltRatio({
+    targetSodiumPerHour: estimate.targetMgPerHour,
+    targetCarbsPerHour: targetCarbs,
+    carbRatio,
+    flavorRatio: flavor.ratio,
+    flavorCarbFraction: flavor.carbFraction,
+  });
+
+  // Cap at the drinkable limit rather than emitting a mix nobody would
+  // finish; the shortfall is reported instead.
+  const saltRatio = solved
+    ? Math.min(solved.ratio, MAX_PRACTICAL_SALT_RATIO)
+    : undefined;
+
+  return { mode, estimate, saltRatio, saltProfile: 'endurance', solved };
+}
 
 function readInputs() {
   const flavor = findFlavoring($('in-flavor-preset').value) ?? FLAVORINGS[0];
   const capRaw = $('in-cap').value;
+  const carbRatio = Number($('in-carb-ratio').value) || 0;
+  const salt = resolveSalt(carbRatio, flavor);
   return {
+    salt,
     onHand: {
       maltodextrin: Number($('in-malto').value) || 0,
       fructose: Number($('in-fructose').value) || 0,
       flavoring: Number($('in-flavoring').value) || 0,
       salt: Number($('in-salt').value) || 0,
     },
-    saltProfile: $('in-salt-profile').value,
+    saltProfile: salt.saltProfile,
+    saltRatio: salt.saltRatio,
     scoopGrams: Number($('in-scoop').value) || 1,
-    carbRatio: Number($('in-carb-ratio').value) || 0,
+    carbRatio,
     maxBatchGrams: capRaw === '' ? undefined : Number(capRaw),
     flavorName: flavor.name,
     flavorRatio: flavor.ratio,
@@ -102,15 +142,8 @@ function renderCost(recipe, flavor, targetCarbs) {
     <div class="card${r.mine ? ' card--active' : ''}">
       <p class="card__eyebrow">${r.name}${r.confidence === 'estimated' ? ' · estimated' : ''}</p>
       <p class="card__value data">${money(r.perHour)}<span class="card__unit"> / hour</span></p>
-      ${!r.mine && r.multiple ? `<p class="field-hint"><strong>${r.multiple >= 1
-        ? `${r.multiple.toFixed(1)}× the cost of making it`
-        : `${(1 / r.multiple).toFixed(1)}× cheaper than making it`}</strong></p>` : ''}
       <p class="field-hint">${formatMg(r.sodiumMgPerHour)} sodium/hr <span class="${statusPillClass(sodiumStatus(r.sodiumMgPerHour))}">${sodiumStatus(r.sodiumMgPerHour)}</span></p>
-      <p class="field-hint">${
-        r.litresPerHour !== null
-          ? `<strong>${r.litresPerHour.toFixed(1)} L/hr</strong> of fluid at label dilution`
-          : r.mine ? 'Dilution is your choice' : 'Dilution not published'}</p>
-      <p class="field-hint">${r.note ?? ''}</p>
+      <p class="cost-card__note">${r.note ?? ''}</p>
       <p class="field-hint cost-card__limitation"><strong>Catch:</strong> ${r.limitation}</p>
     </div>
   `).join('');
@@ -138,7 +171,6 @@ function renderCost(recipe, flavor, targetCarbs) {
       `;
     }).join('');
 
-  $('osmolality-note').textContent = OSMOLALITY_NOTE;
   $('cost-note').textContent = `Ingredient prices as of ${PRICED_AS_OF} (${INGREDIENT_COSTS.maltodextrin.basis}, ${INGREDIENT_COSTS.fructose.basis}, ${INGREDIENT_COSTS.salt.basis}, flavoring ${flavor.priceBasis}). Prices move — treat these as ballpark, not quotes.`;
 }
 
@@ -184,6 +216,12 @@ function renderHourlyGrid(recipe) {
   const ceiling = absorptionCeiling(carbRatio);
   const activeTier = tierFor(targetCarbs);
 
+  // Only cite per-tier when the tiers actually come from different papers.
+  // They don't today, and repeating one link four times is just noise — the
+  // section intro already links it.
+  const showTierSources =
+    new Set(CARB_INTAKE_TIERS.map((t) => t.sourceId)).size > 1;
+
   grid.innerHTML = CARB_INTAKE_TIERS.map((tier) => {
     const plan = planForCarbTarget(recipe.perGram, scoopGrams, tier.gramsPerHour);
     const isActive = tier === activeTier;
@@ -207,7 +245,9 @@ function renderHourlyGrid(recipe) {
             ? `<span class="warn">Above the ~${DUAL_TRANSPORT_TYPICAL} g/hr most people manage — needs gut training.</span>`
             // No fructose at all: a hard transporter limit, not a training one.
             : `<span class="warn">Not reachable without fructose — glucose alone tops out near ${GLUCOSE_ONLY_CEILING} g/hr.</span>`}</p>
-        ${tier.sourceId ? `<p class="card__cite"><a href="#ref-${tier.sourceId}">Source</a></p>` : ''}
+        ${showTierSources && tier.sourceId
+          ? `<p class="card__cite"><a href="#ref-${tier.sourceId}">${findResearch(tier.sourceId)?.role ?? 'Source'}</a></p>`
+          : ''}
       </div>
     `;
   }).join('');
@@ -245,13 +285,65 @@ function renderRatioReadout() {
   readout.innerHTML = `${shape} — ${verdict}`;
 }
 
+function renderSodiumSolve(inputs, recipe, targetCarbs) {
+  const { estimate, solved, mode } = inputs.salt;
+  const [lo, hi] = estimate.rangeMgPerHour;
+
+  $('sodium-estimate').innerHTML = `Losing roughly <strong>${formatMg(estimate.lossMgPerHour)}/hr</strong> of sodium in these conditions. Replacing 50–80% of that puts your target at <strong>${formatMg(lo)}–${formatMg(hi)}/hr</strong>.`;
+
+  const saltPct = recipe.sumRatio > 0
+    ? (recipe.ratios.salt / recipe.sumRatio) * 100 : 0;
+
+  if (mode !== 'solved') {
+    const delivered = recipe.perGram.carbsG > 0
+      ? (recipe.perGram.sodiumMg / recipe.perGram.carbsG) * targetCarbs : 0;
+    const off = delivered < lo ? 'below' : delivered > hi ? 'above' : 'inside';
+    $('sodium-solve-detail').innerHTML = `Using the <strong>${mode}</strong> preset at ${saltPct.toFixed(1)}% salt, which delivers ${formatMg(delivered)}/hr — ${off} that range. Switch the salt level to <em>Solved</em> to hit it exactly.`;
+    return;
+  }
+
+  if (solved && !solved.practical) {
+    // The failure mode worth designing for: technically solvable, actually
+    // undrinkable. Say so and point at the real fix.
+    const shortfall = estimate.targetMgPerHour - solved.maxSodiumAtThisCarbRate;
+    $('sodium-solve-detail').innerHTML = `<span class="warn">That target needs more salt than the mix can carry.</span> Capped at ${saltPct.toFixed(1)}% (${formatMg(solved.maxSodiumAtThisCarbRate)}/hr) — past that it tastes of salt. You're short about <strong>${formatMg(shortfall)}/hr</strong>, so take that separately as a salt tab, or raise your carb intake so the same salt percentage carries more sodium.`;
+    return;
+  }
+
+  $('sodium-solve-detail').innerHTML = `Salt solved to <strong>${saltPct.toFixed(1)}% of the batch</strong> — that delivers ${formatMg(estimate.targetMgPerHour)}/hr at ${targetCarbs} g carbs/hr. Change either target and the formulation follows.`;
+}
+
+function renderSweatCue() {
+  const level = findSweatSodium($('in-sweat-sodium').value);
+  $('sweat-sodium-cue').textContent = level ? level.cue : '';
+  $('salt-profile-note').textContent = $('in-salt-profile').value === 'solved'
+    ? 'Follows your conditions and carb target.'
+    : 'Fixed percentage, regardless of your targets.';
+}
+
+function initConditions() {
+  $('in-sweat-rate').innerHTML = SWEAT_RATES
+    .map((r) => `<option value="${r.id}">${r.label} — ~${r.litresPerHour} L/hr sweat</option>`).join('');
+  $('in-sweat-rate').value = 'moderate';
+
+  $('in-sweat-sodium').innerHTML = SWEAT_SODIUM_LEVELS
+    .map((s) => `<option value="${s.id}">${s.label}</option>`).join('');
+  $('in-sweat-sodium').value = 'average';
+
+  ['in-sweat-rate', 'in-sweat-sodium'].forEach((id) =>
+    $(id).addEventListener('change', recalculate));
+}
+
 function recalculate() {
-  const recipe = computeRecipe(readInputs());
+  const inputs = readInputs();
+  const recipe = computeRecipe(inputs);
   const targetCarbs = Number($('in-target-carbs').value) || DEFAULT_TARGET_CARBS;
   const scoopGrams = Number($('in-scoop').value) || 0;
   const serving = servingFor(recipe, targetCarbs, scoopGrams);
 
   renderRatioReadout();
+  renderSweatCue();
+  renderSodiumSolve(inputs, recipe, targetCarbs);
   renderFactsPanel(recipe, serving, targetCarbs);
   renderRecipeGrid(recipe);
   renderHourlyGrid(recipe);
@@ -283,10 +375,9 @@ function initFlavorPresets() {
 function initProducts() {
   $('products-grid').innerHTML = PRODUCTS.map((p) => `
     <div class="card product-card">
-      ${p.placeholder ? '<span class="todo-badge">Placeholder link</span>' : ''}
       <p class="product-card__name">${p.name}</p>
       <p class="product-card__note">${p.note}</p>
-      <a class="btn btn--outline" href="${p.url}" target="_blank" rel="noopener sponsored">Shop on Amazon</a>
+      <a class="btn btn--outline" href="${p.url}" target="_blank" rel="noopener sponsored">View on Amazon</a>
     </div>
   `).join('');
 }
@@ -294,7 +385,7 @@ function initProducts() {
 function initResearch() {
   $('research-grid').innerHTML = RESEARCH.map((r) => `
     <div class="card research-card" id="ref-${r.id}">
-      ${r.backsTiers ? '<span class="card__eyebrow">Backs the intake tiers</span>' : ''}
+      ${r.role ? `<span class="card__eyebrow">${r.role}</span>` : ''}
       <p class="research-card__name">${r.name}</p>
       <p class="research-card__cite">${r.source}</p>
       <p class="research-card__note">${r.note}</p>
@@ -406,6 +497,7 @@ function initLabel() {
 
 function init() {
   initFlavorPresets();
+  initConditions();
   initTuning();
   initProducts();
   initResearch();

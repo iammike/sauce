@@ -102,12 +102,14 @@
             <input type="number" id="in-salt" min="0" step="1" value="400" inputmode="decimal">
           </div>
           <div class="field field--select">
-            <label for="in-salt-profile">Salt profile</label>
+            <label for="in-salt-profile">Salt level</label>
             <select id="in-salt-profile">
-              <option value="moderate">Moderate — ~147 mg Na/scoop</option>
-              <option value="endurance" selected>Endurance — ~206 mg Na/scoop</option>
-              <option value="hot">Hot / heavy sweat — ~264 mg Na/scoop</option>
+              <option value="solved" selected>Solved for your conditions</option>
+              <option value="moderate">Preset — moderate</option>
+              <option value="endurance">Preset — endurance</option>
+              <option value="hot">Preset — hot / heavy sweat</option>
             </select>
+            <span class="field-hint" id="salt-profile-note"></span>
           </div>
           <div class="field">
             <label for="in-scoop">Your scoop size (g)</label>
@@ -136,11 +138,25 @@
       <h2 class="panel__title">How much, how often?</h2>
       <p>How many carbs you need per hour depends mostly on how long you're out. These tiers follow the <a href="#ref-morton-2026">current guidance</a> (Morton et al., 2026), which raised the old 90 g/hr ceiling to 90–120 for trained athletes. Pick the band that matches your effort and see how much mix it takes.</p>
 
-      <div class="input-grid" style="max-width:20rem;">
+      <div class="input-grid" style="max-width:46rem;">
         <div class="field">
           <label for="in-target-carbs">Your target (g carbs/hr)</label>
           <input type="number" id="in-target-carbs" min="10" max="200" step="5" value="75">
         </div>
+        <div class="field field--select">
+          <label for="in-sweat-rate">Conditions</label>
+          <select id="in-sweat-rate"></select>
+        </div>
+        <div class="field field--select">
+          <label for="in-sweat-sodium">How salty is your sweat?</label>
+          <select id="in-sweat-sodium"></select>
+          <span class="field-hint" id="sweat-sodium-cue"></span>
+        </div>
+      </div>
+
+      <div class="callout" id="sodium-solve">
+        <p id="sodium-estimate"></p>
+        <p class="field-hint" id="sodium-solve-detail"></p>
       </div>
 
       <p class="callout" id="hourly-warning" role="status" hidden></p>
@@ -249,8 +265,6 @@
 
       <div class="card-grid" id="cost-grid"></div>
 
-      <p class="callout" id="osmolality-note"></p>
-
       <h3 class="display" style="font-size:1.1rem;margin:2rem 0 0.75rem;">Where the money goes</h3>
       <div class="card-grid" id="cost-breakdown"></div>
 
@@ -259,9 +273,8 @@
 
     <section class="panel" id="buy">
       <p class="panel__eyebrow">06 — Where to buy</p>
-      <h2 class="panel__title">Ingredients</h2>
-      <p>As an Amazon Associate I earn from qualifying purchases. Buying through these links costs you nothing extra.</p>
-      <p class="field-hint">Specific products aren't picked yet — these go to Amazon search results for now.</p>
+      <h2 class="panel__title">What to buy</h2>
+      <p>These are the exact products the recipe and the costs on this page are based on. Nothing here is special — any food-grade equivalent works, and the calculator doesn't care what you buy. They're listed because "maltodextrin" is a confusing thing to search for the first time.</p>
       <div class="card-grid" id="products-grid"></div>
     </section>
 
@@ -274,7 +287,7 @@
   </main>
 
   <footer class="site-footer">
-    <span>The Sauce — manufactured by Daddy Pig Industries, LLC (a joke, mostly)</span>
+    <span>The Sauce — manufactured by Daddy Pig Industries, LLC (a joke, mostly)<br><span class="site-footer__fine">As an Amazon Associate I earn from qualifying purchases.</span></span>
     <a href="https://github.com/iammike/sauce" target="_blank" rel="noopener">Source</a>
   </footer>
 

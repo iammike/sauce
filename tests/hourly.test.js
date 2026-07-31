@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { computeRecipe } from '../src/calculator.js';
-import { findResearch } from '../data/research.js';
+import { findResearch, RESEARCH } from '../data/research.js';
+
+const findResearchRoles = () => RESEARCH.map((r) => r.role);
 import { hourlyTotals, recommendScoopsPerHour, scoopsForDuration, planForCarbTarget,
   CARB_INTAKE_TIERS, absorptionCeiling, tierFor, ratioStatus, GLUCOSE_ONLY_CEILING,
   DUAL_TRANSPORT_TYPICAL, DUAL_TRANSPORT_TRAINED, FRUCTOSE_RATIO_OPTIMAL,
@@ -170,5 +172,16 @@ describe('ratioStatus', () => {
 
   it('flags ratios past the optimal band', () => {
     expect(ratioStatus(1.4)).toBe('above');
+  });
+});
+
+describe('research card roles', () => {
+  it('gives every source a specific role, not a generic one', () => {
+    const roles = findResearchRoles();
+    for (const role of roles) {
+      expect(role).toBeTruthy();
+    }
+    // A column of cards all saying the same thing tells a reader nothing.
+    expect(new Set(roles).size).toBe(roles.length);
   });
 });
