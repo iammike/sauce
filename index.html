@@ -40,12 +40,16 @@
           <span>Batch size</span>
           <span class="data" id="fp-batch">— g</span>
         </div>
+        <div class="facts-panel__servings">
+          <span>Serving size <em>1 hour</em></span>
+          <span class="data" id="fp-serving-size">— g</span>
+        </div>
         <div class="facts-panel__servings facts-panel__thick">
-          <span>Servings per batch</span>
+          <span>Hours of fueling per batch</span>
           <span class="data" id="fp-servings">—</span>
         </div>
         <div class="facts-panel__amount">
-          <span class="facts-panel__amount-label">Amount per scoop</span>
+          <span class="facts-panel__amount-label">Amount per hour <span id="fp-scoop-note" class="facts-panel__scoop"></span></span>
           <div class="facts-panel__calories">
             <span>Calories</span>
             <span id="fp-calories">—</span>
@@ -63,7 +67,7 @@
           <dt>Sodium</dt>
           <dd id="fp-sodium">— mg</dd>
         </div>
-        <p class="facts-panel__footnote">Sodium from sodium citrate dihydrate (~235 mg Na/g). Flavoring: <span id="fp-flavor-name">Strawberry</span>. Recipe basis: <a href="https://docs.google.com/spreadsheets/d/1ynXY85EZxoiSmAzm9cJSymFrC8IUvmYh5mTmx6V6oKU/edit" target="_blank" rel="noopener">source spreadsheet</a>.</p>
+        <p class="facts-panel__footnote">A serving is one hour of fueling at <span id="fp-target">75 g carbs/hr</span> — set that in <a href="#hourly">Per hour</a>. Sodium from sodium citrate dihydrate (~235 mg Na/g). Flavoring: <span id="fp-flavor-name">Strawberry</span>.</p>
       </dl>
     </div>
   </section>
@@ -158,7 +162,7 @@
     <section class="panel" id="label">
       <p class="panel__eyebrow">04 — Label creator</p>
       <h2 class="panel__title">Make a label</h2>
-      <p>A real 3&Prime; &times; 4&Prime; label for the jar, built from the batch you just calculated. Ingredients are listed by descending weight, the way a food label is supposed to be.</p>
+      <p>A real 3&Prime; &times; 4&Prime; label for the jar, built from the batch you just calculated. A serving is one hour of fueling at your <a href="#hourly">per-hour target</a> — more useful on a homemade jar than a scoop count, since scoops vary. Ingredients are listed by descending weight, the way a food label should be.</p>
 
       <div class="input-grid" style="max-width:40rem;">
         <div class="field">
@@ -227,6 +231,8 @@
           </figure>
 
           <p class="label-sheet__note" id="lb-note" hidden></p>
+
+          <p class="label-sheet__directions" id="lb-directions"></p>
 
           <p class="label-sheet__ingredients"><strong>Ingredients:</strong> <span id="lb-ingredients">—</span></p>
 

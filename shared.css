@@ -233,6 +233,22 @@ a:hover { color: var(--strawberry-dark); }
 .facts-panel__amount-label {
   font-size: 0.8rem;
   font-weight: 700;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.facts-panel__scoop {
+  font-weight: 400;
+  color: var(--ink-soft);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+}
+
+.facts-panel__servings em {
+  font-style: normal;
+  color: var(--ink-soft);
+  font-size: 0.78rem;
 }
 
 .facts-panel__calories {
@@ -765,6 +781,14 @@ html { scroll-behavior: smooth; }
   font-size: 0.09in;
   font-weight: 700;
   text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.label-sheet__directions {
+  font-size: 0.082in;
+  line-height: 1.3;
+  margin: 0;
+  font-weight: 700;
   overflow-wrap: anywhere;
 }
 

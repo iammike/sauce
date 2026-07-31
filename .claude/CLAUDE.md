@@ -22,6 +22,7 @@
 - There is no standard scoop, so anything a user acts on is expressed in grams first. Scoop counts appear only as a labelled convenience ("of your 46 g scoops")
 - Per-hour fueling math must be built on `recipe.perGram`, never `recipe.perScoop` — how much mix an hour takes is a property of the formulation and must not change because someone owns a bigger scoop. There are regression tests for this in `tests/hourly.test.js`
 - Recipe presets deliberately don't set scoop size or pantry amounts
+- **A serving is one hour of fueling, not one scoop.** Both the hero Supplement Facts panel and the printed label size their serving from the per-hour carb target, so "servings per container" reads as hours of fueling — the number you actually want when packing for a ride. A commercial product can define a scoop because it ships you one; a homemade jar can't. `recipe.perScoop` still exists but nothing in the UI uses it
 
 ## Parked features — don't re-wire without a reason
 - `data/recipes.js` and `src/share.js` are complete and tested but deliberately NOT imported by `src/app.js`. Only `classic` and `bare-bones` were ever actually made; the rest are research-backed extrapolations, and shipping them as a recipe collection (plus a way to share untested variants) claimed more authority than the evidence supports

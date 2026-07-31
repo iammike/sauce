@@ -15,9 +15,11 @@ Supplement Facts panel. From there:
   absorb are greyed out, since glucose alone saturates near 60 g/hr.
 - **Dial it in** — symptom-driven tuning guidance (`data/tuning.js`): what to
   change when it's too sweet, too salty, or sitting in your stomach.
-- **Label** — a real 3x4in label with a derived ingredients list (ordered by
-  descending weight, as food labels require), optional artwork, and print
-  rules that isolate it at true size. Artwork never leaves the browser.
+- **Label** — a real 3x4in label whose serving size is *one hour of fueling*
+  at your carb target, so "servings per container" tells you how many hours
+  the jar holds. Ingredients are derived from the batch and ordered by
+  descending weight, as food labels require. Optional artwork never leaves the
+  browser, and print rules isolate the label at true size.
 - **Where to buy** — Amazon Associate links for the ingredients. The tracking
   tag is live; specific products are still to be picked (see open issues).
 - **References** — the research behind the ratios and hourly targets.

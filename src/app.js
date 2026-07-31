@@ -39,14 +39,40 @@ const LIMITING_LABELS = {
   cap: 'your batch-size cap',
 };
 
-function renderFactsPanel(recipe) {
+// A serving is one hour of fueling, not one scoop. A commercial product can
+// define a scoop because it ships you one; a jar of homemade mix can't, and
+// an hour is both universal and the unit people actually plan rides in.
+function servingFor(recipe, targetCarbs, scoopGrams) {
+  const plan = planForCarbTarget(recipe.perGram, scoopGrams, targetCarbs);
+  const grams = plan.mixGramsPerHour;
+  return {
+    grams,
+    scoops: plan.scoopsPerHour,
+    perServing: {
+      carbsG: recipe.perGram.carbsG * grams,
+      sugarsG: recipe.perGram.sugarsG * grams,
+      sodiumMg: recipe.perGram.sodiumMg * grams,
+      calories: recipe.perGram.calories * grams,
+    },
+    // How many hours of fueling the batch holds — the number you want when
+    // deciding whether you've made enough for the weekend.
+    servingsPerBatch: grams > 0 ? recipe.actualBatch / grams : 0,
+  };
+}
+
+function renderFactsPanel(recipe, serving, targetCarbs) {
   $('fp-batch').textContent = formatGrams(recipe.actualBatch);
-  $('fp-servings').textContent = formatCount(recipe.totalScoops, 1);
-  $('fp-calories').textContent = formatCalories(recipe.perScoop.calories);
-  $('fp-carbs').textContent = formatGrams(recipe.perScoop.carbsG);
-  $('fp-sugars').textContent = formatGrams(recipe.perScoop.sugarsG);
-  $('fp-sodium').textContent = formatMg(recipe.perScoop.sodiumMg);
+  $('fp-serving-size').textContent = formatGrams(serving.grams);
+  $('fp-servings').textContent = formatCount(serving.servingsPerBatch, 1);
+  $('fp-calories').textContent = formatCalories(serving.perServing.calories);
+  $('fp-carbs').textContent = formatGrams(serving.perServing.carbsG);
+  $('fp-sugars').textContent = formatGrams(serving.perServing.sugarsG);
+  $('fp-sodium').textContent = formatMg(serving.perServing.sodiumMg);
   $('fp-flavor-name').textContent = recipe.flavorName;
+  $('fp-target').textContent = `${targetCarbs} g carbs/hr`;
+  $('fp-scoop-note').textContent = serving.scoops !== null
+    ? `≈ ${formatCount(serving.scoops, 1)} of your scoops`
+    : '';
 }
 
 function renderRecipeGrid(recipe) {
@@ -154,11 +180,15 @@ function renderRatioReadout() {
 
 function recalculate() {
   const recipe = computeRecipe(readInputs());
+  const targetCarbs = Number($('in-target-carbs').value) || DEFAULT_TARGET_CARBS;
+  const scoopGrams = Number($('in-scoop').value) || 0;
+  const serving = servingFor(recipe, targetCarbs, scoopGrams);
+
   renderRatioReadout();
-  renderFactsPanel(recipe);
+  renderFactsPanel(recipe, serving, targetCarbs);
   renderRecipeGrid(recipe);
   renderHourlyGrid(recipe);
-  renderLabel(recipe);
+  renderLabel(recipe, serving, targetCarbs);
 }
 
 function initTuning() {
@@ -222,17 +252,19 @@ function ingredientList(recipe) {
     .join(', ');
 }
 
-function renderLabel(recipe) {
-  const scoopGrams = Number($('in-scoop').value) || 0;
+function renderLabel(recipe, serving, targetCarbs) {
   $('lb-name').textContent = $('in-label-name').value || 'The Sauce';
   $('lb-flavor').textContent = $('in-label-flavor').value;
   $('lb-maker').textContent = $('in-label-maker').value;
-  $('lb-serving').textContent = `${formatCount(scoopGrams, 0)} g (1 scoop)`;
-  $('lb-servings').textContent = formatCount(recipe.totalScoops, 0);
-  $('lb-calories').textContent = formatCalories(recipe.perScoop.calories);
-  $('lb-carbs').textContent = formatGrams(recipe.perScoop.carbsG);
-  $('lb-sugars').textContent = formatGrams(recipe.perScoop.sugarsG);
-  $('lb-sodium').textContent = formatMg(recipe.perScoop.sodiumMg);
+  $('lb-serving').textContent = `${formatGrams(serving.grams)} (1 hr)`;
+  $('lb-servings').textContent = `${formatCount(serving.servingsPerBatch, 0)} hr`;
+  $('lb-calories').textContent = formatCalories(serving.perServing.calories);
+  $('lb-carbs').textContent = formatGrams(serving.perServing.carbsG);
+  $('lb-sugars').textContent = formatGrams(serving.perServing.sugarsG);
+  $('lb-sodium').textContent = formatMg(serving.perServing.sodiumMg);
+  $('lb-directions').textContent = serving.scoops !== null
+    ? `One serving is one hour of fueling at ${targetCarbs} g carbs/hr — about ${formatCount(serving.scoops, 1)} scoops. Add to water, not water to powder.`
+    : `One serving is one hour of fueling at ${targetCarbs} g carbs/hr. Add to water, not water to powder.`;
   $('lb-ingredients').textContent = ingredientList(recipe);
 
   const note = $('in-label-note').value.trim();
