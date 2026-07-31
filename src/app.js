@@ -303,7 +303,7 @@ function renderSodiumSolve(inputs, recipe, targetCarbs) {
   const gap = need - delivered;
 
   $('sodium-estimate').textContent = mode === 'solved'
-    ? `These conditions suggest about ${formatMg(need)} of sodium per hour. The salt level below is set to match, for a batch you're about to mix.`
+    ? `These conditions suggest about ${formatMg(need)} of sodium per hour, which the salt level above is set to deliver.`
     : `These conditions suggest about ${formatMg(need)} of sodium per hour.`;
 
   // A batch you've already mixed is fixed — conditions change ride to ride,
@@ -511,6 +511,19 @@ function initLabel() {
   });
 }
 
+// A link into a collapsed section has to open it, or it scrolls to a closed
+// summary and looks broken. Covers both in-page clicks and inbound URLs.
+function openTargetedPanel() {
+  const id = location.hash.slice(1);
+  if (!id) return;
+  const el = document.getElementById(id);
+  const panel = el && el.closest('details');
+  if (panel && !panel.open) {
+    panel.open = true;
+    el.scrollIntoView({ block: 'start' });
+  }
+}
+
 function init() {
   initFlavorPresets();
   initConditions();
@@ -528,6 +541,12 @@ function init() {
   $('in-target-carbs').addEventListener('input', recalculate);
 
   recalculate();
+  openTargetedPanel();
+  window.addEventListener('hashchange', openTargetedPanel);
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest('a[href^="#"]');
+    if (link) setTimeout(openTargetedPanel, 0);
+  });
 }
 
 if (document.readyState === 'loading') {

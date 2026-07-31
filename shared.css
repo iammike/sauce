@@ -320,6 +320,53 @@ main {
   margin: 0 0 1.25rem;
 }
 
+/* ---------- Collapsible panels ----------
+   The read-once sections — label, cost, what to buy, references — collapse so
+   the page you land on is the tool. Everything stays in the DOM, so anchors
+   into them still work. */
+
+.panel--collapsible {
+  padding: 0;
+  border-bottom: 3px solid var(--rule);
+}
+
+.panel--collapsible > summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 1.75rem 0;
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.panel--collapsible > summary::-webkit-details-marker { display: none; }
+
+.panel--collapsible > summary::after {
+  content: '+';
+  margin-left: auto;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 1.5rem;
+  color: var(--strawberry);
+  line-height: 1;
+}
+
+.panel--collapsible[open] > summary::after { content: '–'; }
+
+.panel--collapsible > summary .panel__title { margin: 0; }
+
+.panel__blurb {
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+  max-width: 34rem;
+}
+
+.panel__body { padding-bottom: 3rem; }
+
+/* An anchor into a collapsed section should open it — handled in app.js, but
+   make the landing obvious. */
+.panel--collapsible:target > summary .panel__title { color: var(--strawberry); }
+
 /* ---------- Forms / inputs (yellow-cell convention) ---------- */
 
 .input-grid {

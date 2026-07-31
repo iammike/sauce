@@ -112,6 +112,21 @@
             <span class="field-hint" id="salt-profile-note"></span>
           </div>
           <div class="field">
+            <label for="in-target-carbs">Planned intake (g carbs/hr)</label>
+            <input type="number" id="in-target-carbs" min="10" max="200" step="5" value="75">
+            <span class="field-hint">Sets the serving size and salt level.</span>
+          </div>
+          <div class="field field--select">
+            <label for="in-sweat-rate">Conditions</label>
+            <select id="in-sweat-rate"></select>
+            <span class="field-hint" id="sweat-rate-hint"></span>
+          </div>
+          <div class="field field--select">
+            <label for="in-sweat-sodium">How salty is your sweat?</label>
+            <select id="in-sweat-sodium"></select>
+            <span class="field-hint" id="sweat-sodium-cue"></span>
+          </div>
+          <div class="field">
             <label for="in-scoop">Your scoop size (g)</label>
             <input type="number" id="in-scoop" min="1" step="1" value="46" inputmode="decimal">
             <span class="field-hint">Weigh your own — scoops vary. <a href="#tuning">How to measure</a></span>
@@ -137,24 +152,7 @@
     <section class="panel" id="hourly">
       <p class="panel__eyebrow">02 — Per hour</p>
       <h2 class="panel__title">How much, how often?</h2>
-      <p>How many carbs you need per hour depends mostly on how long you're out. These tiers follow the <a href="#ref-morton-2026">current guidance</a> (Morton et al., 2026), which raised the old 90 g/hr ceiling to 90–120 for trained athletes. Pick the band that matches your effort and see how much mix it takes.</p>
-
-      <div class="input-grid" style="max-width:46rem;">
-        <div class="field">
-          <label for="in-target-carbs">Your target (g carbs/hr)</label>
-          <input type="number" id="in-target-carbs" min="10" max="200" step="5" value="75">
-        </div>
-        <div class="field field--select">
-          <label for="in-sweat-rate">Conditions</label>
-          <select id="in-sweat-rate"></select>
-          <span class="field-hint" id="sweat-rate-hint"></span>
-        </div>
-        <div class="field field--select">
-          <label for="in-sweat-sodium">How salty is your sweat?</label>
-          <select id="in-sweat-sodium"></select>
-          <span class="field-hint" id="sweat-sodium-cue"></span>
-        </div>
-      </div>
+      <p>How many carbs you need per hour depends mostly on how long you're out. These tiers follow the <a href="#ref-morton-2026">current guidance</a> (Morton et al., 2026), which raised the old 90 g/hr ceiling to 90–120 for trained athletes. Set your planned intake in the calculator above; this shows what the batch delivers at each band.</p>
 
       <p class="field-hint" id="sodium-estimate"></p>
       <p class="callout" id="sodium-solve-detail" hidden></p>
@@ -173,10 +171,13 @@
       <div class="tuning-list" id="tuning-list"></div>
     </section>
 
-    <section class="panel" id="label">
-      <p class="panel__eyebrow">04 — Label creator</p>
-      <h2 class="panel__title">Make a label</h2>
-      <p>A real 3&Prime; &times; 4&Prime; label for the jar, built from the batch you just calculated. A serving is one hour of fueling at your <a href="#hourly">per-hour target</a> — more useful on a homemade jar than a scoop count, since scoops vary. Ingredients are listed by descending weight, the way a food label should be.</p>
+    <details class="panel panel--collapsible" id="label">
+      <summary>
+        <span class="panel__title">Make a label</span>
+        <span class="panel__blurb">A printable 3&Prime;&times;4&Prime; jar label built from this batch.</span>
+      </summary>
+      <div class="panel__body">
+          <p>A real 3&Prime; &times; 4&Prime; label for the jar, built from the batch you just calculated. A serving is one hour of fueling at your <a href="#hourly">per-hour target</a> — more useful on a homemade jar than a scoop count, since scoops vary. Ingredients are listed by descending weight, the way a food label should be.</p>
 
       <div class="input-grid" style="max-width:40rem;">
         <div class="field">
@@ -256,12 +257,16 @@
           </footer>
         </article>
       </div>
-    </section>
+      </div>
+    </details>
 
-    <section class="panel" id="cost">
-      <p class="panel__eyebrow">05 — Cost</p>
-      <h2 class="panel__title">What an hour costs</h2>
-      <p>Priced per gram of carbohydrate, since that's what you're actually buying — comparing per gram of powder would just flatter whichever product is most diluted. Cost alone is misleading though, so each one lists what the price doesn't tell you.</p>
+    <details class="panel panel--collapsible" id="cost">
+      <summary>
+        <span class="panel__title">What an hour costs</span>
+        <span class="panel__blurb">How this compares to Gatorade, Maurten and Gatorade Endurance.</span>
+      </summary>
+      <div class="panel__body">
+          <p>Priced per gram of carbohydrate, since that's what you're actually buying — comparing per gram of powder would just flatter whichever product is most diluted. Cost alone is misleading though, so each one lists what the price doesn't tell you.</p>
 
       <div class="card-grid" id="cost-grid"></div>
 
@@ -269,21 +274,31 @@
       <div class="card-grid" id="cost-breakdown"></div>
 
       <p class="field-hint" id="cost-note"></p>
-    </section>
+      </div>
+    </details>
 
-    <section class="panel" id="buy">
-      <p class="panel__eyebrow">06 — Where to buy</p>
-      <h2 class="panel__title">What to buy</h2>
-      <p>The exact products the costs above are priced from. Any food-grade equivalent works — the calculator doesn't care what you buy.</p>
+    <details class="panel panel--collapsible" id="buy">
+      <summary>
+        <span class="panel__title">What to buy</span>
+        <span class="panel__blurb">The exact ingredients these numbers are priced from.</span>
+      </summary>
+      <div class="panel__body">
+          <p>The exact products the costs above are priced from. Any food-grade equivalent works — the calculator doesn't care what you buy.</p>
       <div class="card-grid" id="products-grid"></div>
-    </section>
+      </div>
+    </details>
 
-    <section class="panel" id="research">
-      <p class="panel__eyebrow">07 — References</p>
-      <h2 class="panel__title">The science</h2>
-      <p>Every number on this page traces back to one of these.</p>
+    <details class="panel panel--collapsible" id="research">
+      <summary>
+        <span class="panel__title">The science</span>
+        <span class="panel__blurb">Every number on this page, and where it comes from.</span>
+      </summary>
+      <div class="panel__body">
+          <p>Every number on this page traces back to one of these.</p>
       <div class="reference-list" id="research-grid"></div>
-    </section>
+      </div>
+    </details>
+
   </main>
 
   <footer class="site-footer">
