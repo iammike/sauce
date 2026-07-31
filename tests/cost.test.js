@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { computeRecipe } from '../src/calculator.js';
 import { batchCost, costPerGramCarb, compareAtCarbTarget } from '../src/cost.js';
-import { COMMERCIAL_PRODUCTS, commercialCostPerGramCarb, litresPerHour, HOMEMADE_LIMITATION } from '../data/costs.js';
+import { COMMERCIAL_PRODUCTS, commercialCostPerGramCarb, litresPerHour, HOMEMADE_LIMITATION, OSMOLALITY_NOTE } from '../data/costs.js';
+import { sodiumStatus, SODIUM_TARGET_RANGE } from '../src/hourly.js';
 import { FLAVORINGS, findFlavoring } from '../data/flavorings.js';
 
 const PANTRY = { maltodextrin: 2300, fructose: 2000, flavoring: 500, salt: 400 };
@@ -169,5 +170,26 @@ describe('honest comparison', () => {
     for (const c of commercial) {
       expect(c.sodiumMgPerHour).toBeGreaterThan(0);
     }
+  });
+});
+
+describe('sodium is judged, not just reported', () => {
+  it('flags Maurten as under the replacement target', () => {
+    // ~250 mg per 80 g carbs is well under half the 500-1000 mg/hr range,
+    // which is the point the cost figure alone would hide.
+    const maurten = COMMERCIAL_PRODUCTS.find((p) => p.id === 'maurten-320');
+    const perHour = maurten.sodiumMgPerGramCarb * 75;
+    expect(perHour).toBeLessThan(SODIUM_TARGET_RANGE.min / 2);
+    expect(sodiumStatus(perHour)).toBe('low');
+  });
+
+  it('finds Gatorade Endurance the one that covers sodium unaided', () => {
+    const endurance = COMMERCIAL_PRODUCTS.find((p) => p.id === 'gatorade-endurance');
+    expect(sodiumStatus(endurance.sodiumMgPerGramCarb * 75)).not.toBe('low');
+  });
+
+  it('explains the osmolality mechanism, not just the symptom', () => {
+    expect(OSMOLALITY_NOTE).toMatch(/osmolality/i);
+    expect(OSMOLALITY_NOTE).toMatch(/particle/i);
   });
 });

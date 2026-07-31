@@ -1,14 +1,14 @@
 import { computeRecipe } from './calculator.js';
 import { planForCarbTarget, CARB_INTAKE_TIERS, absorptionCeiling, tierFor, ratioStatus,
   GLUCOSE_ONLY_CEILING, DUAL_TRANSPORT_TYPICAL, DUAL_TRANSPORT_TRAINED,
-  FRUCTOSE_RATIO_OPTIMAL, DEFAULT_TARGET_CARBS } from './hourly.js';
+  FRUCTOSE_RATIO_OPTIMAL, DEFAULT_TARGET_CARBS, sodiumStatus } from './hourly.js';
 import { formatGrams, formatMg, formatCalories, formatCount } from './format.js';
 import { FLAVORINGS, findFlavoring } from '../data/flavorings.js';
 import { TUNING } from '../data/tuning.js';
 import { PRODUCTS } from '../data/products.js';
 import { RESEARCH, findResearch } from '../data/research.js';
 import { batchCost, costPerGramCarb, compareAtCarbTarget } from './cost.js';
-import { PRICED_AS_OF, INGREDIENT_COSTS, HOMEMADE_LIMITATION } from '../data/costs.js';
+import { PRICED_AS_OF, INGREDIENT_COSTS, HOMEMADE_LIMITATION, OSMOLALITY_NOTE } from '../data/costs.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -105,10 +105,11 @@ function renderCost(recipe, flavor, targetCarbs) {
       ${!r.mine && r.multiple ? `<p class="field-hint"><strong>${r.multiple >= 1
         ? `${r.multiple.toFixed(1)}× the cost of making it`
         : `${(1 / r.multiple).toFixed(1)}× cheaper than making it`}</strong></p>` : ''}
-      <p class="field-hint">${formatMg(r.sodiumMgPerHour)} sodium/hr · ${
+      <p class="field-hint">${formatMg(r.sodiumMgPerHour)} sodium/hr <span class="${statusPillClass(sodiumStatus(r.sodiumMgPerHour))}">${sodiumStatus(r.sodiumMgPerHour)}</span></p>
+      <p class="field-hint">${
         r.litresPerHour !== null
           ? `<strong>${r.litresPerHour.toFixed(1)} L/hr</strong> of fluid at label dilution`
-          : r.mine ? 'you choose the dilution' : 'dilution not published'}</p>
+          : r.mine ? 'Dilution is your choice' : 'Dilution not published'}</p>
       <p class="field-hint">${r.note ?? ''}</p>
       <p class="field-hint cost-card__limitation"><strong>Catch:</strong> ${r.limitation}</p>
     </div>
@@ -137,6 +138,7 @@ function renderCost(recipe, flavor, targetCarbs) {
       `;
     }).join('');
 
+  $('osmolality-note').textContent = OSMOLALITY_NOTE;
   $('cost-note').textContent = `Ingredient prices as of ${PRICED_AS_OF} (${INGREDIENT_COSTS.maltodextrin.basis}, ${INGREDIENT_COSTS.fructose.basis}, ${INGREDIENT_COSTS.salt.basis}, flavoring ${flavor.priceBasis}). Prices move — treat these as ballpark, not quotes.`;
 }
 

@@ -32,6 +32,19 @@ carbohydrate by mass, ~60% of that as sugar, the rest fiber/acid) but are
 inputs, not constants — see `data/flavorings.js` for other flavoring options
 and how to add more.
 
+## Why maltodextrin, not just sugar
+
+Osmolality depends on the *number* of dissolved particles, not their mass.
+Maltodextrin is a chain of glucose units, so it counts once osmotically while
+delivering many glucose units — a 9% maltodextrin solution is roughly isotonic
+(~290 mOsm/kg), where the same carbohydrate as glucose would run nearer 1000.
+
+That is what makes a carb-dense drink possible at all. A sugar-based sports
+drink can't simply be concentrated into a fuel: raising its carb content
+raises osmolality proportionally, which slows gastric emptying and provokes GI
+distress. It's the mechanism behind the whole product category, and the reason
+maltodextrin is ~52% of this mix rather than more fructose.
+
 ## Hourly targets
 
 Carbohydrate intake is tiered by effort duration, per Morton et al. 2026

@@ -89,6 +89,11 @@ export function tierFor(gramsPerHour) {
 export const CARB_TARGET_RANGE = { min: 30, max: 120 };
 export const SODIUM_TARGET_RANGE = { min: 500, max: 1000, hot: 1500 };
 
+/** Status of a sodium-per-hour figure against the replacement target range. */
+export function sodiumStatus(sodiumMgPerHour) {
+  return rangeStatus(sodiumMgPerHour, SODIUM_TARGET_RANGE);
+}
+
 function rangeStatus(value, { min, max }) {
   if (value < min) return 'low';
   if (value > max) return 'high';

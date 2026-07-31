@@ -54,6 +54,8 @@
 - Prices drift. Re-check and bump `PRICED_AS_OF` rather than silently leaving stale numbers behind a confident-looking table
 - **Cost alone is misleading, so never show it alone.** Every product carries a `limitation`, including the homemade mix (`HOMEMADE_LIMITATION`) — a comparison that only lists the competition's drawbacks is advertising. Tests assert both
 - Fluid volume per hour at label dilution is what separates a fuel from a hydration drink: regular Gatorade needs ~1.8 L/hr to reach 75 g carbs, Maurten ~0.5 L/hr. Keep that visible. `mlPerServing` is null where the dilution isn't verified — don't guess it
+- Sodium gets a status pill against `SODIUM_TARGET_RANGE`, not just a number. Maurten reads `low` and Gatorade Endurance `high`; that judgement is the useful part and there are tests pinning both
+- The real reason a sugar drink can't be concentrated into a fuel is osmolality, not ratios — see `OSMOLALITY_NOTE` in `data/costs.js` and the section in `docs/recipe-source.md`. Don't reduce that back to "wrong ratio"
 
 ## Amazon Associate links
 - `ASSOCIATES_TAG` in `data/products.js` is `sauce-calc-20`, a site-specific tracking ID under store `mikeylikesit-20`. Don't reuse it on other sites — the point is per-site attribution

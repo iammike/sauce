@@ -58,7 +58,7 @@ export const COMMERCIAL_PRODUCTS = [
     basis: '$38.99 / 32 oz (907 g); 24 g serving = 22 g carbs, 300 mg sodium',
     confidence: 'actual',
     note: 'Read off the label and a real purchase price. The closest commercial equivalent to what this mix is for.',
-    limitation: 'Genuinely built for this job, with good sodium. You are mostly paying for convenience and a fixed carb-to-sodium ratio you cannot adjust.',
+    limitation: 'Genuinely built for this job, and the only one here that comfortably covers sodium on its own. You are paying for convenience and accepting a carb-to-sodium ratio you cannot adjust.',
   },
   {
     id: 'maurten-320',
@@ -71,7 +71,7 @@ export const COMMERCIAL_PRODUCTS = [
     basis: '~$3.42 / sachet; 80 g carbs per sachet in 500 ml',
     confidence: 'estimated',
     note: 'The premium benchmark. Hydrogel formulation, priced accordingly.',
-    limitation: 'Very high carb density in little fluid, which is the point. Low sodium for its carb load, so heavy sweaters often add salt separately.',
+    limitation: 'Very high carb density in little fluid, which is the point of the hydrogel. But the sodium is well under half the replacement target at any realistic carb intake — most people need to add salt separately, which is an extra product and an extra cost on top of an already expensive one.',
   },
   {
     id: 'gatorade-regular',
@@ -86,13 +86,19 @@ export const COMMERCIAL_PRODUCTS = [
     basis: 'Approximate retail pricing; label serving = 21 g carbs, 150 mg sodium in 500 ml',
     confidence: 'estimated',
     note: 'Cheapest per gram of carb by a wide margin.',
-    limitation: 'It is a hydration drink, not a fuel. At label dilution you would need close to two litres an hour to hit endurance carb targets — more than most people can drink or carry. Concentrating it fixes the volume but not the locked carb-to-sodium ratio.',
+    limitation: 'It is a hydration drink, not a fuel, and the carbs are the reason. Sucrose and dextrose are small molecules, so each one adds an osmotic particle: a 9% glucose solution runs near 1000 mOsm/kg where 9% maltodextrin is roughly isotonic at ~290. That caps how concentrated it can usefully get, so at label dilution you need close to two litres an hour for endurance carb targets. Concentrating it just makes it hypertonic — slower to leave the stomach, and more likely to cause GI distress.',
   },
 ];
 
 // What the homemade mix gives up. Included so the comparison isn't one-sided:
 // every other product here has its drawback spelled out.
 export const HOMEMADE_LIMITATION = 'You have to weigh it, source four ingredients, and get the sodium right yourself. No third-party testing, and dilution is your call — which is the flexibility, and also the risk.';
+
+// Why the mix is mostly maltodextrin rather than sugar. Osmolality depends on
+// particle count, not mass: maltodextrin is a polymer, so each molecule
+// carries many glucose units while counting once osmotically. That is what
+// lets a drink be carb-dense without being hypertonic.
+export const OSMOLALITY_NOTE = 'Maltodextrin is why this works. Osmolality depends on how many particles are in solution, not how much they weigh — and because maltodextrin is a chain of glucose units, it counts as one particle while delivering many. A 9% maltodextrin solution is roughly isotonic at ~290 mOsm/kg; the same carbohydrate as glucose would be nearer 1000. That is the difference between a drink you can concentrate into fuel and one you cannot.';
 
 /** Litres of fluid needed per hour to hit a carb target at label dilution. */
 export function litresPerHour(product, targetCarbsPerHour) {
