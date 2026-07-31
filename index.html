@@ -141,14 +141,16 @@
     <section class="panel" id="hourly">
       <p class="panel__eyebrow">03 — Per hour</p>
       <h2 class="panel__title">How much, how often?</h2>
-      <p>Target carb ranges for hard/long efforts run 60–90 g/hr; sodium 500–1000 mg/hr (up to ~1500 mg/hr hot or heavy-sweat). Pick a carb target and see how much mix that takes per hour, in grams — scoops follow from whatever scoop you measured.</p>
+      <p>How many carbs you need per hour depends mostly on how long you're out. These are the established tiers — pick the one that matches your effort, and see how much mix it takes in grams.</p>
 
       <div class="input-grid" style="max-width:20rem;">
         <div class="field">
-          <label for="in-target-carbs">Target carbs (g/hr)</label>
-          <input type="number" id="in-target-carbs" min="10" max="150" step="5" value="75">
+          <label for="in-target-carbs">Your target (g carbs/hr)</label>
+          <input type="number" id="in-target-carbs" min="10" max="200" step="5" value="75">
         </div>
       </div>
+
+      <p class="callout" id="hourly-warning" role="status" hidden></p>
 
       <div class="card-grid" id="hourly-grid" aria-live="polite"></div>
     </section>

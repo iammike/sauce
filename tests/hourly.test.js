@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { computeRecipe } from '../src/calculator.js';
-import { hourlyTotals, recommendScoopsPerHour, scoopsForDuration, planForCarbTarget, CARB_TARGET_RANGE } from '../src/hourly.js';
+import { hourlyTotals, recommendScoopsPerHour, scoopsForDuration, planForCarbTarget,
+  CARB_INTAKE_TIERS, absorptionCeiling, tierFor, GLUCOSE_ONLY_CEILING,
+  DUAL_TRANSPORT_CEILING, CARB_TARGET_RANGE } from '../src/hourly.js';
 
 const recipe = computeRecipe({
   onHand: { maltodextrin: 2300, fructose: 2000, flavoring: 500, salt: 400 },
@@ -80,5 +82,51 @@ describe('planForCarbTarget', () => {
     const r = computeRecipe({ ...scoopIndependent, scoopGrams: 46 });
     const plan = planForCarbTarget(r.perGram, 46, 75);
     expect(plan.scoopsPerHour).toBeCloseTo(plan.mixGramsPerHour / 46, 6);
+  });
+});
+
+describe('carb intake tiers', () => {
+  it('follows the established duration-based guidance', () => {
+    expect(CARB_INTAKE_TIERS.map((t) => t.gramsPerHour)).toEqual([30, 60, 90, 120]);
+  });
+
+  it('marks the tiers that require fructose', () => {
+    // Glucose alone saturates SGLT1 near 60 g/hr, so only the tiers above
+    // that depend on a second transporter.
+    for (const tier of CARB_INTAKE_TIERS) {
+      expect(tier.needsFructose).toBe(tier.gramsPerHour > 60);
+    }
+  });
+
+  it('flags 120 g/hr as beyond the classic guidance', () => {
+    expect(CARB_INTAKE_TIERS.find((t) => t.gramsPerHour === 120).aggressive).toBe(true);
+  });
+});
+
+describe('absorptionCeiling', () => {
+  it('caps a glucose-only mix at the single-transporter limit', () => {
+    expect(absorptionCeiling(0)).toBe(GLUCOSE_ONLY_CEILING);
+  });
+
+  it('lifts the ceiling once there is meaningful fructose', () => {
+    expect(absorptionCeiling(0.5)).toBe(DUAL_TRANSPORT_CEILING);
+    expect(absorptionCeiling(0.8)).toBe(DUAL_TRANSPORT_CEILING);
+  });
+
+  it('treats a trace of fructose as glucose-only', () => {
+    expect(absorptionCeiling(0.01)).toBe(GLUCOSE_ONLY_CEILING);
+  });
+});
+
+describe('tierFor', () => {
+  it('picks the highest tier a target reaches', () => {
+    expect(tierFor(30).gramsPerHour).toBe(30);
+    expect(tierFor(75).gramsPerHour).toBe(60);
+    expect(tierFor(90).gramsPerHour).toBe(90);
+    expect(tierFor(150).gramsPerHour).toBe(120);
+  });
+
+  it('floors below the lowest tier rather than returning nothing', () => {
+    expect(tierFor(5).gramsPerHour).toBe(30);
   });
 });

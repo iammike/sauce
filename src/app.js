@@ -1,5 +1,6 @@
 import { computeRecipe } from './calculator.js';
-import { planForCarbTarget, CARB_TARGET_RANGE } from './hourly.js';
+import { planForCarbTarget, CARB_INTAKE_TIERS, absorptionCeiling, tierFor,
+  GLUCOSE_ONLY_CEILING, DUAL_TRANSPORT_CEILING } from './hourly.js';
 import { formatGrams, formatMg, formatCalories, formatCount } from './format.js';
 import { FLAVORINGS, findFlavoring } from '../data/flavorings.js';
 import { RECIPES, findRecipe } from '../data/recipes.js';
@@ -87,28 +88,46 @@ function renderHourlyGrid(recipe) {
   const scoopGrams = Number($('in-scoop').value) || 0;
   const targetCarbs = Number($('in-target-carbs').value) || DEFAULT_TARGET_CARBS;
 
-  // The user's target, bracketed by the research range so they can see where
-  // it sits rather than just being told "in-range".
-  const targets = [...new Set([CARB_TARGET_RANGE.min, targetCarbs, CARB_TARGET_RANGE.max])]
-    .sort((a, b) => a - b);
+  const carbRatio = Number($('in-carb-ratio').value) || 0;
+  const ceiling = absorptionCeiling(carbRatio);
+  const activeTier = tierFor(targetCarbs);
 
-  grid.innerHTML = targets.map((t) => {
-    const plan = planForCarbTarget(recipe.perGram, scoopGrams, t);
-    const isTarget = t === targetCarbs;
+  grid.innerHTML = CARB_INTAKE_TIERS.map((tier) => {
+    const plan = planForCarbTarget(recipe.perGram, scoopGrams, tier.gramsPerHour);
+    const isActive = tier === activeTier;
+    // Flag tiers this formulation can't actually deliver — with glucose only,
+    // drinking more doesn't get you past the transporter limit.
+    const unreachable = tier.gramsPerHour > ceiling;
+
     const scoopNote = plan.scoopsPerHour !== null
       ? `≈ ${formatCount(plan.scoopsPerHour, 1)} of your ${formatCount(scoopGrams, 0)} g scoops`
       : 'Enter your scoop size for a scoop count';
 
     return `
-      <div class="card${isTarget ? ' card--active' : ''}">
-        <p class="card__eyebrow">${isTarget ? 'Your target' : 'Reference'} · ${t} g carbs/hr</p>
-        <p class="card__value data">${formatGrams(plan.mixGramsPerHour)}<span class="card__unit"> of mix/hr</span></p>
-        <p class="field-hint">${scoopNote}</p>
-        <p class="field-hint">${formatMg(plan.sodiumMg)} sodium/hr <span class="${statusPillClass(plan.sodiumStatus)}">${plan.sodiumStatus}</span></p>
-        <p class="field-hint">${formatCalories(plan.calories)} cal/hr</p>
+      <div class="card${isActive ? ' card--active' : ''}${unreachable ? ' card--muted' : ''}">
+        <p class="card__eyebrow">${tier.duration}${isActive ? ' · your target' : ''}</p>
+        <p class="card__value data">${tier.gramsPerHour}<span class="card__unit"> g carbs/hr</span></p>
+        <p class="field-hint"><strong>${formatGrams(plan.mixGramsPerHour)} of mix</strong> — ${scoopNote}</p>
+        <p class="field-hint">${formatMg(plan.sodiumMg)} sodium/hr <span class="${statusPillClass(plan.sodiumStatus)}">${plan.sodiumStatus}</span> · ${formatCalories(plan.calories)} cal/hr</p>
+        <p class="field-hint">${!unreachable ? tier.note
+          : carbRatio > 0.05
+            // Has fructose, but this tier is past what most people absorb.
+            ? `<span class="warn">Above the ~${DUAL_TRANSPORT_CEILING} g/hr most people absorb — needs gut training.</span>`
+            // No fructose at all: a hard transporter limit, not a training one.
+            : `<span class="warn">Not reachable without fructose — glucose alone tops out near ${GLUCOSE_ONLY_CEILING} g/hr.</span>`}</p>
       </div>
     `;
   }).join('');
+
+  const warning = $('hourly-warning');
+  if (targetCarbs > ceiling) {
+    warning.hidden = false;
+    warning.textContent = carbRatio > 0.05
+      ? `You're targeting ${targetCarbs} g/hr, above the ~${DUAL_TRANSPORT_CEILING} g/hr most people absorb. Reachable, but it takes deliberate gut training — build up in training, not on race day.`
+      : `You're targeting ${targetCarbs} g/hr with no fructose in the mix. Glucose alone saturates its transporter near ${GLUCOSE_ONLY_CEILING} g/hr, so drinking more won't deliver more — raise the fructose ratio to go higher.`;
+  } else {
+    warning.hidden = true;
+  }
 }
 
 // Express the fructose ratio the way the research talks about it, as

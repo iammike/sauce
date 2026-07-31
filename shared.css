@@ -450,6 +450,19 @@ main {
   line-height: 1.45;
 }
 
+.card--muted { opacity: 0.58; }
+
+.warn { color: var(--strawberry); font-weight: 700; }
+
+.callout {
+  border-left: 4px solid var(--strawberry);
+  background: var(--paper-raised);
+  padding: 0.85rem 1rem;
+  margin: 0 0 1.5rem;
+  font-size: 0.9rem;
+  max-width: 46rem;
+}
+
 /* ---------- Share bar ---------- */
 
 .share-bar {
