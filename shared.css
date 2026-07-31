@@ -497,6 +497,12 @@ html { scroll-behavior: smooth; }
 
 .hourly-note { margin: 1.25rem 0 0; }
 
+.cost-card__limitation {
+  border-top: 1px solid var(--rule);
+  padding-top: 0.5rem;
+  margin-top: 0.5rem;
+}
+
 .callout {
   border-left: 4px solid var(--strawberry);
   background: var(--paper-raised);

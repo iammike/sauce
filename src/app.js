@@ -8,7 +8,7 @@ import { TUNING } from '../data/tuning.js';
 import { PRODUCTS } from '../data/products.js';
 import { RESEARCH, findResearch } from '../data/research.js';
 import { batchCost, costPerGramCarb, compareAtCarbTarget } from './cost.js';
-import { PRICED_AS_OF, INGREDIENT_COSTS } from '../data/costs.js';
+import { PRICED_AS_OF, INGREDIENT_COSTS, HOMEMADE_LIMITATION } from '../data/costs.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -84,8 +84,17 @@ function renderCost(recipe, flavor, targetCarbs) {
   const perGramCarb = costPerGramCarb(cost.total, recipe.totals.carbsG);
   const { mine, commercial } = compareAtCarbTarget(perGramCarb, targetCarbs);
 
+  const mineSodium = recipe.perGram.carbsG > 0
+    ? (recipe.perGram.sodiumMg / recipe.perGram.carbsG) * targetCarbs : 0;
+
   const rows = [
-    { name: 'The Sauce', perHour: mine, mine: true, note: `Your current mix, at ${money(cost.total)} for the whole ${formatGrams(recipe.actualBatch)} batch.`, confidence: 'actual' },
+    {
+      name: 'The Sauce', perHour: mine, mine: true, confidence: 'actual',
+      note: `Your mix, at ${money(cost.total)} for the whole ${formatGrams(recipe.actualBatch)} batch.`,
+      sodiumMgPerHour: mineSodium,
+      litresPerHour: null,
+      limitation: HOMEMADE_LIMITATION,
+    },
     ...commercial,
   ].sort((a, b) => a.perHour - b.perHour);
 
@@ -96,7 +105,12 @@ function renderCost(recipe, flavor, targetCarbs) {
       ${!r.mine && r.multiple ? `<p class="field-hint"><strong>${r.multiple >= 1
         ? `${r.multiple.toFixed(1)}× the cost of making it`
         : `${(1 / r.multiple).toFixed(1)}× cheaper than making it`}</strong></p>` : ''}
+      <p class="field-hint">${formatMg(r.sodiumMgPerHour)} sodium/hr · ${
+        r.litresPerHour !== null
+          ? `<strong>${r.litresPerHour.toFixed(1)} L/hr</strong> of fluid at label dilution`
+          : r.mine ? 'you choose the dilution' : 'dilution not published'}</p>
       <p class="field-hint">${r.note ?? ''}</p>
+      <p class="field-hint cost-card__limitation"><strong>Catch:</strong> ${r.limitation}</p>
     </div>
   `).join('');
 

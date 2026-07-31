@@ -4,7 +4,7 @@
 // carbohydrate is what you're actually buying. Comparing per gram of powder
 // would flatter whichever product is most diluted.
 
-import { INGREDIENT_COSTS, COMMERCIAL_PRODUCTS, commercialCostPerGramCarb } from '../data/costs.js';
+import { INGREDIENT_COSTS, COMMERCIAL_PRODUCTS, commercialCostPerGramCarb, litresPerHour } from '../data/costs.js';
 
 /**
  * What a batch costs to make, broken down by ingredient.
@@ -54,6 +54,10 @@ export function compareAtCarbTarget(mixCostPerGramCarb, targetCarbsPerHour) {
       ...product,
       perGramCarb,
       perHour,
+      // Fluid you'd have to get down per hour at the label's own dilution.
+      // The number that separates a fuel from a hydration drink.
+      litresPerHour: litresPerHour(product, targetCarbsPerHour),
+      sodiumMgPerHour: product.sodiumMgPerGramCarb * targetCarbsPerHour,
       // How many times more expensive than making it yourself. Below 1 means
       // the commercial option is actually cheaper — true for regular Gatorade,
       // and worth showing rather than hiding.

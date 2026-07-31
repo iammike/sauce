@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { computeRecipe } from '../src/calculator.js';
 import { batchCost, costPerGramCarb, compareAtCarbTarget } from '../src/cost.js';
-import { COMMERCIAL_PRODUCTS, commercialCostPerGramCarb } from '../data/costs.js';
+import { COMMERCIAL_PRODUCTS, commercialCostPerGramCarb, litresPerHour, HOMEMADE_LIMITATION } from '../data/costs.js';
 import { FLAVORINGS, findFlavoring } from '../data/flavorings.js';
 
 const PANTRY = { maltodextrin: 2300, fructose: 2000, flavoring: 500, salt: 400 };
@@ -128,6 +128,46 @@ describe('flavoring price data', () => {
       expect(typeof f.pricePerGram).toBe('number');
       expect(f.pricePerGram).toBeGreaterThanOrEqual(0);
       expect(['actual', 'estimated']).toContain(f.priceConfidence);
+    }
+  });
+});
+
+describe('honest comparison', () => {
+  it('states a limitation for every commercial product', () => {
+    for (const p of COMMERCIAL_PRODUCTS) {
+      expect(typeof p.limitation).toBe('string');
+      expect(p.limitation.length).toBeGreaterThan(20);
+    }
+  });
+
+  it('states a limitation for the homemade mix too', () => {
+    // The comparison must cut both ways, or it's advertising.
+    expect(typeof HOMEMADE_LIMITATION).toBe('string');
+    expect(HOMEMADE_LIMITATION.length).toBeGreaterThan(20);
+  });
+
+  it('shows the cheapest option needs impractical fluid volume', () => {
+    // This is the whole point: cheapest per carb is a hydration drink you'd
+    // have to drink ~2 L/hr of. If this stops being surfaced, the cost panel
+    // becomes misleading.
+    const gatorade = COMMERCIAL_PRODUCTS.find((p) => p.id === 'gatorade-regular');
+    expect(litresPerHour(gatorade, 75)).toBeGreaterThan(1.5);
+  });
+
+  it('shows a real fuel needs far less fluid for the same carbs', () => {
+    const maurten = COMMERCIAL_PRODUCTS.find((p) => p.id === 'maurten-320');
+    expect(litresPerHour(maurten, 75)).toBeLessThan(0.6);
+  });
+
+  it('returns null rather than guessing an unpublished dilution', () => {
+    const endurance = COMMERCIAL_PRODUCTS.find((p) => p.id === 'gatorade-endurance');
+    expect(litresPerHour(endurance, 75)).toBeNull();
+  });
+
+  it('reports sodium per hour alongside cost', () => {
+    const { commercial } = compareAtCarbTarget(0.017, 75);
+    for (const c of commercial) {
+      expect(c.sodiumMgPerHour).toBeGreaterThan(0);
     }
   });
 });

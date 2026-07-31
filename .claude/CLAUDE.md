@@ -52,6 +52,8 @@
 - Comparisons are normalised per gram of **carbohydrate**, never per gram of powder — otherwise the most diluted product looks cheapest
 - Don't rig the comparison. Regular Gatorade is genuinely cheaper per carb than making it yourself, and the page says so; there's a test asserting it (`tests/cost.test.js`)
 - Prices drift. Re-check and bump `PRICED_AS_OF` rather than silently leaving stale numbers behind a confident-looking table
+- **Cost alone is misleading, so never show it alone.** Every product carries a `limitation`, including the homemade mix (`HOMEMADE_LIMITATION`) — a comparison that only lists the competition's drawbacks is advertising. Tests assert both
+- Fluid volume per hour at label dilution is what separates a fuel from a hydration drink: regular Gatorade needs ~1.8 L/hr to reach 75 g carbs, Maurten ~0.5 L/hr. Keep that visible. `mlPerServing` is null where the dilution isn't verified — don't guess it
 
 ## Amazon Associate links
 - `ASSOCIATES_TAG` in `data/products.js` is `sauce-calc-20`, a site-specific tracking ID under store `mikeylikesit-20`. Don't reuse it on other sites — the point is per-site attribution
