@@ -6,11 +6,11 @@
 // it's decided, keeping the same tag param, and drop that entry's
 // `placeholder` flag.
 
-// Store ID is `mikeylikesit-20`; `reftag00-20` is a tracking ID under it.
-// Both credit the same account — the tracking ID is used deliberately so this
-// site's earnings are segmented in Associates reporting. Worth swapping for a
-// dedicated `sauce`-specific tracking ID if this one gets reused elsewhere.
-export const ASSOCIATES_TAG = 'reftag00-20';
+// Store ID is `mikeylikesit-20`; `sauce-calc-20` is a tracking ID under it,
+// created specifically for this site so its earnings stay segmented in
+// Associates reporting. Don't reuse this tag anywhere else — that's the whole
+// point of it being site-specific.
+export const ASSOCIATES_TAG = 'sauce-calc-20';
 
 function searchUrl(query) {
   return `https://www.amazon.com/s?k=${encodeURIComponent(query)}&tag=${ASSOCIATES_TAG}`;
