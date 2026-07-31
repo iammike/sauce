@@ -383,13 +383,16 @@ function initProducts() {
 }
 
 function initResearch() {
+  // A bibliography, not a card grid — the title is the link, so there's no
+  // separate call-to-action line, and the role reads as the heading.
   $('research-grid').innerHTML = RESEARCH.map((r) => `
-    <div class="card research-card" id="ref-${r.id}">
-      ${r.role ? `<span class="card__eyebrow">${r.role}</span>` : ''}
-      <p class="research-card__name">${r.name}</p>
-      <p class="research-card__cite">${r.source}</p>
-      <p class="research-card__note">${r.note}</p>
-      <a href="${r.url}" target="_blank" rel="noopener">Read the paper →</a>
+    <div class="reference" id="ref-${r.id}">
+      <p class="reference__role">${r.role}</p>
+      <p class="reference__title">
+        <a href="${r.url}" target="_blank" rel="noopener">${r.name}</a>
+        <span class="reference__cite">${r.source}</span>
+      </p>
+      <p class="reference__note">${r.note}</p>
     </div>
   `).join('');
 }

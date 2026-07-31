@@ -619,6 +619,67 @@ html { scroll-behavior: smooth; }
   color: var(--paper);
 }
 
+/* ---------- References ---------- */
+
+.reference-list {
+  display: grid;
+  gap: 0;
+  max-width: 46rem;
+  border-top: 1px solid var(--rule);
+}
+
+.reference {
+  padding: 1.1rem 0;
+  border-bottom: 1px solid var(--rule);
+  display: grid;
+  grid-template-columns: 12rem 1fr;
+  gap: 0.2rem 1.5rem;
+}
+
+@media (max-width: 720px) {
+  .reference { grid-template-columns: 1fr; }
+}
+
+.reference__role {
+  grid-row: span 2;
+  margin: 0;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--strawberry);
+  line-height: 1.4;
+}
+
+.reference__title {
+  margin: 0;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.reference__title a { text-decoration: none; border-bottom: 1px solid currentColor; }
+
+.reference__cite {
+  display: block;
+  font-weight: 400;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  font-family: 'IBM Plex Mono', monospace;
+  margin-top: 0.15rem;
+}
+
+.reference__note {
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+.reference:target {
+  background: var(--paper-raised);
+  box-shadow: -0.75rem 0 0 var(--paper-raised), 0.75rem 0 0 var(--paper-raised);
+}
+
 /* ---------- Product / research lists ---------- */
 
 .product-card, .research-card {
