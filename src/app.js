@@ -285,40 +285,51 @@ function renderRatioReadout() {
   readout.innerHTML = `${shape} — ${verdict}`;
 }
 
+// Only speak up when there's something to act on, and say it in numbers the
+// reader can use. The solved salt percentage is already in the calculator and
+// the sodium figure in the facts panel — restating the arithmetic is noise.
+const MEANINGFUL_GAP = 0.1; // fraction of target worth mentioning
+
 function renderSodiumSolve(inputs, recipe, targetCarbs) {
-  const { estimate, solved, mode } = inputs.salt;
-  const [lo, hi] = estimate.rangeMgPerHour;
+  const { estimate, mode } = inputs.salt;
+  const advice = $('sodium-solve-detail');
 
-  $('sodium-estimate').innerHTML = `Losing roughly <strong>${formatMg(estimate.lossMgPerHour)}/hr</strong> of sodium in these conditions. Replacing 50–80% of that puts your target at <strong>${formatMg(lo)}–${formatMg(hi)}/hr</strong>.`;
+  // What the mix actually delivers, whatever the reason — a capped solve and
+  // a preset that doesn't suit the conditions leave you short the same way.
+  const delivered = recipe.perGram.carbsG > 0
+    ? (recipe.perGram.sodiumMg / recipe.perGram.carbsG) * targetCarbs
+    : 0;
+  const need = estimate.targetMgPerHour;
+  const gap = need - delivered;
 
-  const saltPct = recipe.sumRatio > 0
-    ? (recipe.ratios.salt / recipe.sumRatio) * 100 : 0;
+  $('sodium-estimate').textContent = mode === 'solved'
+    ? `These conditions suggest about ${formatMg(need)} of sodium per hour. The salt level below is set to match, for a batch you're about to mix.`
+    : `These conditions suggest about ${formatMg(need)} of sodium per hour.`;
 
-  if (mode !== 'solved') {
-    const delivered = recipe.perGram.carbsG > 0
-      ? (recipe.perGram.sodiumMg / recipe.perGram.carbsG) * targetCarbs : 0;
-    const off = delivered < lo ? 'below' : delivered > hi ? 'above' : 'inside';
-    $('sodium-solve-detail').innerHTML = `Using the <strong>${mode}</strong> preset at ${saltPct.toFixed(1)}% salt, which delivers ${formatMg(delivered)}/hr — ${off} that range. Switch the salt level to <em>Solved</em> to hit it exactly.`;
+  // A batch you've already mixed is fixed — conditions change ride to ride,
+  // the jar doesn't. So the advice is what to add today, not how to
+  // reformulate. Reformulating is only useful for the *next* batch.
+  if (gap > need * MEANINGFUL_GAP) {
+    advice.hidden = false;
+    advice.innerHTML = `This mix carries <strong>${formatMg(delivered)}/hr</strong> of sodium. For these conditions, add roughly <strong>${formatMg(gap)}/hr</strong> on top — a salt tab or electrolyte capsule alongside your bottle.`;
     return;
   }
 
-  if (solved && !solved.practical) {
-    // The failure mode worth designing for: technically solvable, actually
-    // undrinkable. Say so and point at the real fix.
-    const shortfall = estimate.targetMgPerHour - solved.maxSodiumAtThisCarbRate;
-    $('sodium-solve-detail').innerHTML = `<span class="warn">That target needs more salt than the mix can carry.</span> Capped at ${saltPct.toFixed(1)}% (${formatMg(solved.maxSodiumAtThisCarbRate)}/hr) — past that it tastes of salt. You're short about <strong>${formatMg(shortfall)}/hr</strong>, so take that separately as a salt tab, or raise your carb intake so the same salt percentage carries more sodium.`;
+  if (delivered > need * (1 + MEANINGFUL_GAP)) {
+    advice.hidden = false;
+    advice.innerHTML = `This mix carries <strong>${formatMg(delivered)}/hr</strong> of sodium, more than these conditions call for. No harm in it, but nothing to add.`;
     return;
   }
 
-  $('sodium-solve-detail').innerHTML = `Salt solved to <strong>${saltPct.toFixed(1)}% of the batch</strong> — that delivers ${formatMg(estimate.targetMgPerHour)}/hr at ${targetCarbs} g carbs/hr. Change either target and the formulation follows.`;
+  advice.hidden = true;
 }
 
 function renderSweatCue() {
   const level = findSweatSodium($('in-sweat-sodium').value);
   $('sweat-sodium-cue').textContent = level ? level.cue : '';
   $('salt-profile-note').textContent = $('in-salt-profile').value === 'solved'
-    ? 'Follows your conditions and carb target.'
-    : 'Fixed percentage, regardless of your targets.';
+    ? 'Solved from your conditions above.'
+    : 'A fixed percentage. Set this to match a batch you already made.';
 }
 
 function initConditions() {
@@ -507,7 +518,11 @@ function init() {
   initLabel();
 
   document.getElementById('calc-form').addEventListener('input', recalculate);
-  $('in-flavor-preset').addEventListener('change', recalculate);
+  // Selects need an explicit change listener. The form's 'input' listener
+  // happens to cover them in current browsers, but relying on that made the
+  // salt level silently not recalculate when driven programmatically.
+  ['in-flavor-preset', 'in-salt-profile'].forEach((id) =>
+    $(id).addEventListener('change', recalculate));
   $('in-target-carbs').addEventListener('input', recalculate);
 
   recalculate();

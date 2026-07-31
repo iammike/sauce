@@ -104,10 +104,10 @@
           <div class="field field--select">
             <label for="in-salt-profile">Salt level</label>
             <select id="in-salt-profile">
-              <option value="solved" selected>Solved for your conditions</option>
-              <option value="moderate">Preset — moderate</option>
-              <option value="endurance">Preset — endurance</option>
-              <option value="hot">Preset — hot / heavy sweat</option>
+              <option value="solved" selected>Match my conditions</option>
+              <option value="moderate">Fixed — moderate</option>
+              <option value="endurance">Fixed — endurance</option>
+              <option value="hot">Fixed — hot / heavy sweat</option>
             </select>
             <span class="field-hint" id="salt-profile-note"></span>
           </div>
@@ -122,8 +122,9 @@
             <span class="field-hint" id="ratio-readout"></span>
           </div>
           <div class="field">
-            <label for="in-cap">Max batch size (g) <span class="field-hint">optional cap</span></label>
+            <label for="in-cap">Max batch size (g) <span class="field-hint">optional</span></label>
             <input type="number" id="in-cap" min="0" step="1" placeholder="no cap" inputmode="decimal">
+            <span class="field-hint">How big is your container?</span>
           </div>
         </div>
         <p class="field-hint" id="calc-limiting"></p>
@@ -154,10 +155,8 @@
         </div>
       </div>
 
-      <div class="callout" id="sodium-solve">
-        <p id="sodium-estimate"></p>
-        <p class="field-hint" id="sodium-solve-detail"></p>
-      </div>
+      <p class="field-hint" id="sodium-estimate"></p>
+      <p class="callout" id="sodium-solve-detail" hidden></p>
 
       <p class="callout" id="hourly-warning" role="status" hidden></p>
 

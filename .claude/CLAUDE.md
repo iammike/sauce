@@ -52,6 +52,8 @@
 - The reason this exists: carb need scales with duration/intensity, sodium need with sweat rate/heat. A fixed salt percentage welds them together, which is the exact criticism levelled at Gatorade Endurance on the cost panel. Don't reintroduce that coupling
 - `MAX_PRACTICAL_SALT_RATIO` is a taste limit, not a math one. Past it the tool must refuse and say "take salt separately" rather than emit an undrinkable formulation. There are tests on the refusal
 - The sodium estimate is genuinely uncertain (sweat sodium varies 500–1300 mg/L). Present it as a range to adjust from, never as a prescription
+- **A batch that's already mixed is fixed.** Conditions change ride to ride; the jar doesn't. So when sodium falls short, the advice is how much to add *today* — a salt tab alongside — not how to reformulate. Solving the salt level is for a batch about to be made, and the fixed presets exist so someone can describe a batch they already have
+- Say it in numbers the reader can act on ("carries 438 mg/hr, add 829") rather than explaining the mechanism. Don't warn about trivial gaps; `MEANINGFUL_GAP` is 10% of target
 
 ## Cost data is dated and approximate
 - `data/costs.js` carries `PRICED_AS_OF` and a `basis` string per ingredient; flavoring prices live on the flavorings themselves since that slot varies hugely. Every price is labelled `actual` or `estimated` and the page says so
