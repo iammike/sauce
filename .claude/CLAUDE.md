@@ -24,7 +24,9 @@
 - The `accept` attribute is a hint, not a control: MIME type and size are re-checked in `loadArtwork()`. Don't add SVG to the allowlist (it can carry script)
 
 ## Amazon Associate links
-- `data/products.js` — `TODO_TAG` is a placeholder; links point at Amazon search results, not guessed ASINs, until real products are picked. Replace `url` with the exact product page once decided, keeping the same `tag` param
+- `ASSOCIATES_TAG` in `data/products.js` is `sauce-calc-20`, a site-specific tracking ID under store `mikeylikesit-20`. Don't reuse it on other sites — the point is per-site attribution
+- Product `url`s still point at Amazon search results, not guessed ASINs. Replace with the exact product page once picked, keep the `tag` param, and drop that entry's `placeholder: true`
+- The Operating Agreement disclosure ("As an Amazon Associate I earn from qualifying purchases") must stay on any page with affiliate links
 
 ## GitHub Issues
 - When creating an issue, add a size label (`size:small` < 1hr, `size:medium` 1-4hr, `size:large` 4+hr) and a priority label (`priority:low/medium/high/critical`)

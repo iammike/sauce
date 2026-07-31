@@ -3,7 +3,7 @@
 Homemade endurance hydration mix calculator, hourly fueling guide, and
 printable nutrition label.
 
-**Live:** [sauce.iammike.org](https://sauce.iammike.org/) (once DNS/Pages are cut over — see #issues)
+**Live:** [sauce.iammike.org](https://sauce.iammike.org/)
 
 A static site, no backend. Enter what you have on hand (any flavoring, not
 just strawberry — see `data/flavorings.js`), and the calculator finds the
@@ -21,8 +21,8 @@ Supplement Facts panel. From there:
 - **Label** — a real 3x4in label with a derived ingredients list (ordered by
   descending weight, as food labels require), optional artwork, and print
   rules that isolate it at true size. Artwork never leaves the browser.
-- **Where to buy** — Amazon Associate links for the ingredients (placeholder
-  tag/products until real ones are picked — see open issues).
+- **Where to buy** — Amazon Associate links for the ingredients. The tracking
+  tag is live; specific products are still to be picked (see open issues).
 - **References** — the research behind the ratios and hourly targets.
 
 ## How it works
