@@ -385,14 +385,21 @@ function initFlavorPresets() {
   select.value = 'strawberry';
 }
 
-function initProducts() {
-  $('products-grid').innerHTML = PRODUCTS.map((p) => `
+function renderProductCards(list) {
+  return list.map((p) => `
     <div class="card product-card">
       <p class="product-card__name">${p.name}</p>
       <p class="product-card__note">${p.note}</p>
       <a class="btn btn--outline" href="${p.url}" target="_blank" rel="noopener sponsored">View on Amazon</a>
     </div>
   `).join('');
+}
+
+function initProducts() {
+  const ingredients = PRODUCTS.filter((p) => p.kind !== 'equipment');
+  const equipment = PRODUCTS.filter((p) => p.kind === 'equipment');
+  $('products-grid').innerHTML = renderProductCards(ingredients);
+  $('equipment-grid').innerHTML = renderProductCards(equipment);
 }
 
 function initResearch() {

@@ -18,6 +18,12 @@
 - Verify citations before publishing them. These were checked against the literature, not recalled
 - Intake targets are absolute g/hr and must NOT be turned into per-kg inputs. Absorption is the limiter, not muscle mass, and transporter capacity barely varies with body size — this is the one sports-nutrition number that isn't per-kilogram. Reasoning is in `docs/recipe-source.md`; it deliberately isn't on the site, which just needs the numbers to be right
 
+## Two pages, two jobs
+- `ride.html` (+ `src/ride.js`, `src/ride-app.js`) is the day-of bottle planner: duration, intensity, weather, one answer. It deliberately assumes the **base recipe** and **average sweat** — it must not grow a sweat profile or read the batch calculator's formulation. Precision lives on the other page
+- Duration, not distance: the carb guidance is duration-based, and deriving duration from distance needs a speed guess that adds more error than it removes
+- Salt advice is rounded to 50 mg and expressed in countable capsules. Don't make it look precise
+- `index.html` (+ `src/app.js`) is the batch calculator. Both pages share `shared.css`; `build.js` emits a bundle per page
+
 ## Section responsibilities
 - **Calculator** owns every input that changes the batch — including planned carb intake and sweat conditions, because the salt solve reads them. **Per hour** is a pure readout with no inputs at all; if you find yourself adding a control there, it belongs above
 - Label, Cost, What to buy and References are collapsed `<details>` — they're read once, and the page should land on the tool. They stay in the DOM so anchors keep working, and `openTargetedPanel()` opens a section when something links into it

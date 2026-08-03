@@ -7,6 +7,9 @@
 //
 // `searchUrl` remains for any ingredient added later that doesn't yet have a
 // chosen product — a search link is honest where a guessed ASIN wouldn't be.
+//
+// `kind: 'equipment'` separates the kit from the ingredients; entries without
+// it are what actually goes in the jar.
 
 // Store ID is `mikeylikesit-20`; `sauce-calc-20` is a tracking ID under it,
 // created specifically for this site so its earnings stay segmented in
@@ -38,6 +41,20 @@ export const PRODUCTS = [
     name: 'Gya Tea Co Organic Freeze-Dried Strawberry Powder, 1.1 lb',
     note: 'The tested default, and the biggest cost lever in the mix — swap it or drop it to cut the price per hour.',
     url: `https://www.amazon.com/dp/B0DZX5QTJ4?tag=${ASSOCIATES_TAG}`,
+  },
+  {
+    id: 'scale',
+    kind: 'equipment',
+    name: 'Etekcity Digital Kitchen Scale, 11 lb',
+    note: 'The one piece of equipment that actually matters. Everything on this site is measured by weight, and a batch is only as accurate as the scale you mix it on. Cheap, and the tare function saves a lot of arithmetic.',
+    url: `https://www.amazon.com/dp/B0113UZJE2?tag=${ASSOCIATES_TAG}`,
+  },
+  {
+    id: 'scoop',
+    kind: 'equipment',
+    name: '80 cc Measuring Scoops, set of 5',
+    note: 'Optional. Handy once you know what yours weighs — 80 cc of this mix lands somewhere near 50 g, but density varies with how packed the powder is, so weigh it once and enter that number rather than trusting the volume.',
+    url: `https://www.amazon.com/dp/B08RX9RWJX?tag=${ASSOCIATES_TAG}`,
   },
   {
     id: 'sodium-citrate',

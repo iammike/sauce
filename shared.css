@@ -196,6 +196,59 @@ a:hover { color: var(--strawberry-dark); }
   color: #fff2e4;
 }
 
+.hero-band--compact { padding-bottom: 2.5rem; }
+.hero-inner--single { grid-template-columns: 1fr; }
+/* Links inside the hero sit on the strawberry band, where the default link
+   colour is invisible against the background. */
+.dek a, .dek__link {
+  color: #fff9f0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.dek a:hover, .dek__link:hover { color: #fff; }
+
+/* ---------- Day-of answer ---------- */
+
+.ride-answer {
+  border: 3px solid var(--rule);
+  background: var(--paper-raised);
+  padding: 1.75rem;
+  max-width: 52rem;
+  margin-bottom: 1.25rem;
+}
+
+.ride-answer__headline {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  border-bottom: 3px solid var(--rule);
+  padding-bottom: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.ride-answer__value {
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-weight: 900;
+  font-size: clamp(2.5rem, 7vw, 4rem);
+  line-height: 0.9;
+  margin: 0;
+}
+
+.ride-answer__label {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--ink-soft);
+}
+
+.ride-answer__detail {
+  margin: 0 0 0.6rem;
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.ride-answer__detail:last-child { margin-bottom: 0; }
+
 /* ---------- Supplement Facts panel (the signature element) ---------- */
 
 .facts-panel {
