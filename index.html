@@ -19,7 +19,6 @@
     <nav class="site-nav" aria-label="Primary">
       <a href="ride.html">Bottle planner</a>
       <a href="#calculator">Calculator</a>
-      <a href="#hourly">Per hour</a>
       <a href="#tuning">Dial it in</a>
       <a href="#label">Label</a>
       <a href="#cost">Cost</a>
@@ -70,7 +69,7 @@
           <dt>Sodium</dt>
           <dd id="fp-sodium">— mg</dd>
         </div>
-        <p class="facts-panel__footnote">A serving is one hour of fueling at <span id="fp-target">75 g carbs/hr</span> — set that in <a href="#hourly">Per hour</a>. Sodium from sodium citrate dihydrate (~235 mg Na/g). Flavoring: <span id="fp-flavor-name">Strawberry</span>.</p>
+        <p class="facts-panel__footnote">A serving is one hour of fueling at <span id="fp-target">75 g carbs/hr</span>. Sodium from sodium citrate dihydrate (~235 mg Na/g). Flavoring: <span id="fp-flavor-name">Strawberry</span>.</p>
       </dl>
     </div>
   </section>
@@ -115,7 +114,7 @@
           <div class="field">
             <label for="in-target-carbs">Planned intake (g carbs/hr)</label>
             <input type="number" id="in-target-carbs" min="10" max="200" step="5" value="75">
-            <span class="field-hint">Sets the serving size and salt level.</span>
+            <span class="field-hint">Sets the serving size. Not sure? The <a href="ride.html">bottle planner</a> works it out per ride.</span>
           </div>
           <div class="field">
             <label for="in-scoop">Your scoop size (g)</label>
@@ -140,20 +139,24 @@
       <div class="card-grid" id="recipe-grid" aria-live="polite"></div>
     </section>
 
-    <section class="panel" id="hourly">
-      <p class="panel__eyebrow">02 — Per hour</p>
-      <h2 class="panel__title">How much, how often?</h2>
-      <p>How many carbs you need per hour depends mostly on how long you're out. These tiers follow the <a href="#ref-morton-2026">current guidance</a> (Morton et al., 2026), which raised the old 90 g/hr ceiling to 90–120 for trained athletes. Set your planned intake in the calculator above; this shows what the batch delivers at each band.</p>
+    <details class="panel panel--collapsible" id="hourly">
+      <summary>
+        <span class="panel__title">What this batch delivers per hour</span>
+        <span class="panel__blurb">Reference. For a specific ride, the <a href="ride.html">bottle planner</a> answers it directly.</span>
+      </summary>
+      <div class="panel__body">
+        <p>How many carbs you need per hour depends mostly on how long you're out. These bands follow the <a href="#ref-morton-2026">current guidance</a> (Morton et al., 2026), which raised the old 90 g/hr ceiling to 90–120 for trained athletes. This shows what <em>your</em> batch delivers at each one — the bottle planner assumes the standard mix instead.</p>
 
-      <p class="callout" id="hourly-warning" role="status" hidden></p>
+        <p class="callout" id="hourly-warning" role="status" hidden></p>
 
-      <div class="card-grid" id="hourly-grid" aria-live="polite"></div>
+        <div class="card-grid" id="hourly-grid" aria-live="polite"></div>
 
-      <p class="field-hint hourly-note">Bands assume moderate-to-hard endurance effort — sit toward the low end for easy riding.</p>
-    </section>
+        <p class="field-hint hourly-note">Bands assume moderate-to-hard endurance effort — sit toward the low end for easy riding.</p>
+      </div>
+    </details>
 
     <section class="panel" id="tuning">
-      <p class="panel__eyebrow">03 — Dial it in</p>
+      <p class="panel__eyebrow">02 — Dial it in</p>
       <h2 class="panel__title">Adjusting to taste</h2>
       <p>The recipes are starting points. Sweetness, salt, and gut tolerance are personal, and the only way to find yours is to make a batch and pay attention. Here is what to change when something is off.</p>
       <div class="tuning-list" id="tuning-list"></div>
@@ -165,7 +168,7 @@
         <span class="panel__blurb">A printable 3&Prime;&times;4&Prime; jar label built from this batch.</span>
       </summary>
       <div class="panel__body">
-          <p>A real 3&Prime; &times; 4&Prime; label for the jar, built from the batch you just calculated. A serving is one hour of fueling at your <a href="#hourly">per-hour target</a> — more useful on a homemade jar than a scoop count, since scoops vary. Ingredients are listed by descending weight, the way a food label should be.</p>
+          <p>A serving is one hour of fueling at your planned intake — more useful on a homemade jar than a scoop count, since scoops vary. Ingredients are listed by descending weight, the way a food label should be.</p>
 
       <div class="input-grid" style="max-width:40rem;">
         <div class="field">
@@ -271,7 +274,7 @@
         <span class="panel__blurb">The exact ingredients these numbers are priced from.</span>
       </summary>
       <div class="panel__body">
-          <p>The exact products the costs above are priced from. Any food-grade equivalent works — the calculator doesn't care what you buy.</p>
+          <p>Any food-grade equivalent works — the calculator doesn't care what you buy.</p>
       <div class="card-grid" id="products-grid"></div>
 
       <h3 class="display" style="font-size:1.1rem;margin:2.5rem 0 0.75rem;">Kit</h3>
@@ -285,8 +288,7 @@
         <span class="panel__blurb">Every number on this page, and where it comes from.</span>
       </summary>
       <div class="panel__body">
-          <p>Every number on this page traces back to one of these.</p>
-      <div class="reference-list" id="research-grid"></div>
+        <div class="reference-list" id="research-grid"></div>
       </div>
     </details>
 

@@ -45,16 +45,16 @@ export const PRODUCTS = [
   {
     id: 'scale',
     kind: 'equipment',
-    name: 'Etekcity Digital Kitchen Scale, 11 lb',
-    note: 'The one piece of equipment that actually matters. Everything on this site is measured by weight, and a batch is only as accurate as the scale you mix it on. Cheap, and the tare function saves a lot of arithmetic.',
-    url: `https://www.amazon.com/dp/B0113UZJE2?tag=${ASSOCIATES_TAG}`,
+    name: 'Escali Primo Digital Food Scale',
+    note: 'The one piece of equipment that actually matters. Everything here is measured by weight, and a batch is only as accurate as the scale you mix it on. The tare function saves a lot of arithmetic.',
+    url: `https://www.amazon.com/dp/B0007GAWSC?tag=${ASSOCIATES_TAG}`,
   },
   {
     id: 'scoop',
     kind: 'equipment',
-    name: '80 cc Measuring Scoops, set of 5',
-    note: 'Optional. Handy once you know what yours weighs — 80 cc of this mix lands somewhere near 50 g, but density varies with how packed the powder is, so weigh it once and enter that number rather than trusting the volume.',
-    url: `https://www.amazon.com/dp/B08RX9RWJX?tag=${ASSOCIATES_TAG}`,
+    name: 'Measuring spoon set, 3 g to 30 g',
+    note: 'Optional, and worth reading the fine print on: the gram markings are nominal, calibrated for a denser powder than this one. Maltodextrin is light, so a spoon marked 30 g holds noticeably less of the mix. Weigh one once, note what it actually gives you, and the set becomes a fast way to portion without the scale.',
+    url: `https://www.amazon.com/dp/B082ZMPS1V?tag=${ASSOCIATES_TAG}`,
   },
   {
     id: 'sodium-citrate',

@@ -26,6 +26,8 @@
 
 ## Section responsibilities
 - **Calculator** owns every input that changes the batch — including planned carb intake and sweat conditions, because the salt solve reads them. **Per hour** is a pure readout with no inputs at all; if you find yourself adding a control there, it belongs above
+- A collapsible panel's `panel__blurb` stays visible when it's open, so the body must not restate it. Three of them opened with a paraphrase of their own summary, which reads like a stutter
+- Per hour is collapsed reference: the bottle planner answers "how much today" directly, and the only thing this adds is what *your* batch delivers rather than the standard mix
 - Label, Cost, What to buy and References are collapsed `<details>` — they're read once, and the page should land on the tool. They stay in the DOM so anchors keep working, and `openTargetedPanel()` opens a section when something links into it
 - `tests/dom-contract.test.js` asserts every id `src/app.js` reaches for exists in `index.html`. Moving markup between sections once deleted an element app.js still wrote to, which threw mid-render and left every later panel blank with no visible error
 
