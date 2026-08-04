@@ -19,11 +19,12 @@
 - Verify citations before publishing them. These were checked against the literature, not recalled
 - Intake targets are absolute g/hr and must NOT be turned into per-kg inputs. Absorption is the limiter, not muscle mass, and transporter capacity barely varies with body size — this is the one sports-nutrition number that isn't per-kilogram. Reasoning is in `docs/recipe-source.md`; it deliberately isn't on the site, which just needs the numbers to be right
 
-## Two pages, two jobs
-- `ride.html` (+ `src/ride.js`, `src/ride-app.js`) is the day-of bottle planner: duration, intensity, weather, one answer. It deliberately assumes the **base recipe** and **average sweat** — it must not grow a sweat profile or read the batch calculator's formulation. Precision lives on the other page
+## One page, two jobs
+- The day-of planner (`src/ride.js`, `src/ride-app.js`) sits first on `index.html` as `#planner`, above the batch calculator, because it's the weekly-use tool and a separate page made it hard to find. `ride.html` is a redirect stub
+- It deliberately assumes the **standard mix** and **average sweat** even though the calculator's real formulation is right there on the same page — it must not start reading it. Precision is the calculator's job; this one's job is being fast
 - Duration, not distance: the carb guidance is duration-based, and deriving duration from distance needs a speed guess that adds more error than it removes
 - Salt advice is rounded to 50 mg and expressed in countable capsules. Don't make it look precise
-- `index.html` (+ `src/app.js`) is the batch calculator. Both pages share `shared.css`; `build.js` emits a bundle per page
+- `src/ride-app.js` exports `initRidePlanner()` rather than self-starting, and `src/app.js` calls it. One page, one bundle
 
 ## Disclosure animation is JS, deliberately
 - `src/disclosure.js` drives the height directly. The pure-CSS route (transitioning `::details-content` with `interpolate-size`) reports as supported in Chrome here but leaves the element at `block-size: 0` while `[open]` matches — panels stop opening entirely. Verify expansion still works before touching this

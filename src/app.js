@@ -10,6 +10,7 @@ import { batchCost, costPerGramCarb, compareAtCarbTarget } from './cost.js';
 import { PRICED_AS_OF, INGREDIENT_COSTS, HOMEMADE_LIMITATION } from '../data/costs.js';
 import { SALT_PROFILES } from './calculator.js';
 import { initDisclosureAnimation } from './disclosure.js';
+import { initRidePlanner } from './ride-app.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -413,6 +414,7 @@ function init() {
   $('in-target-carbs').addEventListener('input', recalculate);
 
   recalculate();
+  initRidePlanner();
   initDisclosureAnimation();
   openTargetedPanel();
   window.addEventListener('hashchange', openTargetedPanel);

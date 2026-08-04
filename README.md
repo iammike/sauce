@@ -5,13 +5,15 @@ printable nutrition label.
 
 **Live:** [sauce.iammike.org](https://sauce.iammike.org/)
 
-Two pages, each doing one job:
+One page, two jobs:
 
-- **[Bottle planner](ride.html)** — day-of. How long, how hard, how hot; get
-  grams of mix to pack and rough salt advice. Assumes the base recipe and
-  average sweat, on purpose.
-- **Batch calculator** (`index.html`) — everything below. Occasional, precise,
-  and aware of what you actually mixed.
+- **Today's ride** — how long, how hard, how hot, and it tells you grams of
+  mix to pack plus rough salt advice. Assumes the standard mix and average
+  sweat, on purpose. First on the page, since it's the weekly one.
+- **Making a batch** — the calculator below it, plus label, cost and
+  references. Occasional, precise, aware of what you actually mixed.
+
+`ride.html` is a redirect to `#planner`, kept so the old URL still works.
 
 A static site, no backend. Enter what you have on hand (any flavoring, not
 just strawberry — see `data/flavorings.js`), and the calculator finds the

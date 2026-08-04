@@ -17,8 +17,8 @@
       <span class="wordmark__sauce display">Sauce</span>
     </a>
     <nav class="site-nav" aria-label="Primary">
-      <a href="ride.html">Bottle planner</a>
-      <a href="#calculator">Calculator</a>
+      <a href="#planner">Today's ride</a>
+      <a href="#calculator">Make a batch</a>
       <a href="#tuning">Troubleshooting</a>
       <a href="#label">Label</a>
       <a href="#cost">Cost</a>
@@ -33,7 +33,7 @@
         <p class="kicker">Homemade endurance hydration mix</p>
         <h1 class="headline">Fuel you <em>mix yourself</em>.</h1>
         <p class="dek">Maltodextrin and fructose in a tested 2:1-ish ratio for dual-transporter carb absorption, plus sodium citrate and any flavoring you like. Enter what's in your pantry — the panel on the right fills itself out.</p>
-        <p class="dek">Just packing a bottle for today? Use the <a href="ride.html" class="dek__link">bottle planner</a> instead.</p>
+        <p class="dek">Already have a batch made? Skip to <a href="#planner" class="dek__link">today's ride</a>.</p>
       </div>
 
       <dl class="facts-panel" id="facts-panel" aria-label="Live nutrition facts, per scoop">
@@ -75,8 +75,41 @@
   </section>
 
   <main>
+    <section class="panel" id="planner">
+      <p class="panel__eyebrow">01 — Today's ride</p>
+      <h2 class="panel__title">What do I pack?</h2>
+      <p>If you already have a batch made, this is the whole job. Three questions, one answer — it assumes the standard mix rather than reading your exact formulation, which is close enough for filling bottles.</p>
+
+      <form id="ride-form" novalidate>
+        <div class="input-grid" style="max-width:58rem;">
+          <div class="field">
+            <label for="in-duration">How long are you out? (hours)</label>
+            <input type="number" id="in-duration" min="0.25" max="24" step="0.25" value="3" inputmode="decimal">
+          </div>
+          <div class="field field--select">
+            <label for="in-intensity">How hard?</label>
+            <select id="in-intensity"></select>
+            <span class="field-hint" id="intensity-note"></span>
+          </div>
+          <div class="field field--select">
+            <label for="in-weather">How hot?</label>
+            <select id="in-weather"></select>
+            <span class="field-hint" id="weather-note"></span>
+          </div>
+          <div class="field field--select">
+            <label for="in-bottle">Bottle size</label>
+            <select id="in-bottle"></select>
+          </div>
+        </div>
+      </form>
+
+      <div class="ride-answer" id="ride-answer" aria-live="polite"></div>
+      <p class="field-hint" id="ride-caveat"></p>
+    </section>
+
     <section class="panel panel--calculator" id="calculator">
-      <h2 class="panel__title">What's in the pantry?</h2>
+      <p class="panel__eyebrow">02 — Mix calculator</p>
+      <h2 class="panel__title">Making a batch</h2>
       <p>Enter what you have on hand (yellow cells are inputs, same convention as the original spreadsheet). The calculator finds the limiting ingredient and scales the rest of the batch to match.</p>
 
       <form id="calc-form" novalidate>
@@ -272,7 +305,7 @@
       </summary>
       <div class="panel__body">
           <p>Any food-grade equivalent works — the calculator doesn't care what you buy.</p>
-        <p class="field-hint">These are affiliate links. As an Amazon Associate I earn from qualifying purchases, at no extra cost to you.</p>
+        <p class="field-hint">These are affiliate links — buying through them costs you nothing extra.</p>
       <div class="card-grid" id="products-grid"></div>
 
       <h3 class="display" style="font-size:1.1rem;margin:2.5rem 0 0.75rem;">Kit</h3>
@@ -293,8 +326,7 @@
   </main>
 
   <footer class="site-footer">
-    <span>Packing a bottle for a specific ride?</span>
-    <a href="ride.html">Bottle planner →</a>
+    <span>These are affiliate links — as an Amazon Associate I earn from qualifying purchases.</span>
   </footer>
 
   <script src="dist/app.min.js"></script>

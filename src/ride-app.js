@@ -1,3 +1,5 @@
+// Wiring for the day-of planner. Exported rather than self-starting so it can
+// live alongside the batch calculator on the same page.
 import { INTENSITIES, WEATHER, BOTTLE_SIZES, findIntensity, findWeather, findBottle, planRide } from './ride.js';
 import { formatGrams, formatMg, formatCount } from './format.js';
 
@@ -76,7 +78,8 @@ function render() {
   $('ride-caveat').textContent = 'Rough numbers, on purpose, and they only hold if you actually finish what you carry — an unfinished bottle is the most common reason a fuelling plan quietly does not work. Assumes the standard mix and average sweat.';
 }
 
-function init() {
+export function initRidePlanner() {
+  if (!$('ride-form')) return;
   $('in-intensity').innerHTML = INTENSITIES
     .map((i) => `<option value="${i.id}">${i.label}</option>`).join('');
   $('in-intensity').value = 'moderate';
@@ -94,10 +97,4 @@ function init() {
     $(id).addEventListener('change', render));
 
   render();
-}
-
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', init);
-} else {
-  init();
 }

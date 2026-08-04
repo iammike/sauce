@@ -6,9 +6,11 @@ import { fileURLToPath } from 'node:url';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
 // Each page and the script that drives it.
+// ride.html is a redirect stub with no script of its own. The planner's
+// markup and wiring both live on the main page now.
 const PAGES = [
   { html: 'index.html', script: 'src/app.js' },
-  { html: 'ride.html', script: 'src/ride-app.js' },
+  { html: 'index.html', script: 'src/ride-app.js' },
 ];
 
 function contractFor({ html: htmlFile, script }) {
