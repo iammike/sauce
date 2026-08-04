@@ -12,7 +12,7 @@
 const DURATION_MS = 300;
 
 function bodyOf(details) {
-  return details.querySelector(':scope > .panel__body, :scope > .tuning-item__body, :scope > .advanced__body');
+  return details.querySelector(':scope > .panel__body, :scope > .tuning-item__body');
 }
 
 function animate(details, body, from, to, done) {
