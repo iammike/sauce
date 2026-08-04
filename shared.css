@@ -8,6 +8,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=Karla:ital,wght@0,400;0,500;0,700;1,400&family=IBM+Plex+Mono:wght@500;600&display=swap');
 
 :root {
+  /* Comfortable reading measure — ~78 characters at the body size. Prose is
+     held to this; interactive and structural elements span the full width. */
+  --measure: 40rem;
   --paper: #f7f3ea;
   --paper-raised: #ffffff;
   --ink: #171512;
@@ -364,6 +367,10 @@ main {
    only <section> among <details> siblings and would otherwise match too. */
 main > .panel:last-child { padding-bottom: 0; }
 
+/* Prose is held to a readable measure; grids and controls span full width. */
+.panel > p,
+.panel__body > p { max-width: var(--measure); }
+
 .panel__eyebrow {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 0.78rem;
@@ -372,6 +379,9 @@ main > .panel:last-child { padding-bottom: 0; }
   color: var(--strawberry);
   margin: 0 0 0.4rem;
 }
+
+.panel > p,
+.panel__body > p { max-width: var(--measure); }
 
 .panel__title {
   font-family: 'Big Shoulders Display', sans-serif;
@@ -414,7 +424,10 @@ main > .panel:last-child { padding-bottom: 0; }
 
 .panel--collapsible[open] > summary::after { content: '–'; }
 
-.panel--collapsible > summary .panel__title { margin: 0; }
+.panel--collapsible > summary .panel > p,
+.panel__body > p { max-width: var(--measure); }
+
+.panel__title { margin: 0; }
 
 .panel__blurb {
   font-size: 0.9rem;
@@ -703,10 +716,12 @@ html { scroll-behavior: smooth; }
 
 /* ---------- Tuning accordion ---------- */
 
+/* Bars run full width so they line up with the section rules and give the
+   toggle the same right-hand column as the panels above. The text inside
+   doesn't follow — at full width it runs about 134 characters a line. */
 .tuning-list {
   display: grid;
   gap: 0.5rem;
-  max-width: 46rem;
 }
 
 .tuning-item {
@@ -751,6 +766,7 @@ html { scroll-behavior: smooth; }
 }
 
 .tuning-item__body { padding: 0.9rem 1rem 1rem; }
+.tuning-item__body > p { max-width: var(--measure); }
 
 .tuning-item__fix { margin: 0 0 0.6rem; font-size: 0.92rem; }
 

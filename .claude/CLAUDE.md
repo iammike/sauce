@@ -30,6 +30,13 @@
 - `src/disclosure.js` drives the height directly. The pure-CSS route (transitioning `::details-content` with `interpolate-size`) reports as supported in Chrome here but leaves the element at `block-size: 0` while `[open]` matches — panels stop opening entirely. Verify expansion still works before touching this
 - Bails out under `prefers-reduced-motion`, and `openTargetedPanel()` sets `.open` directly so anchors bypass the animation rather than fighting it
 
+## Prose gets a measure, structure doesn't
+- `--measure` (40rem, ~78 characters) holds panel intros and troubleshooting bodies. Full-width prose on this page runs ~134 characters, well past the readable 45-75
+- Bars, grids and controls do span full width — the constraint is on text, not containers
+
+## Careful with string replace on CSS selectors
+- A bare `.panel__title {` matched twice and spliced a new rule into the middle of the `:target` selector, leaving every collapsible heading permanently strawberry. Match on enough context to be unique, and check the occurrence count
+
 ## Slicing HTML by index: anchor the end search
 - `s.index('</footer>')` found the *label's* closing tag hundreds of lines before the site footer, so `s[:start] + s[end:]` ran backwards and duplicated four panels. Always pass the start offset: `s.index(close, start)`. Same trap with `</main>`, `</section>`, `</details>`
 - The duplicate-id check in `tests/dom-contract.test.js` is what caught it
