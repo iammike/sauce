@@ -354,8 +354,10 @@ main {
 
 /* The last panel keeps its border — that rule is the boundary above the
    footer. Drawing it on the footer instead can't align: a footer border spans
-   its padding box, while panel borders sit inside main's padding. */
-.panel:last-of-type { padding-bottom: 0; }
+   its padding box, while panel borders sit inside main's padding.
+   :last-child, not :last-of-type — the calculator is the only <section> among
+   <details> siblings, so :last-of-type matched it too and ate its padding. */
+main > .panel:last-child { padding-bottom: 0; }
 
 .panel__eyebrow {
   font-family: 'IBM Plex Mono', monospace;

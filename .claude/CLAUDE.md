@@ -28,6 +28,9 @@
 - `src/disclosure.js` drives the height directly. The pure-CSS route (transitioning `::details-content` with `interpolate-size`) reports as supported in Chrome here but leaves the element at `block-size: 0` while `[open]` matches — panels stop opening entirely. Verify expansion still works before touching this
 - Bails out under `prefers-reduced-motion`, and `openTargetedPanel()` sets `.open` directly so anchors bypass the animation rather than fighting it
 
+## Don't use :last-of-type on panels
+- Panels are a mix of `<section>` and `<details>`, so `:last-of-type` matches the last of *each* type — it silently hit the calculator (the only remaining section) and ate its bottom padding, running the rule into the Weigh Out cells. Use `main > .panel:last-child`
+
 ## Section responsibilities
 - **Calculator** owns every input that changes the batch — including planned carb intake and sweat conditions, because the salt solve reads them. **Per hour** is a pure readout with no inputs at all; if you find yourself adding a control there, it belongs above
 - A collapsible panel's `panel__blurb` stays visible when it's open, so the body must not restate it. Three of them opened with a paraphrase of their own summary, which reads like a stutter
