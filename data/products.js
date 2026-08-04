@@ -43,6 +43,18 @@ export const PRODUCTS = [
     url: `https://www.amazon.com/dp/B0DZX5QTJ4?tag=${ASSOCIATES_TAG}`,
   },
   {
+    id: 'lemon-powder',
+    name: 'Micro Ingredients Organic Lemon Juice Powder, 10 oz',
+    note: 'Citrus that works in a dry batch. Tart rather than sweet, which suits a maltodextrin mix — start light, it is sharper than it looks.',
+    url: `https://www.amazon.com/dp/B07NY4MF5Y?tag=${ASSOCIATES_TAG}`,
+  },
+  {
+    id: 'citrus-juice',
+    name: 'ReaLemon 100% Lemon Juice, 48 oz',
+    note: 'The cheap route to citrus, but it goes in the bottle rather than the jar since a liquid would spoil a dry mix. ReaLime is the same thing for limes.',
+    url: `https://www.amazon.com/dp/B008JEH2EG?tag=${ASSOCIATES_TAG}`,
+  },
+  {
     id: 'scale',
     kind: 'equipment',
     name: 'Escali Primo Digital Food Scale',

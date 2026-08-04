@@ -83,7 +83,13 @@ const money = (v) => `$${v.toFixed(2)}`;
 
 function renderCost(recipe, flavor, targetCarbs) {
   const cost = batchCost(recipe.recipeGrams, flavor.pricePerGram);
-  const perGramCarb = costPerGramCarb(cost.total, recipe.totals.carbsG);
+  // A per-bottle flavouring adds nothing to the batch but isn't free to use.
+  // Assume roughly a bottle an hour, which is what the planner assumes too.
+  const perBottleCostPerHour = flavor.perBottle
+    ? flavor.perBottleMl * flavor.pricePerMl
+    : 0;
+  const perGramCarb = costPerGramCarb(cost.total, recipe.totals.carbsG)
+    + (targetCarbs > 0 ? perBottleCostPerHour / targetCarbs : 0);
   const { mine, commercial } = compareAtCarbTarget(perGramCarb, targetCarbs);
 
   const mineSodium = recipe.perGram.carbsG > 0
@@ -160,6 +166,15 @@ function renderRecipeGrid(recipe) {
       </div>
     `;
   }).join('');
+
+  const flavor = findFlavoring($('in-flavor-preset').value);
+  const perBottleNote = $('flavor-per-bottle');
+  if (flavor?.perBottle) {
+    perBottleNote.hidden = false;
+    perBottleNote.innerHTML = `<strong>${flavor.name} goes in the bottle, not the jar.</strong> Keep the batch unflavoured and add about ${flavor.perBottleMl} ml per bottle when you mix — a liquid would spoil a dry mix.`;
+  } else {
+    perBottleNote.hidden = true;
+  }
 
   const limitLabel = LIMITING_LABELS[recipe.limiting] ?? recipe.limiting;
   $('calc-limiting').textContent = recipe.limiting === 'cap'

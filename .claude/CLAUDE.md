@@ -90,6 +90,10 @@
 - Sodium gets a status pill against `SODIUM_TARGET_RANGE`, not just a number. Maurten reads `low` and Gatorade Endurance `high`; that judgement is the useful part and there are tests pinning both
 - The real reason a sugar drink can't be concentrated into a fuel is osmolality, not ratios — see `OSMOLALITY_NOTE` in `data/costs.js` and the section in `docs/recipe-source.md`. Don't reduce that back to "wrong ratio"
 
+## A flavouring can be a per-bottle addition
+- `perBottle: true` flavourings (citrus juice) have `ratio: 0` — they never enter the dry batch, because a liquid would spoil it. The calculator shows a note instead of listing 0 g, and their cost is added per hour rather than per batch
+- Lemon juice *powder* is the version that does go in the jar; both are offered because they solve the same craving differently
+
 ## Amazon Associate links
 - `ASSOCIATES_TAG` in `data/products.js` is `sauce-calc-20`, a site-specific tracking ID under store `mikeylikesit-20`. Don't reuse it on other sites — the point is per-site attribution
 - Product `url`s still point at Amazon search results, not guessed ASINs. Replace with the exact product page once picked, keep the `tag` param, and drop that entry's `placeholder: true`
