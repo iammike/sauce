@@ -892,11 +892,6 @@ html { scroll-behavior: smooth; }
 
 /* ---------- Footer ---------- */
 
-.site-footer__fine {
-  opacity: 0.75;
-  font-size: 0.75rem;
-}
-
 .site-footer {
   max-width: 72rem;
   margin: 0 auto;
@@ -905,8 +900,11 @@ html { scroll-behavior: smooth; }
   color: var(--ink-soft);
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 0.5rem;
 }
+
+.site-footer a { font-weight: 700; text-decoration: none; }
+.site-footer a:hover { text-decoration: underline; }
 
 /* ---------- Label creator ----------
    A real label at real dimensions (3in x 4in), not a styled page. Sized in

@@ -113,7 +113,7 @@
 ## Amazon Associate links
 - `ASSOCIATES_TAG` in `data/products.js` is `sauce-calc-20`, a site-specific tracking ID under store `mikeylikesit-20`. Don't reuse it on other sites — the point is per-site attribution
 - Product `url`s still point at Amazon search results, not guessed ASINs. Replace with the exact product page once picked, keep the `tag` param, and drop that entry's `placeholder: true`
-- The Operating Agreement disclosure ("As an Amazon Associate I earn from qualifying purchases") must stay on any page with affiliate links
+- The Operating Agreement disclosure sits in the What to buy panel, beside the links it describes — clearer than a footer, and it keeps it off `ride.html`, which has no affiliate links to disclose. Any page that gains affiliate links needs it too
 
 ## GitHub Issues
 - When creating an issue, add a size label (`size:small` < 1hr, `size:medium` 1-4hr, `size:large` 4+hr) and a priority label (`priority:low/medium/high/critical`)
