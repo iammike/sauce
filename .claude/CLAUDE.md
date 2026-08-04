@@ -82,6 +82,7 @@
 ## Cost data is dated and approximate
 - `data/costs.js` carries `PRICED_AS_OF` and a `basis` string per ingredient; flavoring prices live on the flavorings themselves since that slot varies hugely. Every price is labelled `actual` or `estimated` and the page says so
 - Comparisons are normalised per gram of **carbohydrate**, never per gram of powder — otherwise the most diluted product looks cheapest
+- An hourly cost is meaningless without stating the intake it assumes. The panel says which, and carries a per-100 g figure that doesn't move so the comparison is portable. Per *gram* rounds to a cent or two and can't be compared — use per 100 g
 - Don't rig the comparison. Regular Gatorade is genuinely cheaper per carb than making it yourself, and the page says so; there's a test asserting it (`tests/cost.test.js`)
 - Prices drift. Re-check and bump `PRICED_AS_OF` rather than silently leaving stale numbers behind a confident-looking table
 - **Cost alone is misleading, so never show it alone.** Every product carries a `limitation`, including the homemade mix (`HOMEMADE_LIMITATION`) — a comparison that only lists the competition's drawbacks is advertising. Tests assert both

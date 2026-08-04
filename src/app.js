@@ -100,10 +100,16 @@ function renderCost(recipe, flavor, targetCarbs) {
     ...commercial,
   ].sort((a, b) => a.perHour - b.perHour);
 
+  // An hourly cost is meaningless without saying at what intake. Everything
+  // scales with it, so state it — and note that the ranking doesn't move,
+  // since every product is priced at the same carb rate.
+  $('cost-basis').innerHTML = `Costs below are for <strong>one hour at ${targetCarbs} g of carbs</strong>, your planned intake. Change that in the calculator and every figure scales together — the comparison between them doesn't move. Per 100 g of carbohydrate — roughly an hour of hard fuelling, and the figure that doesn't move — this mix runs ${money(perGramCarb * 100)}.`;
+
   $('cost-grid').innerHTML = rows.map((r) => `
     <div class="card${r.mine ? ' card--active' : ''}">
       <p class="card__eyebrow">${r.name}${r.confidence === 'estimated' ? ' · estimated' : ''}</p>
       <p class="card__value data">${money(r.perHour)}<span class="card__unit"> / hour</span></p>
+      <p class="field-hint">${money((r.perGramCarb ?? perGramCarb) * 100)} per 100 g of carbohydrate</p>
       <p class="field-hint">${formatMg(r.sodiumMgPerHour)} sodium/hr <span class="${statusPillClass(sodiumStatus(r.sodiumMgPerHour))}">${sodiumStatus(r.sodiumMgPerHour)}</span></p>
       <p class="cost-card__note">${r.note ?? ''}</p>
       <p class="field-hint cost-card__limitation"><strong>Catch:</strong> ${r.limitation}</p>
