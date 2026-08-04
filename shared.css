@@ -352,9 +352,10 @@ main {
   border-bottom: 3px solid var(--rule);
 }
 
-/* The last panel's bottom padding used to stack on main's, leaving a large
-   dead gap above the footer. The footer's own top rule marks the boundary. */
-.panel:last-of-type { border-bottom: none; padding-bottom: 1.5rem; }
+/* The last panel keeps its border — that rule is the boundary above the
+   footer. Drawing it on the footer instead can't align: a footer border spans
+   its padding box, while panel borders sit inside main's padding. */
+.panel:last-of-type { padding-bottom: 0; }
 
 .panel__eyebrow {
   font-family: 'IBM Plex Mono', monospace;
@@ -897,8 +898,7 @@ html { scroll-behavior: smooth; }
 .site-footer {
   max-width: 72rem;
   margin: 0 auto;
-  padding: 1.5rem 1.5rem 3rem;
-  border-top: 3px solid var(--rule);
+  padding: 1.25rem 1.5rem 1.75rem;
   font-size: 0.8rem;
   color: var(--ink-soft);
   display: flex;

@@ -176,7 +176,7 @@ function renderRecipeGrid(recipe) {
 
   const limitLabel = LIMITING_LABELS[recipe.limiting] ?? recipe.limiting;
   $('calc-limiting').textContent = recipe.limiting === 'cap'
-    ? `Batch capped at ${formatGrams(recipe.actualBatch)} by your max batch size — you have more of every ingredient than this batch needs.`
+    ? `Sized to fill your ${formatGrams(recipe.actualBatch)} container — you have more of every ingredient than this batch needs, so there's another batch in the bag.`
     : `${limitLabel} is the limiting ingredient — everything else is scaled to match it.`;
 }
 

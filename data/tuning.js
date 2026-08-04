@@ -55,6 +55,12 @@ export const TUNING = [
     why: 'Flavoring is typically about 10% of the mix by weight and contributes little to carbs or sodium, so moving it is nearly free nutritionally. It is not free financially: freeze-dried fruit powder is often around a third of the cost, so heavy-handed flavoring is the most expensive habit here.',
   },
   {
+    id: 'uneven-batch',
+    symptom: 'The batch is not evenly mixed',
+    fix: 'Leave the container at least a third empty and shake it properly — end over end, not side to side, for a good minute. Top the container up only after mixing.',
+    why: 'Four powders of different densities and particle sizes do not combine by being poured into the same tub. Salt is the one that matters: it is the densest and by far the smallest fraction, so if it settles you get scoops that taste of nothing followed by one that tastes of seawater. A full container cannot tumble, which is why headroom is not wasted space — it is what does the mixing.',
+  },
+  {
     id: 'clumping',
     symptom: 'Clumping in the bottle or not dissolving',
     fix: 'Add powder to water rather than water to powder, and mix in stages. Warm water dissolves it faster.',
