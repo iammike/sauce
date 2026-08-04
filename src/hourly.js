@@ -65,11 +65,6 @@ export const DUAL_TRANSPORT_TRAINED = 120;
 // below it, and 1:0.8 (0.8) sits inside.
 export const FRUCTOSE_RATIO_OPTIMAL = { min: 0.6, max: 1.0 };
 
-/** The most carbs per hour this formulation can realistically deliver. */
-export function absorptionCeiling(carbRatio) {
-  return carbRatio > 0.05 ? DUAL_TRANSPORT_TRAINED : GLUCOSE_ONLY_CEILING;
-}
-
 /** Where a fructose ratio sits relative to the evidence-backed optimal band. */
 export function ratioStatus(carbRatio) {
   if (carbRatio <= 0.05) return 'none';
@@ -78,16 +73,8 @@ export function ratioStatus(carbRatio) {
   return 'optimal';
 }
 
-/** The tier a target falls into, for labelling what an intake actually means. */
-export function tierFor(gramsPerHour) {
-  return CARB_INTAKE_TIERS.reduce((best, tier) =>
-    (gramsPerHour >= tier.gramsPerHour ? tier : best), CARB_INTAKE_TIERS[0]);
-}
-
-// Every tier currently cites the same review. If that ever stops being true,
-// src/app.js starts rendering a per-tier citation automatically.
-// Kept as a coarse sanity band for the status pills. The tiers above are the
-// real guidance; this is just "is the number broadly sensible".
+// A coarse sanity band for the status pills. The tiers above are the real
+// guidance; this is just "is the number broadly sensible".
 export const CARB_TARGET_RANGE = { min: 30, max: 120 };
 export const SODIUM_TARGET_RANGE = { min: 500, max: 1000, hot: 1500 };
 
@@ -100,31 +87,6 @@ function rangeStatus(value, { min, max }) {
   if (value < min) return 'low';
   if (value > max) return 'high';
   return 'in-range';
-}
-
-/** Nutrition delivered per hour at a given scoops/hr rate. */
-export function hourlyTotals(perScoop, scoopsPerHour) {
-  return {
-    scoopsPerHour,
-    carbsG: perScoop.carbsG * scoopsPerHour,
-    sugarsG: perScoop.sugarsG * scoopsPerHour,
-    sodiumMg: perScoop.sodiumMg * scoopsPerHour,
-    calories: perScoop.calories * scoopsPerHour,
-  };
-}
-
-/**
- * Work backward from a target carb intake to the scoops/hr that delivers it,
- * and report where that lands relative to sodium targets.
- */
-export function recommendScoopsPerHour(perScoop, targetCarbsPerHour = CARB_TARGET_RANGE.max) {
-  const scoopsPerHour = perScoop.carbsG > 0 ? targetCarbsPerHour / perScoop.carbsG : 0;
-  const totals = hourlyTotals(perScoop, scoopsPerHour);
-  return {
-    ...totals,
-    carbStatus: rangeStatus(totals.carbsG, CARB_TARGET_RANGE),
-    sodiumStatus: rangeStatus(totals.sodiumMg, SODIUM_TARGET_RANGE),
-  };
 }
 
 /**
@@ -151,12 +113,4 @@ export function planForCarbTarget(perGram, scoopGrams, targetCarbsPerHour) {
     carbStatus: rangeStatus(targetCarbsPerHour, CARB_TARGET_RANGE),
     sodiumStatus: rangeStatus(sodiumMg, SODIUM_TARGET_RANGE),
   };
-}
-
-/** Total scoops (and batches) needed to fuel a ride/run of a given duration. */
-export function scoopsForDuration(scoopsPerHour, durationHours, actualBatchGrams, scoopGrams) {
-  const totalScoops = scoopsPerHour * durationHours;
-  const totalGrams = totalScoops * scoopGrams;
-  const batchesNeeded = actualBatchGrams > 0 ? totalGrams / actualBatchGrams : 0;
-  return { totalScoops, totalGrams, batchesNeeded };
 }

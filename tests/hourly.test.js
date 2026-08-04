@@ -3,50 +3,14 @@ import { computeRecipe } from '../src/calculator.js';
 import { findResearch, RESEARCH } from '../data/research.js';
 
 const findResearchRoles = () => RESEARCH.map((r) => r.role);
-import { hourlyTotals, recommendScoopsPerHour, scoopsForDuration, planForCarbTarget,
-  CARB_INTAKE_TIERS, absorptionCeiling, tierFor, ratioStatus, GLUCOSE_ONLY_CEILING,
-  DUAL_TRANSPORT_TYPICAL, DUAL_TRANSPORT_TRAINED, FRUCTOSE_RATIO_OPTIMAL,
-  CARB_TARGET_RANGE } from '../src/hourly.js';
+import { planForCarbTarget, CARB_INTAKE_TIERS, ratioStatus,
+  FRUCTOSE_RATIO_OPTIMAL } from '../src/hourly.js';
 
 const recipe = computeRecipe({
   onHand: { maltodextrin: 2300, fructose: 2000, flavoring: 500, salt: 400 },
   saltProfile: 'endurance',
   maxBatchGrams: 1800,
   scoopGrams: 46,
-});
-
-describe('hourlyTotals', () => {
-  it('scales per-scoop nutrition linearly by scoops/hr', () => {
-    const at2 = hourlyTotals(recipe.perScoop, 2);
-    const at3 = hourlyTotals(recipe.perScoop, 3);
-    expect(at3.carbsG).toBeCloseTo(at2.carbsG * 1.5, 5);
-    expect(at3.sodiumMg).toBeCloseTo(at2.sodiumMg * 1.5, 5);
-  });
-});
-
-describe('recommendScoopsPerHour', () => {
-  it('recommends fewer scoops for a lower carb target', () => {
-    const low = recommendScoopsPerHour(recipe.perScoop, 60);
-    const high = recommendScoopsPerHour(recipe.perScoop, 90);
-    expect(low.scoopsPerHour).toBeLessThan(high.scoopsPerHour);
-  });
-
-  it('flags carb intake outside the research target range', () => {
-    const wayLow = recommendScoopsPerHour(recipe.perScoop, 10);
-    expect(wayLow.carbStatus).toBe('low');
-
-    const inRange = recommendScoopsPerHour(recipe.perScoop, (CARB_TARGET_RANGE.min + CARB_TARGET_RANGE.max) / 2);
-    expect(inRange.carbStatus).toBe('in-range');
-  });
-});
-
-describe('scoopsForDuration', () => {
-  it('multiplies scoops/hr by ride duration and converts to batches needed', () => {
-    const result = scoopsForDuration(3, 4, recipe.actualBatch, 46);
-    expect(result.totalScoops).toBe(12);
-    expect(result.totalGrams).toBeCloseTo(12 * 46, 5);
-    expect(result.batchesNeeded).toBeCloseTo((12 * 46) / recipe.actualBatch, 5);
-  });
 });
 
 describe('planForCarbTarget', () => {
@@ -117,34 +81,6 @@ describe('carb intake tiers', () => {
 
   it('flags the 90-120 band as needing gut training', () => {
     expect(CARB_INTAKE_TIERS.find((t) => t.gramsPerHour === 120).aggressive).toBe(true);
-  });
-});
-
-describe('absorptionCeiling', () => {
-  it('caps a glucose-only mix at the single-transporter limit', () => {
-    expect(absorptionCeiling(0)).toBe(GLUCOSE_ONLY_CEILING);
-  });
-
-  it('lifts the ceiling once there is meaningful fructose', () => {
-    expect(absorptionCeiling(0.5)).toBe(DUAL_TRANSPORT_TRAINED);
-    expect(absorptionCeiling(0.8)).toBe(DUAL_TRANSPORT_TRAINED);
-  });
-
-  it('treats a trace of fructose as glucose-only', () => {
-    expect(absorptionCeiling(0.01)).toBe(GLUCOSE_ONLY_CEILING);
-  });
-});
-
-describe('tierFor', () => {
-  it('picks the highest tier a target reaches', () => {
-    expect(tierFor(30).gramsPerHour).toBe(30);
-    expect(tierFor(75).gramsPerHour).toBe(60);
-    expect(tierFor(90).gramsPerHour).toBe(90);
-    expect(tierFor(150).gramsPerHour).toBe(120);
-  });
-
-  it('floors below the lowest tier rather than returning nothing', () => {
-    expect(tierFor(5).gramsPerHour).toBe(30);
   });
 });
 

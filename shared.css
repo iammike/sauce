@@ -1097,9 +1097,13 @@ html { scroll-behavior: smooth; }
 @page { margin: 0.4in; size: auto; }
 
 @media print {
+  /* #label is a <details>, so the sheet sits inside .panel__body rather than
+     being a direct child. Targeting `#label > *` hid the wrapper and printed
+     a blank page. */
   body > *:not(main),
   main > .panel:not(#label),
-  #label > *:not(.label-stage),
+  #label > summary,
+  #label .panel__body > *:not(.label-stage),
   .no-print {
     display: none !important;
   }
@@ -1107,6 +1111,9 @@ html { scroll-behavior: smooth; }
   body { background: #fff; }
 
   #label { padding: 0; border: none; }
+
+  /* A collapsed <details> hides its content; force it open for printing. */
+  #label .panel__body { display: block !important; height: auto !important; }
 
   .label-stage {
     background: none;

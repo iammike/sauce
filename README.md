@@ -20,9 +20,9 @@ Supplement Facts panel. From there:
 - **Troubleshooting** — symptom-driven guidance (`data/tuning.js`), ordered by
   when you'd hit each problem: making the batch, mixing a bottle, taste, then
   how it feels on the bike.
-- **Label** — a real 3x4in label whose serving size is *one hour of fueling*
-  at your carb target, so "servings per container" tells you how many hours
-  the jar holds. Ingredients are derived from the batch and ordered by
+- **Label** — a printable label, sized for a jar or to wrap the tub, whose
+  serving is *one hour of fueling* at your carb target, so "servings per
+  container" tells you how many hours the jar holds. Ingredients are derived from the batch and ordered by
   descending weight, as food labels require. Optional artwork never leaves the
   browser, and print rules isolate the label at true size.
 - **Cost** — what an hour of fueling costs to make, against Gatorade
@@ -37,7 +37,7 @@ Supplement Facts panel. From there:
 
 - `src/calculator.js` — batch/recipe math, ported from the source spreadsheet
   (see `docs/recipe-source.md` for the full derivation)
-- `src/hourly.js` — per-hour fueling recommendation
+- `src/hourly.js` — intake tiers and the per-hour fueling maths
 - `data/flavorings.js` — flavoring presets (ratio, carb/sugar fraction); the
   recipe isn't tied to strawberry, any flavoring type plugs in here
 - `data/products.js` / `data/research.js` — Where to Buy / References content

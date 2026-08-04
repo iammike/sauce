@@ -61,7 +61,7 @@
 - The nav must mirror this order exactly — it teaches the shape of the page, and a stale nav says the opposite of what the page does
 
 ## Section responsibilities
-- **Calculator** owns every input that changes the batch — including planned carb intake and sweat conditions, because the salt solve reads them. **Per hour** is a pure readout with no inputs at all; if you find yourself adding a control there, it belongs above
+- **Calculator** owns every input that changes the batch. Conditions are not among them — they're a day-of reading and live in the bottle planner
 - A collapsible panel's `panel__blurb` stays visible when it's open, so the body must not restate it. Three of them opened with a paraphrase of their own summary, which reads like a stutter
 - There is no Per hour section any more — the bottle planner answers "how much today" directly, and a tier table on the batch page only restated it. `CARB_INTAKE_TIERS` still drives `src/ride.js`
 - Label, Cost, What to buy and References are collapsed `<details>` — they're read once, and the page should land on the tool. They stay in the DOM so anchors keep working, and `openTargetedPanel()` opens a section when something links into it
@@ -103,7 +103,7 @@
 
 ## Conditions are day-of, not batch
 - The batch calculator must NOT ask about weather, sweat or effort. A jar is mixed in advance and can't know Saturday's conditions; salt level there is a general-purpose choice from three presets
-- Everything conditional lives on `ride.html`, which reads conditions and advises adding salt on the day. `src/sodium.js` (sweat profiling, salt solving) is parked for this reason
+- Everything conditional lives in the bottle planner, which reads conditions and advises adding salt on the day. `src/sodium.js` (sweat profiling, salt solving) is parked for this reason
 - The bottle planner asks bottle size for **concentration**, not division — concentration is the usual cause of a drink that won't go down, and fluid volume is derived from the existing sweat estimate rather than a fourth question
 - Say that the numbers assume you finish what you carry. That's the most common silent failure of a fuelling plan
 
@@ -142,7 +142,7 @@
 ## Amazon Associate links
 - `ASSOCIATES_TAG` in `data/products.js` is `sauce-calc-20`, a site-specific tracking ID under store `mikeylikesit-20`. Don't reuse it on other sites — the point is per-site attribution
 - Product `url`s still point at Amazon search results, not guessed ASINs. Replace with the exact product page once picked, keep the `tag` param, and drop that entry's `placeholder: true`
-- The Operating Agreement disclosure sits **inside** the What to buy panel, beside the links. It briefly lived in the footer, where it read "these are affiliate links" with no links anywhere near it — clearer than a footer, and it keeps it off `ride.html`, which has no affiliate links to disclose. Any page that gains affiliate links needs it too
+- The Operating Agreement disclosure sits **inside** the What to buy panel, beside the links. It briefly lived in the footer, where it read "these are affiliate links" with no links anywhere near it. Keep it beside the links
 
 ## GitHub Issues
 - When creating an issue, add a size label (`size:small` < 1hr, `size:medium` 1-4hr, `size:large` 4+hr) and a priority label (`priority:low/medium/high/critical`)
