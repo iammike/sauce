@@ -24,6 +24,10 @@
 - Salt advice is rounded to 50 mg and expressed in countable capsules. Don't make it look precise
 - `index.html` (+ `src/app.js`) is the batch calculator. Both pages share `shared.css`; `build.js` emits a bundle per page
 
+## Disclosure animation is JS, deliberately
+- `src/disclosure.js` drives the height directly. The pure-CSS route (transitioning `::details-content` with `interpolate-size`) reports as supported in Chrome here but leaves the element at `block-size: 0` while `[open]` matches — panels stop opening entirely. Verify expansion still works before touching this
+- Bails out under `prefers-reduced-motion`, and `openTargetedPanel()` sets `.open` directly so anchors bypass the animation rather than fighting it
+
 ## Section responsibilities
 - **Calculator** owns every input that changes the batch — including planned carb intake and sweat conditions, because the salt solve reads them. **Per hour** is a pure readout with no inputs at all; if you find yourself adding a control there, it belongs above
 - A collapsible panel's `panel__blurb` stays visible when it's open, so the body must not restate it. Three of them opened with a paraphrase of their own summary, which reads like a stutter
@@ -35,6 +39,7 @@
 - There is no standard scoop, so anything a user acts on is expressed in grams first. Scoop counts appear only as a labelled convenience ("of your 46 g scoops")
 - Per-hour fueling math must be built on `recipe.perGram`, never `recipe.perScoop` — how much mix an hour takes is a property of the formulation and must not change because someone owns a bigger scoop. There are regression tests for this in `tests/hourly.test.js`
 - Recipe presets deliberately don't set scoop size or pantry amounts
+- Scoop size affects no calculation — it's purely a grams-to-scoops display conversion, so it lives in the panel that shows that conversion, not among the batch inputs. The Supplement Facts panel stays pure grams
 - **A serving is one hour of fueling, not one scoop.** Both the hero Supplement Facts panel and the printed label size their serving from the per-hour carb target, so "servings per container" reads as hours of fueling — the number you actually want when packing for a ride. A commercial product can define a scoop because it ships you one; a homemade jar can't. `recipe.perScoop` still exists but nothing in the UI uses it
 
 ## Parked features — don't re-wire without a reason

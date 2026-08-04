@@ -10,6 +10,7 @@ import { RESEARCH, findResearch } from '../data/research.js';
 import { batchCost, costPerGramCarb, compareAtCarbTarget } from './cost.js';
 import { PRICED_AS_OF, INGREDIENT_COSTS, HOMEMADE_LIMITATION } from '../data/costs.js';
 import { SALT_PROFILES } from './calculator.js';
+import { initDisclosureAnimation } from './disclosure.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -74,9 +75,6 @@ function renderFactsPanel(recipe, serving, targetCarbs) {
   $('fp-sodium').textContent = formatMg(serving.perServing.sodiumMg);
   $('fp-flavor-name').textContent = recipe.flavorName;
   $('fp-target').textContent = `${targetCarbs} g carbs/hr`;
-  $('fp-scoop-note').textContent = serving.scoops !== null
-    ? `≈ ${formatCount(serving.scoops, 1)} of your scoops`
-    : '';
 }
 
 const money = (v) => `$${v.toFixed(2)}`;
@@ -476,6 +474,7 @@ function init() {
   $('in-target-carbs').addEventListener('input', recalculate);
 
   recalculate();
+  initDisclosureAnimation();
   openTargetedPanel();
   window.addEventListener('hashchange', openTargetedPanel);
   document.addEventListener('click', (e) => {
