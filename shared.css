@@ -373,6 +373,37 @@ main {
   margin: 0 0 1.25rem;
 }
 
+/* An inline disclosure for the one input that changes a tested formula. */
+.advanced {
+  border: 2px solid var(--rule);
+  margin: 1.25rem 0 0;
+  max-width: 34rem;
+}
+
+.advanced > summary {
+  cursor: pointer;
+  padding: 0.6rem 0.85rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  list-style: none;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.advanced > summary::-webkit-details-marker { display: none; }
+
+.advanced > summary::after {
+  content: '+';
+  margin-left: auto;
+  font-family: 'IBM Plex Mono', monospace;
+  color: var(--strawberry);
+}
+
+.advanced[open] > summary::after { content: '–'; }
+.advanced[open] > summary { border-bottom: 1px solid var(--rule); }
+.advanced__body { padding: 0.85rem; }
+.advanced__body .input-grid { margin-bottom: 0; }
+
 /* ---------- Collapsible panels ----------
    The read-once sections — label, cost, what to buy, references — collapse so
    the page you land on is the tool. Everything stays in the DOM, so anchors
