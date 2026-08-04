@@ -43,12 +43,6 @@ export const PRODUCTS = [
     url: `https://www.amazon.com/dp/B0DZX5QTJ4?tag=${ASSOCIATES_TAG}`,
   },
   {
-    id: 'citrus-juice',
-    name: 'ReaLemon 100% Lemon Juice, 48 oz',
-    note: 'The best-value flavouring here, and you may already have some. Goes in the bottle rather than the jar, so you can adjust it per ride. ReaLime is the same for limes.',
-    url: `https://www.amazon.com/dp/B008JEH2EG?tag=${ASSOCIATES_TAG}`,
-  },
-  {
     id: 'scale',
     kind: 'equipment',
     name: 'Escali Primo Digital Food Scale',
