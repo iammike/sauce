@@ -21,8 +21,9 @@ Supplement Facts panel. From there:
 - **Per hour** — the established duration-based carb tiers (30/60/90/120 g/hr),
   showing how much mix each takes. Tiers your formulation can't actually
   absorb are greyed out, since glucose alone saturates near 60 g/hr.
-- **Dial it in** — symptom-driven tuning guidance (`data/tuning.js`): what to
-  change when it's too sweet, too salty, or sitting in your stomach.
+- **Troubleshooting** — symptom-driven guidance (`data/tuning.js`), ordered by
+  when you'd hit each problem: making the batch, mixing a bottle, taste, then
+  how it feels on the bike.
 - **Label** — a real 3x4in label whose serving size is *one hour of fueling*
   at your carb target, so "servings per container" tells you how many hours
   the jar holds. Ingredients are derived from the batch and ordered by

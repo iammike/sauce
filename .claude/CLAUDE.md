@@ -8,6 +8,7 @@
 ## Flavoring is generic, not strawberry-specific
 - The recipe's flavoring slot takes a name, a ratio (g per 1g maltodextrin), a carb fraction, and a sugar fraction — see `data/flavorings.js`
 - Only the strawberry preset is `confidence: 'tested'` (measured in a real batch); everything else is `'estimated'` — don't upgrade a preset's confidence without an actual measured batch behind it
+- `data/tuning.js` is ordered deliberately — batch, bottle, taste, body — so new entries go in the group they belong to rather than on the end
 - When adding a flavoring preset, add it to `data/flavorings.js` and the existing `tests/flavorings.test.js` loop picks it up automatically — no new test needed unless the preset needs special-case behavior
 
 ## Health claims need a citation on the page

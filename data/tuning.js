@@ -1,4 +1,6 @@
-// "Dial it in" guidance — symptom-driven adjustments.
+// Troubleshooting — symptom-driven, in the order you'd hit the problems:
+// making the batch, then mixing a bottle, then taste, then how it feels on
+// the bike.
 //
 // Each entry is a thing you might notice, and the specific lever to move.
 // Kept as data (not prose in the HTML) so the guidance can be reordered,
@@ -13,6 +15,18 @@ export const TUNING = [
     tag: 'Start here',
   },
   {
+    id: 'uneven-batch',
+    symptom: 'The batch is not evenly mixed',
+    fix: 'Leave the container at least a third empty and shake it properly — end over end, not side to side, for a good minute. Top the container up only after mixing.',
+    why: 'Four powders of different densities and particle sizes do not combine by being poured into the same tub. Salt is the one that matters: it is the densest and by far the smallest fraction, so if it settles you get scoops that taste of nothing followed by one that tastes of seawater. A full container cannot tumble, which is why headroom is not wasted space — it is what does the mixing.',
+  },
+  {
+    id: 'clumping',
+    symptom: 'Clumping in the bottle or not dissolving',
+    fix: 'Add powder to water rather than water to powder, and mix in stages. Warm water dissolves it faster.',
+    why: 'Maltodextrin gels on contact when water hits a dry pile, sealing the outside and leaving dry powder trapped inside. Adding powder into moving water keeps the particles separated. This is a mixing-technique problem, not a formulation one — no ratio change will fix it.',
+  },
+  {
     id: 'too-sweet',
     symptom: 'Too sweet, or cloying late in a ride',
     fix: 'Move toward maltodextrin: drop the fructose ratio (try 0.65 → 0.5). If it is still too much, dilute — same scoops, more water.',
@@ -25,16 +39,16 @@ export const TUNING = [
     why: 'Salt suppresses bitterness and lifts perceived sweetness, which is why a mix that tastes flat is sometimes under-salted rather than under-sweetened. Try the salt first — it is the cheaper change nutritionally.',
   },
   {
+    id: 'flavor-weak',
+    symptom: 'Flavor too weak or too strong',
+    fix: 'Adjust the flavoring ratio directly — it is the one ingredient you can change freely without touching the fueling math.',
+    why: 'Flavoring is typically about 10% of the mix by weight and contributes little to carbs or sodium, so moving it is nearly free nutritionally. It is not free financially: freeze-dried fruit powder is often around a third of the cost, so heavy-handed flavoring is the most expensive habit here.',
+  },
+  {
     id: 'too-salty',
     symptom: 'Tastes salty or makes you thirstier',
     fix: 'Step the salt profile down (hot → endurance → moderate), or dilute with more water per scoop.',
     why: 'You are likely on a profile built for more sweat than you actually produce. Sodium needs vary several-fold between people; the profiles here are starting points, not prescriptions. Note that a mix tasting salty at rest often tastes correct mid-effort, when you are actually losing sodium.',
-  },
-  {
-    id: 'cramping',
-    symptom: 'Cramping, or salt crust on your face and kit',
-    fix: 'Step the salt profile up (moderate → endurance → hot). If you are already on hot and still crusting, add salt separately rather than pushing this mix further.',
-    why: 'Visible salt residue means a high sweat sodium concentration — some people lose over 1500 mg/hr. Past the hot profile, adding more salt starts to hurt the taste and does not scale well, so a dedicated electrolyte tab alongside the mix is the better tool. Cramping has causes other than sodium, so treat this as one thing to rule out, not a guaranteed fix.',
   },
   {
     id: 'gi-distress',
@@ -43,27 +57,15 @@ export const TUNING = [
     why: 'A too-concentrated drink empties from the stomach slowly and sits there sloshing; concentration is the more common culprit than the ratio. If dilution does not help, fructose is the next suspect — malabsorption is common and dose-dependent. Gut tolerance is trainable: raise carbs/hr gradually in training rather than on race day.',
   },
   {
+    id: 'cramping',
+    symptom: 'Cramping, or salt crust on your face and kit',
+    fix: 'Step the salt profile up (moderate → endurance → hot). If you are already on hot and still crusting, add salt separately rather than pushing this mix further.',
+    why: 'Visible salt residue means a high sweat sodium concentration — some people lose over 1500 mg/hr. Past the hot profile, adding more salt starts to hurt the taste and does not scale well, so a dedicated electrolyte tab alongside the mix is the better tool. Cramping has causes other than sodium, so treat this as one thing to rule out, not a guaranteed fix.',
+  },
+  {
     id: 'bonking',
     symptom: 'Running out of energy despite drinking',
     fix: 'Raise carbs/hr before touching the ratio — most people under-fuel. Work up toward 90 g/hr first, and only then consider raising the fructose ratio toward 0.8.',
     why: 'The ceiling on glucose alone is about 60 g/hr; adding fructose lifts it toward 90, and toward 120 for trained athletes, because the two use separate intestinal transporters. But most people fall short of even the lower number, so the fix is usually volume rather than formulation. The ratio only becomes the limiting factor once you are reliably fuelling above about 90 g/hr.',
-  },
-  {
-    id: 'flavor-weak',
-    symptom: 'Flavor too weak or too strong',
-    fix: 'Adjust the flavoring ratio directly — it is the one ingredient you can change freely without touching the fueling math.',
-    why: 'Flavoring is typically about 10% of the mix by weight and contributes little to carbs or sodium, so moving it is nearly free nutritionally. It is not free financially: freeze-dried fruit powder is often around a third of the cost, so heavy-handed flavoring is the most expensive habit here.',
-  },
-  {
-    id: 'uneven-batch',
-    symptom: 'The batch is not evenly mixed',
-    fix: 'Leave the container at least a third empty and shake it properly — end over end, not side to side, for a good minute. Top the container up only after mixing.',
-    why: 'Four powders of different densities and particle sizes do not combine by being poured into the same tub. Salt is the one that matters: it is the densest and by far the smallest fraction, so if it settles you get scoops that taste of nothing followed by one that tastes of seawater. A full container cannot tumble, which is why headroom is not wasted space — it is what does the mixing.',
-  },
-  {
-    id: 'clumping',
-    symptom: 'Clumping in the bottle or not dissolving',
-    fix: 'Add powder to water rather than water to powder, and mix in stages. Warm water dissolves it faster.',
-    why: 'Maltodextrin gels on contact when water hits a dry pile, sealing the outside and leaving dry powder trapped inside. Adding powder into moving water keeps the particles separated. This is a mixing-technique problem, not a formulation one — no ratio change will fix it.',
   },
 ];
