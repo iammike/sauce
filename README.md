@@ -5,13 +5,10 @@ printable nutrition label.
 
 **Live:** [sauce.iammike.org](https://sauce.iammike.org/)
 
-One page, two jobs:
-
-- **Today's ride** — how long, how hard, how hot, and it tells you grams of
-  mix to pack plus rough salt advice. Assumes the standard mix and average
-  sweat, on purpose. First on the page, since it's the weekly one.
-- **Making a batch** — the calculator below it, plus label, cost and
-  references. Occasional, precise, aware of what you actually mixed.
+One page. The batch calculator is the tool, open at the top; everything else
+is a collapsed panel below it, in the order you'd meet them: **bottle
+planner** (what to pack once you have a batch), **label**, **troubleshooting**,
+then reference — **what to buy**, **cost**, **the science**.
 
 `ride.html` is a redirect to `#planner`, kept so the old URL still works.
 

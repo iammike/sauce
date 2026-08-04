@@ -30,6 +30,10 @@
 - `src/disclosure.js` drives the height directly. The pure-CSS route (transitioning `::details-content` with `interpolate-size`) reports as supported in Chrome here but leaves the element at `block-size: 0` while `[open]` matches — panels stop opening entirely. Verify expansion still works before touching this
 - Bails out under `prefers-reduced-motion`, and `openTargetedPanel()` sets `.open` directly so anchors bypass the animation rather than fighting it
 
+## Slicing HTML by index: anchor the end search
+- `s.index('</footer>')` found the *label's* closing tag hundreds of lines before the site footer, so `s[:start] + s[end:]` ran backwards and duplicated four panels. Always pass the start offset: `s.index(close, start)`. Same trap with `</main>`, `</section>`, `</details>`
+- The duplicate-id check in `tests/dom-contract.test.js` is what caught it
+
 ## Don't use :last-of-type on panels
 - Panels are a mix of `<section>` and `<details>`, so `:last-of-type` matches the last of *each* type — it silently hit the calculator (the only remaining section) and ate its bottom padding, running the rule into the Weigh Out cells. Use `main > .panel:last-child`
 
@@ -115,7 +119,7 @@
 ## Amazon Associate links
 - `ASSOCIATES_TAG` in `data/products.js` is `sauce-calc-20`, a site-specific tracking ID under store `mikeylikesit-20`. Don't reuse it on other sites — the point is per-site attribution
 - Product `url`s still point at Amazon search results, not guessed ASINs. Replace with the exact product page once picked, keep the `tag` param, and drop that entry's `placeholder: true`
-- The Operating Agreement disclosure sits in the What to buy panel, beside the links it describes — clearer than a footer, and it keeps it off `ride.html`, which has no affiliate links to disclose. Any page that gains affiliate links needs it too
+- The Operating Agreement disclosure sits **inside** the What to buy panel, beside the links. It briefly lived in the footer, where it read "these are affiliate links" with no links anywhere near it — clearer than a footer, and it keeps it off `ride.html`, which has no affiliate links to disclose. Any page that gains affiliate links needs it too
 
 ## GitHub Issues
 - When creating an issue, add a size label (`size:small` < 1hr, `size:medium` 1-4hr, `size:large` 4+hr) and a priority label (`priority:low/medium/high/critical`)
