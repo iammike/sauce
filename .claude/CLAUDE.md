@@ -35,7 +35,7 @@
 ## Section responsibilities
 - **Calculator** owns every input that changes the batch — including planned carb intake and sweat conditions, because the salt solve reads them. **Per hour** is a pure readout with no inputs at all; if you find yourself adding a control there, it belongs above
 - A collapsible panel's `panel__blurb` stays visible when it's open, so the body must not restate it. Three of them opened with a paraphrase of their own summary, which reads like a stutter
-- Per hour is collapsed reference: the bottle planner answers "how much today" directly, and the only thing this adds is what *your* batch delivers rather than the standard mix
+- There is no Per hour section any more — the bottle planner answers "how much today" directly, and a tier table on the batch page only restated it. `CARB_INTAKE_TIERS` still drives `src/ride.js`
 - Label, Cost, What to buy and References are collapsed `<details>` — they're read once, and the page should land on the tool. They stay in the DOM so anchors keep working, and `openTargetedPanel()` opens a section when something links into it
 - `tests/dom-contract.test.js` asserts every id `src/app.js` reaches for exists in `index.html`. Moving markup between sections once deleted an element app.js still wrote to, which threw mid-render and left every later panel blank with no visible error
 
@@ -47,7 +47,7 @@
 - Links inside a `<summary>` must be allowed through in `src/disclosure.js` — `preventDefault()` on the summary click otherwise swallows them and just toggles the panel
 - A note cell and the field it describes live in a `.field-pair` so an auto-fit grid can't split them across rows. Without that the arrow could point at nothing even on a wide screen; because they're paired, the direction is knowable and flips to ↓ when they stack
 - The fructose ratio is preceded by a `.field--note` cell labelled ADVANCED. It's the one input that meaningfully alters a tested formula, so it's captioned rather than bare — but it's a normal cell in the grid, not a box. A bordered disclosure interrupted the row rhythm
-- Scoop size affects no calculation — it's purely a grams-to-scoops display conversion, so it lives in the panel that shows that conversion, not among the batch inputs. The Supplement Facts panel stays pure grams
+- Scoop size affects no calculation — it's purely a grams-to-scoops conversion, and its only consumer is the label's directions line, so it lives in the Label panel. The Supplement Facts panel stays pure grams
 - **A serving is one hour of fueling, not one scoop.** Both the hero Supplement Facts panel and the printed label size their serving from the per-hour carb target, so "servings per container" reads as hours of fueling — the number you actually want when packing for a ride. A commercial product can define a scoop because it ships you one; a homemade jar can't. `recipe.perScoop` still exists but nothing in the UI uses it
 
 ## Parked features — don't re-wire without a reason

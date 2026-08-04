@@ -18,9 +18,6 @@ just strawberry — see `data/flavorings.js`), and the calculator finds the
 limiting ingredient, scales the rest of the batch, and fills out a live
 Supplement Facts panel. From there:
 
-- **Per hour** — the established duration-based carb tiers (30/60/90/120 g/hr),
-  showing how much mix each takes. Tiers your formulation can't actually
-  absorb are greyed out, since glucose alone saturates near 60 g/hr.
 - **Troubleshooting** — symptom-driven guidance (`data/tuning.js`), ordered by
   when you'd hit each problem: making the batch, mixing a bottle, taste, then
   how it feels on the bike.

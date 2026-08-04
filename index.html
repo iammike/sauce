@@ -141,30 +141,6 @@
       <div class="card-grid" id="recipe-grid" aria-live="polite"></div>
     </section>
 
-    <details class="panel panel--collapsible" id="hourly">
-      <summary>
-        <span class="panel__title">What this batch delivers per hour</span>
-        <span class="panel__blurb">Reference. For a specific ride, the <a href="ride.html">bottle planner</a> answers it directly.</span>
-      </summary>
-      <div class="panel__body">
-        <p>How many carbs you need per hour depends mostly on how long you're out. These bands follow the <a href="#ref-morton-2026">current guidance</a> (Morton et al., 2026), which raised the old 90 g/hr ceiling to 90–120 for trained athletes. This shows what <em>your</em> batch delivers at each one — the bottle planner assumes the standard mix instead.</p>
-
-        <div class="input-grid" style="max-width:22rem;">
-          <div class="field">
-            <label for="in-scoop">Your scoop size (g) <span class="field-hint">optional</span></label>
-            <input type="number" id="in-scoop" min="1" step="1" value="46" inputmode="decimal">
-            <span class="field-hint">Only used to convert grams into scoops. <a href="#tune-scoop-calibration">How to measure</a></span>
-          </div>
-        </div>
-
-        <p class="callout" id="hourly-warning" role="status" hidden></p>
-
-        <div class="card-grid" id="hourly-grid" aria-live="polite"></div>
-
-        <p class="field-hint hourly-note">Bands assume moderate-to-hard endurance effort — sit toward the low end for easy riding.</p>
-      </div>
-    </details>
-
     <details class="panel panel--collapsible" id="tuning">
       <summary>
         <span class="panel__title">Troubleshooting</span>
@@ -200,6 +176,11 @@
         <div class="field">
           <label for="in-label-date">Batch date</label>
           <input type="date" id="in-label-date">
+        </div>
+        <div class="field">
+          <label for="in-scoop">Your scoop size (g) <span class="field-hint">optional</span></label>
+          <input type="number" id="in-scoop" min="1" step="1" value="46" inputmode="decimal">
+          <span class="field-hint">Adds a scoop count to the directions. <a href="#tune-scoop-calibration">How to measure</a></span>
         </div>
         <div class="field">
           <label for="in-label-note">Note <span class="field-hint">optional</span></label>

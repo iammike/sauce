@@ -1,7 +1,6 @@
 import { computeRecipe } from './calculator.js';
-import { planForCarbTarget, CARB_INTAKE_TIERS, absorptionCeiling, tierFor, ratioStatus,
-  GLUCOSE_ONLY_CEILING, DUAL_TRANSPORT_TYPICAL, DUAL_TRANSPORT_TRAINED,
-  FRUCTOSE_RATIO_OPTIMAL, DEFAULT_TARGET_CARBS, sodiumStatus } from './hourly.js';
+import { planForCarbTarget, ratioStatus, FRUCTOSE_RATIO_OPTIMAL,
+  DEFAULT_TARGET_CARBS, sodiumStatus } from './hourly.js';
 import { formatGrams, formatMg, formatCalories, formatCount } from './format.js';
 import { FLAVORINGS, findFlavoring } from '../data/flavorings.js';
 import { TUNING } from '../data/tuning.js';
@@ -184,65 +183,6 @@ function statusPillClass(status) {
   return `status-pill status-pill--${status}`;
 }
 
-// Grams of mix per hour is the headline number — it's the same for everyone.
-// The scoop equivalent is shown underneath as a convenience, clearly tied to
-// the scoop size the user measured rather than an assumed one.
-function renderHourlyGrid(recipe) {
-  const grid = $('hourly-grid');
-  const scoopGrams = Number($('in-scoop').value) || 0;
-  const targetCarbs = Number($('in-target-carbs').value) || DEFAULT_TARGET_CARBS;
-
-  const carbRatio = Number($('in-carb-ratio').value) || 0;
-  const ceiling = absorptionCeiling(carbRatio);
-  const activeTier = tierFor(targetCarbs);
-
-  // Only cite per-tier when the tiers actually come from different papers.
-  // They don't today, and repeating one link four times is just noise — the
-  // section intro already links it.
-  const showTierSources =
-    new Set(CARB_INTAKE_TIERS.map((t) => t.sourceId)).size > 1;
-
-  grid.innerHTML = CARB_INTAKE_TIERS.map((tier) => {
-    const plan = planForCarbTarget(recipe.perGram, scoopGrams, tier.gramsPerHour);
-    const isActive = tier === activeTier;
-    // Flag tiers this formulation can't actually deliver — with glucose only,
-    // drinking more doesn't get you past the transporter limit.
-    const unreachable = tier.gramsPerHour > ceiling;
-
-    const scoopNote = plan.scoopsPerHour !== null
-      ? `≈ ${formatCount(plan.scoopsPerHour, 1)} of your ${formatCount(scoopGrams, 0)} g scoops`
-      : 'Enter your scoop size for a scoop count';
-
-    return `
-      <div class="card${isActive ? ' card--active' : ''}${unreachable ? ' card--muted' : ''}">
-        <p class="card__eyebrow">${tier.duration}${isActive ? ' · your target' : ''}</p>
-        <p class="card__value data">${tier.range[0]}–${tier.range[1]}<span class="card__unit"> g carbs/hr</span></p>
-        <p class="field-hint"><strong>${formatGrams(plan.mixGramsPerHour)} of mix</strong> — ${scoopNote}</p>
-        <p class="field-hint">${formatMg(plan.sodiumMg)} sodium/hr <span class="${statusPillClass(plan.sodiumStatus)}">${plan.sodiumStatus}</span> · ${formatCalories(plan.calories)} cal/hr</p>
-        <p class="field-hint">${!unreachable ? tier.note
-          : carbRatio > 0.05
-            // Has fructose, but this tier is past what most people absorb.
-            ? `<span class="warn">Above the ~${DUAL_TRANSPORT_TYPICAL} g/hr most people manage — needs gut training.</span>`
-            // No fructose at all: a hard transporter limit, not a training one.
-            : `<span class="warn">Not reachable without fructose — glucose alone tops out near ${GLUCOSE_ONLY_CEILING} g/hr.</span>`}</p>
-        ${showTierSources && tier.sourceId
-          ? `<p class="card__cite"><a href="#ref-${tier.sourceId}">${findResearch(tier.sourceId)?.role ?? 'Source'}</a></p>`
-          : ''}
-      </div>
-    `;
-  }).join('');
-
-  const warning = $('hourly-warning');
-  if (targetCarbs > ceiling) {
-    warning.hidden = false;
-    warning.textContent = carbRatio > 0.05
-      ? `You're targeting ${targetCarbs} g/hr. Above ${DUAL_TRANSPORT_TRAINED} g/hr is experimental territory — people do fuel that high, but the efficacy evidence doesn't back it yet.`
-      : `You're targeting ${targetCarbs} g/hr with no fructose in the mix. Glucose alone saturates its transporter near ${GLUCOSE_ONLY_CEILING} g/hr, so drinking more won't deliver more — raise the fructose ratio to go higher.`;
-  } else {
-    warning.hidden = true;
-  }
-}
-
 // Express the fructose ratio the way the research talks about it, as
 // glucose:fructose — maltodextrin digests to glucose, so 0.5 is the classic
 // 2:1 and 0.8 is the ~1.25:1 used by modern high-carb products.
@@ -286,7 +226,6 @@ function recalculate() {
   renderSaltNote();
   renderFactsPanel(recipe, serving, targetCarbs);
   renderRecipeGrid(recipe);
-  renderHourlyGrid(recipe);
   renderLabel(recipe, serving, targetCarbs);
   renderCost(recipe, findFlavoring($('in-flavor-preset').value) ?? FLAVORINGS[0], targetCarbs);
 }
