@@ -25,7 +25,7 @@ export const PRODUCTS = [
   {
     id: 'maltodextrin',
     name: 'Nutricost Maltodextrin Powder, 4 lb',
-    note: 'Primary carb — complex, low sweetness. This is the one the recipe costs are based on.',
+    note: 'Primary carb. Complex, barely sweet. The recipe costs are based on this one.',
     // Canonical /dp/ form with our tag; the referrer cruft from a browser
     // session (ref_=, th=) is deliberately stripped.
     url: `https://www.amazon.com/dp/B079V9KD8T?tag=${ASSOCIATES_TAG}`,
@@ -39,21 +39,21 @@ export const PRODUCTS = [
   {
     id: 'flavoring',
     name: 'Gya Tea Co Organic Freeze-Dried Strawberry Powder, 1.1 lb',
-    note: 'The tested default, and the biggest cost lever in the mix — swap it or drop it to cut the price per hour.',
+    note: 'The tested default, and the biggest cost lever — swap or drop it to cut the price per hour.',
     url: `https://www.amazon.com/dp/B0DZX5QTJ4?tag=${ASSOCIATES_TAG}`,
   },
   {
     id: 'scale',
     kind: 'equipment',
     name: 'Escali Primo Digital Food Scale',
-    note: 'The one piece of equipment that actually matters. Everything here is measured by weight, and a batch is only as accurate as the scale you mix it on. The tare function saves a lot of arithmetic.',
+    note: 'Everything here is measured by weight, so the batch is only as accurate as the scale. Tare function saves arithmetic.',
     url: `https://www.amazon.com/dp/B0007GAWSC?tag=${ASSOCIATES_TAG}`,
   },
   {
     id: 'scoop',
     kind: 'equipment',
     name: 'Measuring spoon set, 3 g to 30 g',
-    note: 'Optional, and worth reading the fine print on: the gram markings are nominal, calibrated for a denser powder than this one. Maltodextrin is light, so a spoon marked 30 g holds noticeably less of the mix. Weigh one once, note what it actually gives you, and the set becomes a fast way to portion without the scale.',
+    note: 'Optional. The gram markings are calibrated for a denser powder — maltodextrin is light, so a spoon marked 30 g holds less than that. Weigh one once and use your own number.',
     url: `https://www.amazon.com/dp/B082ZMPS1V?tag=${ASSOCIATES_TAG}`,
   },
   {

@@ -32,7 +32,7 @@
       <div>
         <p class="kicker">Homemade endurance hydration mix</p>
         <h1 class="headline">Fuel you <em>mix yourself</em>.</h1>
-        <p class="dek">Maltodextrin and fructose in a tested 2:1-ish ratio for dual-transporter carb absorption, plus sodium citrate and any flavoring you like. Enter what's in your pantry — the panel on the right fills itself out.</p>
+        <p class="dek">Maltodextrin and fructose in a roughly 1.5:1 ratio, which uses two intestinal transporters instead of one, plus sodium citrate and a flavouring. Enter what you have on hand and the panel fills in.</p>
         <p class="dek">Already have a batch? The <a href="#planner" class="dek__link">bottle planner</a> works out what to pack for a given ride.</p>
       </div>
 
@@ -77,7 +77,7 @@
   <main>
     <section class="panel panel--calculator" id="calculator">
       <h2 class="panel__title">Making a batch</h2>
-      <p>Enter what you have on hand (yellow cells are inputs, same convention as the original spreadsheet). The calculator finds the limiting ingredient and scales the rest of the batch to match.</p>
+      <p>Enter what you have on hand. The calculator finds the limiting ingredient and scales the rest of the batch to it.</p>
 
       <form id="calc-form" novalidate>
         <div class="input-grid">
@@ -146,7 +146,7 @@
         <span class="panel__blurb">A printable 3&Prime;&times;4&Prime; jar label built from this batch.</span>
       </summary>
       <div class="panel__body">
-          <p>A serving is one hour of fueling at your planned intake — more useful on a homemade jar than a scoop count, since scoops vary. Ingredients are listed by descending weight, the way a food label should be.</p>
+          <p>A serving is one hour of fueling at your serving basis. Ingredients are listed by descending weight.</p>
 
       <div class="input-grid" style="max-width:40rem;">
         <div class="field">
@@ -239,7 +239,7 @@
         <span class="panel__blurb">Already have a batch? What to pack for a specific ride.</span>
       </summary>
       <div class="panel__body">
-      <p>Three questions, one answer. Assumes the standard mix rather than reading your exact formulation, which is close enough for filling bottles.</p>
+      <p>Assumes the standard mix rather than your exact formulation.</p>
 
       <form id="ride-form" novalidate>
         <div class="input-grid" style="max-width:58rem;">
@@ -271,7 +271,7 @@
     <details class="panel panel--collapsible" id="buy">
       <summary>
         <span class="panel__title">What to buy</span>
-        <span class="panel__blurb">The exact ingredients these numbers are priced from.</span>
+        <span class="panel__blurb">The ingredients and kit these numbers are priced from.</span>
       </summary>
       <div class="panel__body">
           <p>Any food-grade equivalent works — the calculator doesn't care what you buy.</p>
@@ -288,7 +288,7 @@
         <span class="panel__blurb">How this compares to Gatorade, Maurten and Gatorade Endurance.</span>
       </summary>
       <div class="panel__body">
-          <p>Priced per gram of carbohydrate, since that's what you're actually buying — comparing per gram of powder would just flatter whichever product is most diluted. Cost alone is misleading though, so each one lists what the price doesn't tell you.</p>
+          <p>Priced per gram of carbohydrate — comparing per gram of powder would favour whichever product is most diluted. Each one also lists what the price doesn't cover.</p>
 
           <p class="field-hint" id="cost-basis"></p>
 
@@ -303,10 +303,10 @@
     <details class="panel panel--collapsible" id="tuning">
       <summary>
         <span class="panel__title">Troubleshooting</span>
-        <span class="panel__blurb">Ten things that go wrong, and what to change — from a batch that won't mix to a stomach that won't settle.</span>
+        <span class="panel__blurb">Common problems and what to change.</span>
       </summary>
       <div class="panel__body">
-        <p>Roughly in the order you'd meet them: making the batch, mixing a bottle, getting the taste right, then how it actually feels once you're riding.</p>
+        <p>Ordered by when you'd hit them: mixing the batch, then the bottle, then taste, then how it feels riding.</p>
         <div class="tuning-list" id="tuning-list"></div>
       </div>
     </details>

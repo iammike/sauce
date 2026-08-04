@@ -176,7 +176,7 @@ function renderRecipeGrid(recipe) {
 
   const limitLabel = LIMITING_LABELS[recipe.limiting] ?? recipe.limiting;
   $('calc-limiting').textContent = recipe.limiting === 'cap'
-    ? `Sized to fill your ${formatGrams(recipe.actualBatch)} container — you have more of every ingredient than this batch needs, so there's another batch in the bag.`
+    ? `Sized to your ${formatGrams(recipe.actualBatch)} container. You have enough of every ingredient for more than one batch.`
     : `${limitLabel} is the limiting ingredient — everything else is scaled to match it.`;
 }
 
@@ -311,8 +311,8 @@ function renderLabel(recipe, serving, targetCarbs) {
   $('lb-sugars').textContent = formatGrams(serving.perServing.sugarsG);
   $('lb-sodium').textContent = formatMg(serving.perServing.sodiumMg);
   $('lb-directions').textContent = serving.scoops !== null
-    ? `One serving is one hour of fueling at ${targetCarbs} g carbs/hr — about ${formatCount(serving.scoops, 1)} scoops. Add to water, not water to powder.`
-    : `One serving is one hour of fueling at ${targetCarbs} g carbs/hr. Add to water, not water to powder.`;
+    ? `One serving = one hour at ${targetCarbs} g carbs/hr, about ${formatCount(serving.scoops, 1)} scoops. Add powder to water.`
+    : `One serving = one hour at ${targetCarbs} g carbs/hr. Add powder to water.`;
   $('lb-ingredients').textContent = ingredientList(recipe);
 
   const note = $('in-label-note').value.trim();

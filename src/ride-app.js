@@ -43,25 +43,25 @@ function render() {
         <p class="ride-answer__value data">Water</p>
         <p class="ride-answer__label">is fine for this one</p>
       </div>
-      <p class="ride-answer__detail">Under an hour at an easy pace, there's little to gain from fuelling. Take a bottle of water and don't think about it.</p>`;
+      <p class="ride-answer__detail">Under an hour at an easy pace there is little to gain from fuelling.</p>`;
     $('ride-caveat').textContent = '';
     return;
   }
 
   const salt = plan.extraSodiumPerHour > 0
-    ? `<p class="ride-answer__detail"><strong>Add salt.</strong> These conditions call for roughly ${formatMg(plan.extraSodiumPerHour)}/hr more sodium than the mix carries — about ${capsulePhrase(plan.capsulesPerHour)} an hour, or a pinch of salt in the bottle.</p>`
-    : `<p class="ride-answer__detail"><strong>No extra salt needed.</strong> The mix carries enough sodium for these conditions on its own.</p>`;
+    ? `<p class="ride-answer__detail"><strong>Add salt.</strong> About ${formatMg(plan.extraSodiumPerHour)}/hr more than the mix carries — ${capsulePhrase(plan.capsulesPerHour)} an hour, or a pinch in the bottle.</p>`
+    : `<p class="ride-answer__detail"><strong>No extra salt needed</strong> for these conditions.</p>`;
 
-  // Concentration is the usual reason a drink won't go down, so it gets said
-  // out loud rather than left as an exercise in division.
-  const bottles = `<p class="ride-answer__detail"><strong>Per bottle:</strong> about ${formatGrams(plan.gramsPerBottle)} in each ${plan.bottleMl} ml bottle — roughly ${formatCount(plan.bottlesNeeded, 1)} bottles across the ride, assuming you drink enough to keep up with sweat.</p>`;
+  // Concentration is the usual reason a drink won't go down, so it's stated
+  // rather than left to the reader to work out.
+  const bottles = `<p class="ride-answer__detail"><strong>Per bottle:</strong> ${formatGrams(plan.gramsPerBottle)} in each ${plan.bottleMl} ml bottle, about ${formatCount(plan.bottlesNeeded, 1)} bottles over the ride.</p>`;
 
   const strength = plan.concentration.id === 'dilute' || plan.concentration.id === 'typical'
     ? `<p class="ride-answer__detail"><strong>${plan.concentration.label}</strong> at ${plan.concentrationPercent.toFixed(0)}%. ${plan.concentration.note}</p>`
     : `<p class="ride-answer__detail"><span class="warn">${plan.concentration.label}</span> at ${plan.concentrationPercent.toFixed(0)}%. ${plan.concentration.note}</p>`;
 
   const gut = plan.needsTrainedGut
-    ? `<p class="ride-answer__detail"><span class="warn">That's a high carb rate.</span> Fine if you've practised it, but don't try ${plan.carbsPerHour} g/hr for the first time on a ride that matters.</p>`
+    ? `<p class="ride-answer__detail"><span class="warn">${plan.carbsPerHour} g/hr is a high rate.</span> Practise it in training before relying on it.</p>`
     : '';
 
   answer.innerHTML = `
@@ -75,7 +75,7 @@ function render() {
     ${salt}
     ${gut}`;
 
-  $('ride-caveat').textContent = 'Rough numbers, on purpose, and they only hold if you actually finish what you carry — an unfinished bottle is the most common reason a fuelling plan quietly does not work. Assumes the standard mix and average sweat.';
+  $('ride-caveat').textContent = 'Estimates, and they assume you finish what you carry. Based on the standard mix and average sweat.';
 }
 
 export function initRidePlanner() {

@@ -57,8 +57,8 @@ export const COMMERCIAL_PRODUCTS = [
     mlPerServing: null,
     basis: '$38.99 / 32 oz (907 g); 24 g serving = 22 g carbs, 300 mg sodium',
     confidence: 'actual',
-    note: 'Purpose-built endurance fuel, and the closest commercial equivalent to this mix. Multiple carbohydrate sources, and the best electrolyte profile here by some distance — the only option on this page that covers a serious sweat rate unaided. Figures come from an actual label and an actual purchase price, so this is the most trustworthy comparison of the four.',
-    limitation: 'Roughly two and a half times what the same carbohydrate costs to mix yourself, and the carb-to-sodium ratio is fixed. The sodium is generous, which suits a heavy sweater in the heat — but on a cool day at an easy pace you take that same sodium load regardless, because the only way to take less of it is to take fewer carbs.',
+    note: 'Purpose-built endurance fuel and the closest commercial equivalent to this mix. Multiple carb sources, and the only option here that covers a serious sweat rate without added salt. Figures are from the label and a real purchase price.',
+    limitation: 'About 2.5x the cost of mixing it yourself, and the carb-to-sodium ratio is fixed — on a cool day you take the same sodium load regardless, since the only way to take less is to take fewer carbs.',
   },
   {
     id: 'maurten-320',
@@ -70,8 +70,8 @@ export const COMMERCIAL_PRODUCTS = [
     mlPerServing: 500,
     basis: '~$3.42 / sachet; 80 g carbs per sachet in 500 ml',
     confidence: 'estimated',
-    note: 'The premium benchmark, and genuinely good at the thing it is designed for: getting a lot of carbohydrate down in very little fluid. The hydrogel encapsulation is the differentiator — 80 g of carbohydrate in 500 ml, which is roughly a quarter of the fluid regular Gatorade needs for the same fuel. If your constraint is stomach volume or how much you can carry, that matters.',
-    limitation: 'Sodium is well under half the replacement target at any realistic carb intake, so most people take a salt tab alongside it — the real cost is higher than the sticker, and it is two products to manage instead of one. The hydrogel advantage also only earns its price at high intakes; at 60 g/hr you are paying for headroom you are not using.',
+    note: 'Very high carb density: 80 g in 500 ml, about a quarter the fluid regular Gatorade needs for the same carbs. Worth it if your constraint is stomach volume or carrying capacity.',
+    limitation: 'Sodium is under half the replacement target at any realistic intake, so most people add a salt tab — two products, and a higher real cost than the sticker. The density advantage only earns its price at high intakes.',
   },
   {
     id: 'gatorade-regular',
@@ -85,14 +85,14 @@ export const COMMERCIAL_PRODUCTS = [
     mlPerServing: 500,
     basis: 'Approximate retail pricing; label serving = 21 g carbs, 150 mg sodium in 500 ml',
     confidence: 'estimated',
-    note: 'Cheapest per gram of carbohydrate by a wide margin, and fine at what it is designed for: hydration on shorter or hotter sessions. Reasonable sodium, available everywhere. It only falls down when you ask it to be fuel.',
-    limitation: 'It is a hydration drink, not a fuel, and the carbs are the reason. Sucrose and dextrose are small molecules, so each one adds an osmotic particle: a 9% glucose solution runs near 1000 mOsm/kg where 9% maltodextrin is roughly isotonic at ~290. That caps how concentrated it can usefully get. Mixed as directed, hitting a real endurance carb target means drinking close to two litres an hour — more than most people can stomach while working hard, and more than anyone wants to carry. Mixing it stronger to avoid that just makes it hypertonic, so it sits in your stomach instead of emptying, and you trade a volume problem for a nausea one. There is no dilution that makes it work.',
+    note: 'Cheapest per gram of carbohydrate by a wide margin, and fine at what it is for: hydration on shorter sessions. Reasonable sodium, available everywhere.',
+    limitation: 'A hydration drink, not a fuel, because of the carb sources. Sucrose and dextrose are small molecules, so each adds an osmotic particle: 9% glucose runs near 1000 mOsm/kg where 9% maltodextrin is roughly isotonic at ~290. Mixed as directed, an endurance carb target means close to two litres an hour. Mixing it stronger makes it hypertonic, so it empties slowly — a volume problem traded for a nausea one.',
   },
 ];
 
 // What the homemade mix gives up. Included so the comparison isn't one-sided:
 // every other product here has its drawback spelled out.
-export const HOMEMADE_LIMITATION = 'You weigh it yourself, and nothing checks your work — get the sodium wrong and there is no label to catch it. Ingredients come in kilogram bags, so the first batch costs far more up front than a serving of anything else here, and you are committed to four of them before knowing whether you like the result. Make a batch and ride on it well before it matters.';
+export const HOMEMADE_LIMITATION = 'Nothing checks your work — get the sodium wrong and there is no label to catch it. Ingredients come in kilogram bags, so the up-front cost is high and you commit to four of them before knowing whether you like it. Ride on a batch before it matters.';
 
 // Why the mix is mostly maltodextrin rather than sugar. Osmolality depends on
 // particle count, not mass: maltodextrin is a polymer, so each molecule

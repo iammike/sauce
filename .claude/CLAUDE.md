@@ -30,6 +30,11 @@
 - `src/disclosure.js` drives the height directly. The pure-CSS route (transitioning `::details-content` with `interpolate-size`) reports as supported in Chrome here but leaves the element at `block-size: 0` while `[open]` matches — panels stop opening entirely. Verify expansion still works before touching this
 - Bails out under `prefers-reduced-motion`, and `openTargetedPanel()` sets `.open` directly so anchors bypass the animation rather than fighting it
 
+## Write it flat
+- State the fact and stop. No "three questions, one answer", no "from a batch that won't mix to a stomach that won't settle", no explaining why a sentence is about to be useful
+- Counts in copy go stale — "three questions" survived a fourth input being added. Prefer no count to a wrong one
+- Trim, don't gut: the substance in the cost catches and troubleshooting entries is the point; it's the framing around it that goes
+
 ## Prose gets a measure, structure doesn't
 - `--measure` (40rem, ~78 characters) holds panel intros and troubleshooting bodies. Full-width prose on this page runs ~134 characters, well past the readable 45-75
 - Bars, grids and controls do span full width — the constraint is on text, not containers
