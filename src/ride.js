@@ -30,6 +30,29 @@ export const WEATHER = [
 const AVERAGE_SWEAT_SODIUM_MG_PER_L = 950;
 const REPLACEMENT_FRACTION = 0.65;
 
+// Common cycling bottle sizes. Volume matters less for dividing the powder up
+// — that's arithmetic — than for concentration, which is the usual culprit
+// behind a drink that won't go down.
+export const BOTTLE_SIZES = [
+  { id: '500', ml: 500, label: '500 ml (17 oz)' },
+  { id: '620', ml: 620, label: '620 ml (21 oz)' },
+  { id: '710', ml: 710, label: '710 ml (24 oz)' },
+  { id: '750', ml: 750, label: '750 ml (26 oz)' },
+  { id: '950', ml: 950, label: '950 ml (32 oz)' },
+];
+
+// Carbohydrate as a percentage of the drink by weight.
+//   ~6-8%   a conventional sports drink, easy to absorb
+//   ~9-13%  where a purpose-made fuel mix normally sits
+//   13-20%  concentrated; workable with a trained gut, better with water alongside
+//   >20%    empties slowly enough to cause trouble for most people
+export const CONCENTRATION_BANDS = [
+  { id: 'dilute', max: 9, label: 'Dilute', note: 'Gentle on the stomach — closer to a sports drink than a fuel.' },
+  { id: 'typical', max: 13, label: 'Typical', note: 'About where a purpose-made endurance mix sits.' },
+  { id: 'concentrated', max: 20, label: 'Concentrated', note: 'Strong. Fine if you have practised it, but carry plain water alongside.' },
+  { id: 'very-concentrated', max: Infinity, label: 'Very concentrated', note: 'Likely to sit in your stomach. Split the powder across more fluid, or carry a separate water bottle and drink both.' },
+];
+
 // A typical electrolyte capsule. Products vary a lot; this is only used to
 // turn a milligram figure into something countable.
 export const SALT_CAPSULE_MG = 300;
@@ -53,6 +76,14 @@ export function findIntensity(id) {
 
 export function findWeather(id) {
   return WEATHER.find((w) => w.id === id);
+}
+
+export function findBottle(id) {
+  return BOTTLE_SIZES.find((b) => b.id === String(id));
+}
+
+export function concentrationBand(percent) {
+  return CONCENTRATION_BANDS.find((b) => percent < b.max) ?? CONCENTRATION_BANDS.at(-1);
 }
 
 /**
@@ -86,7 +117,7 @@ export function sodiumNeedFor(intensityId, weatherId) {
 }
 
 /** The whole plan for one ride. */
-export function planRide({ durationHours, intensityId, weatherId }) {
+export function planRide({ durationHours, intensityId, weatherId, bottleMl = 750 }) {
   const perGram = baseRecipeProfile();
   const { tier, gramsPerHour } = carbTargetFor(durationHours, intensityId);
 
@@ -119,5 +150,33 @@ export function planRide({ durationHours, intensityId, weatherId }) {
     // A short easy ride genuinely needs nothing. Saying so is more useful
     // than printing a recipe for 0 g of powder.
     nothingNeeded: gramsPerHour === 0,
+    ...bottlePlan({ intensityId, weatherId, durationHours, totalMixGrams, bottleMl }),
+  };
+}
+
+/**
+ * How the powder lands in bottles.
+ *
+ * Fluid volume comes from the same sweat estimate used for sodium — how much
+ * you ought to be drinking — rather than another question. That makes the
+ * concentration figure meaningful without a fourth input.
+ */
+function bottlePlan({ intensityId, weatherId, durationHours, totalMixGrams, bottleMl }) {
+  const intensity = findIntensity(intensityId) ?? INTENSITIES[1];
+  const weather = findWeather(weatherId) ?? WEATHER[1];
+
+  const fluidMl = weather.litresPerHour * intensity.sweatFactor * durationHours * 1000;
+  if (!(fluidMl > 0) || !(bottleMl > 0)) return { concentrationPercent: 0 };
+
+  const concentrationPercent = (totalMixGrams / fluidMl) * 100;
+
+  return {
+    fluidMl,
+    bottleMl,
+    bottlesNeeded: fluidMl / bottleMl,
+    // Exact rather than derived from a rounded bottle count.
+    gramsPerBottle: (totalMixGrams / fluidMl) * bottleMl,
+    concentrationPercent,
+    concentration: concentrationBand(concentrationPercent),
   };
 }

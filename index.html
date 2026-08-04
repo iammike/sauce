@@ -106,10 +106,9 @@
           <div class="field field--select">
             <label for="in-salt-profile">Salt level</label>
             <select id="in-salt-profile">
-              <option value="solved" selected>Match my conditions</option>
-              <option value="moderate">Fixed — moderate</option>
-              <option value="endurance">Fixed — endurance</option>
-              <option value="hot">Fixed — hot</option>
+              <option value="moderate">Moderate</option>
+              <option value="endurance" selected>Endurance</option>
+              <option value="hot">Hot / heavy sweat</option>
             </select>
             <span class="field-hint" id="salt-profile-note"></span>
           </div>
@@ -117,16 +116,6 @@
             <label for="in-target-carbs">Planned intake (g carbs/hr)</label>
             <input type="number" id="in-target-carbs" min="10" max="200" step="5" value="75">
             <span class="field-hint">Sets the serving size and salt level.</span>
-          </div>
-          <div class="field field--select">
-            <label for="in-sweat-rate">Conditions</label>
-            <select id="in-sweat-rate"></select>
-            <span class="field-hint" id="sweat-rate-hint"></span>
-          </div>
-          <div class="field field--select">
-            <label for="in-sweat-sodium">How salty is your sweat?</label>
-            <select id="in-sweat-sodium"></select>
-            <span class="field-hint" id="sweat-sodium-cue"></span>
           </div>
           <div class="field">
             <label for="in-scoop">Your scoop size (g)</label>
@@ -155,9 +144,6 @@
       <p class="panel__eyebrow">02 — Per hour</p>
       <h2 class="panel__title">How much, how often?</h2>
       <p>How many carbs you need per hour depends mostly on how long you're out. These tiers follow the <a href="#ref-morton-2026">current guidance</a> (Morton et al., 2026), which raised the old 90 g/hr ceiling to 90–120 for trained athletes. Set your planned intake in the calculator above; this shows what the batch delivers at each band.</p>
-
-      <p class="field-hint" id="sodium-estimate"></p>
-      <p class="callout" id="sodium-solve-detail" hidden></p>
 
       <p class="callout" id="hourly-warning" role="status" hidden></p>
 

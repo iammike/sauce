@@ -16,10 +16,13 @@ export const DEFAULT_FLAVOR_RATIO = 0.2; // g flavoring per 1g maltodextrin
 export const DEFAULT_FLAVOR_CARB_FRACTION = 1; // fraction of flavoring mass that's carbohydrate
 export const DEFAULT_FLAVOR_SUGAR_FRACTION = 0.6; // fraction of flavoring mass that's sugar (rest is fiber/acid/other)
 
+// Notes describe what the level is for rather than a milligrams-per-scoop
+// figure — scoops are no longer the unit anywhere, and the actual sodium
+// depends on how much you drink per hour, which the batch can't know.
 export const SALT_PROFILES = {
-  moderate: { ratio: 0.046, label: 'Moderate', note: '~147 mg Na/scoop' },
-  endurance: { ratio: 0.065, label: 'Endurance', note: '~206 mg Na/scoop' },
-  hot: { ratio: 0.085, label: 'Hot / heavy sweat', note: '~264 mg Na/scoop' },
+  moderate: { ratio: 0.046, label: 'Moderate', note: 'Least salty. Cool weather, shorter efforts.' },
+  endurance: { ratio: 0.065, label: 'Endurance', note: 'The tested default, and a sensible general-purpose batch.' },
+  hot: { ratio: 0.085, label: 'Hot / heavy sweat', note: 'As salty as the mix takes before you taste it.' },
 };
 
 // Sodium citrate dihydrate. (Table salt/NaCl is ~393 mg Na/g — do not use that

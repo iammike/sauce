@@ -58,7 +58,13 @@
 - Artwork is read with `FileReader` into a data URL and never uploaded — there is no server to upload to. Keep it that way
 - The `accept` attribute is a hint, not a control: MIME type and size are re-checked in `loadArtwork()`. Don't add SVG to the allowlist (it can carry script)
 
-## Sodium drives the formulation, not a preset
+## Conditions are day-of, not batch
+- The batch calculator must NOT ask about weather, sweat or effort. A jar is mixed in advance and can't know Saturday's conditions; salt level there is a general-purpose choice from three presets
+- Everything conditional lives on `ride.html`, which reads conditions and advises adding salt on the day. `src/sodium.js` (sweat profiling, salt solving) is parked for this reason
+- The bottle planner asks bottle size for **concentration**, not division — concentration is the usual cause of a drink that won't go down, and fluid volume is derived from the existing sweat estimate rather than a fourth question
+- Say that the numbers assume you finish what you carry. That's the most common silent failure of a fuelling plan
+
+## Sodium drives the formulation, not a preset (parked)
 - `src/sodium.js` estimates a sodium target from sweat rate + sweat sodium, then solves the salt ratio that delivers it at the user's carb intake. Closed form — batch size cancels; see the derivation comment on `solveSaltRatio`
 - The reason this exists: carb need scales with duration/intensity, sodium need with sweat rate/heat. A fixed salt percentage welds them together, which is the exact criticism levelled at Gatorade Endurance on the cost panel. Don't reintroduce that coupling
 - `MAX_PRACTICAL_SALT_RATIO` is a taste limit, not a math one. Past it the tool must refuse and say "take salt separately" rather than emit an undrinkable formulation. There are tests on the refusal

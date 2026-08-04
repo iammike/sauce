@@ -1,4 +1,4 @@
-import { INTENSITIES, WEATHER, findIntensity, findWeather, planRide } from './ride.js';
+import { INTENSITIES, WEATHER, BOTTLE_SIZES, findIntensity, findWeather, findBottle, planRide } from './ride.js';
 import { formatGrams, formatMg, formatCount } from './format.js';
 
 const $ = (id) => document.getElementById(id);
@@ -8,6 +8,7 @@ function readInputs() {
     durationHours: Number($('in-duration').value) || 0,
     intensityId: $('in-intensity').value,
     weatherId: $('in-weather').value,
+    bottleMl: findBottle($('in-bottle').value)?.ml ?? 750,
   };
 }
 
@@ -49,6 +50,14 @@ function render() {
     ? `<p class="ride-answer__detail"><strong>Add salt.</strong> These conditions call for roughly ${formatMg(plan.extraSodiumPerHour)}/hr more sodium than the mix carries — about ${capsulePhrase(plan.capsulesPerHour)} an hour, or a pinch of salt in the bottle.</p>`
     : `<p class="ride-answer__detail"><strong>No extra salt needed.</strong> The mix carries enough sodium for these conditions on its own.</p>`;
 
+  // Concentration is the usual reason a drink won't go down, so it gets said
+  // out loud rather than left as an exercise in division.
+  const bottles = `<p class="ride-answer__detail"><strong>Per bottle:</strong> about ${formatGrams(plan.gramsPerBottle)} in each ${plan.bottleMl} ml bottle — roughly ${formatCount(plan.bottlesNeeded, 1)} bottles across the ride, assuming you drink enough to keep up with sweat.</p>`;
+
+  const strength = plan.concentration.id === 'dilute' || plan.concentration.id === 'typical'
+    ? `<p class="ride-answer__detail"><strong>${plan.concentration.label}</strong> at ${plan.concentrationPercent.toFixed(0)}%. ${plan.concentration.note}</p>`
+    : `<p class="ride-answer__detail"><span class="warn">${plan.concentration.label}</span> at ${plan.concentrationPercent.toFixed(0)}%. ${plan.concentration.note}</p>`;
+
   const gut = plan.needsTrainedGut
     ? `<p class="ride-answer__detail"><span class="warn">That's a high carb rate.</span> Fine if you've practised it, but don't try ${plan.carbsPerHour} g/hr for the first time on a ride that matters.</p>`
     : '';
@@ -59,10 +68,12 @@ function render() {
       <p class="ride-answer__label">of mix, total</p>
     </div>
     <p class="ride-answer__detail">That's <strong>${formatGrams(plan.mixGramsPerHour)} an hour</strong>, giving you ${plan.carbsPerHour} g of carbs per hour and ${plan.totalCarbs} g across the ride.</p>
+    ${bottles}
+    ${strength}
     ${salt}
     ${gut}`;
 
-  $('ride-caveat').textContent = 'Rough numbers, on purpose. This assumes the standard mix and average sweat — good enough for packing a bottle, not a substitute for finding out what actually works for you.';
+  $('ride-caveat').textContent = 'Rough numbers, on purpose, and they only hold if you actually finish what you carry — an unfinished bottle is the most common reason a fuelling plan quietly does not work. Assumes the standard mix and average sweat.';
 }
 
 function init() {
@@ -74,8 +85,12 @@ function init() {
     .map((w) => `<option value="${w.id}">${w.label}</option>`).join('');
   $('in-weather').value = 'mild';
 
+  $('in-bottle').innerHTML = BOTTLE_SIZES
+    .map((b) => `<option value="${b.id}">${b.label}</option>`).join('');
+  $('in-bottle').value = '750';
+
   $('ride-form').addEventListener('input', render);
-  ['in-intensity', 'in-weather'].forEach((id) =>
+  ['in-intensity', 'in-weather', 'in-bottle'].forEach((id) =>
     $(id).addEventListener('change', render));
 
   render();

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
-  INTENSITIES, WEATHER, SALT_CAPSULE_MG,
-  baseRecipeProfile, carbTargetFor, sodiumNeedFor, planRide,
+  INTENSITIES, WEATHER, SALT_CAPSULE_MG, CONCENTRATION_BANDS,
+  baseRecipeProfile, carbTargetFor, sodiumNeedFor, planRide, concentrationBand,
 } from '../src/ride.js';
 import { CARB_INTAKE_TIERS } from '../src/hourly.js';
 
@@ -141,5 +141,56 @@ describe('planRide', () => {
     const p = planRide({ durationHours: 3, intensityId: 'nope', weatherId: 'nope' });
     expect(p.carbsPerHour).toBeGreaterThan(0);
     expect(Number.isFinite(p.sodiumNeed)).toBe(true);
+  });
+});
+
+describe('bottle plan', () => {
+  it('divides the mix across bottles of the size you actually use', () => {
+    const small = planRide({ durationHours: 3, intensityId: 'moderate', weatherId: 'mild', bottleMl: 500 });
+    const large = planRide({ durationHours: 3, intensityId: 'moderate', weatherId: 'mild', bottleMl: 950 });
+
+    expect(large.gramsPerBottle).toBeGreaterThan(small.gramsPerBottle);
+    expect(large.bottlesNeeded).toBeLessThan(small.bottlesNeeded);
+    // Same ride, so concentration is a property of the plan, not the bottle.
+    expect(large.concentrationPercent).toBeCloseTo(small.concentrationPercent, 6);
+  });
+
+  it('derives fluid from the same sweat estimate used for sodium', () => {
+    // Rather than asking a fourth question. Hotter means more fluid, which
+    // means the same powder ends up more dilute.
+    const mild = planRide({ durationHours: 3, intensityId: 'moderate', weatherId: 'mild', bottleMl: 750 });
+    const hot = planRide({ durationHours: 3, intensityId: 'moderate', weatherId: 'hot', bottleMl: 750 });
+    expect(hot.fluidMl).toBeGreaterThan(mild.fluidMl);
+    expect(hot.concentrationPercent).toBeLessThan(mild.concentrationPercent);
+  });
+
+  it('flags a long hard effort in the cold as too concentrated', () => {
+    // The realistic bad case: high carb need, low sweat rate, so the powder
+    // has little fluid to dissolve into.
+    const p = planRide({ durationHours: 5, intensityId: 'hard', weatherId: 'cool', bottleMl: 750 });
+    expect(p.concentrationPercent).toBeGreaterThan(20);
+    expect(p.concentration.id).toBe('very-concentrated');
+  });
+
+  it('calls a normal ride typical rather than alarming', () => {
+    const p = planRide({ durationHours: 3, intensityId: 'moderate', weatherId: 'mild', bottleMl: 750 });
+    expect(['typical', 'dilute', 'concentrated']).toContain(p.concentration.id);
+  });
+
+  it('bands concentration in ascending order with no gaps', () => {
+    const maxes = CONCENTRATION_BANDS.map((b) => b.max);
+    expect([...maxes].sort((a, b) => a - b)).toEqual(maxes);
+    expect(CONCENTRATION_BANDS.at(-1).max).toBe(Infinity);
+  });
+
+  it('classifies any concentration, however extreme', () => {
+    for (const pct of [0, 5, 9, 13, 20, 50, 500]) {
+      expect(concentrationBand(pct)).toBeDefined();
+    }
+  });
+
+  it('grams per bottle is consistent with the concentration', () => {
+    const p = planRide({ durationHours: 4, intensityId: 'hard', weatherId: 'warm', bottleMl: 620 });
+    expect(p.gramsPerBottle).toBeCloseTo((p.concentrationPercent / 100) * 620, 6);
   });
 });

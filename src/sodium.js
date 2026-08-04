@@ -1,5 +1,11 @@
 // Estimating how much sodium you need, and solving the formulation to deliver it.
 //
+// NOT CURRENTLY WIRED INTO THE UI. Conditions are a day-of reading and a batch
+// is mixed in advance, so asking about sweat while planning a jar was asking
+// the wrong question at the wrong time. The bottle planner (src/ride.js) now
+// handles conditions, with a deliberately coarser model. Kept, with its tests,
+// because solveSaltRatio is the non-obvious part and worth not rederiving.
+//
 // The problem this exists to fix: carbohydrate need and sodium need are driven
 // by different things. Carbs scale with duration and intensity; sodium scales
 // with sweat rate and heat. In a single powder they're welded together by the

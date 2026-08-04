@@ -8,61 +8,23 @@ import { TUNING } from '../data/tuning.js';
 import { PRODUCTS } from '../data/products.js';
 import { RESEARCH, findResearch } from '../data/research.js';
 import { batchCost, costPerGramCarb, compareAtCarbTarget } from './cost.js';
-import {
-  SWEAT_RATES, SWEAT_SODIUM_LEVELS, MAX_PRACTICAL_SALT_RATIO,
-  estimateSodiumNeed, solveSaltRatio, findSweatSodium,
-} from './sodium.js';
 import { PRICED_AS_OF, INGREDIENT_COSTS, HOMEMADE_LIMITATION } from '../data/costs.js';
+import { SALT_PROFILES } from './calculator.js';
 
 const $ = (id) => document.getElementById(id);
-
-// The formulation follows from the targets, not the other way round: when the
-// salt level is "solved", the salt ratio is whatever delivers the estimated
-// sodium need at the carb intake actually being fuelled at.
-function resolveSalt(carbRatio, flavor) {
-  const mode = $('in-salt-profile').value;
-  const targetCarbs = Number($('in-target-carbs').value) || DEFAULT_TARGET_CARBS;
-  const estimate = estimateSodiumNeed({
-    sweatRateId: $('in-sweat-rate').value,
-    sweatSodiumId: $('in-sweat-sodium').value,
-  });
-
-  if (mode !== 'solved') {
-    return { mode, estimate, saltRatio: undefined, saltProfile: mode, solved: null };
-  }
-
-  const solved = solveSaltRatio({
-    targetSodiumPerHour: estimate.targetMgPerHour,
-    targetCarbsPerHour: targetCarbs,
-    carbRatio,
-    flavorRatio: flavor.ratio,
-    flavorCarbFraction: flavor.carbFraction,
-  });
-
-  // Cap at the drinkable limit rather than emitting a mix nobody would
-  // finish; the shortfall is reported instead.
-  const saltRatio = solved
-    ? Math.min(solved.ratio, MAX_PRACTICAL_SALT_RATIO)
-    : undefined;
-
-  return { mode, estimate, saltRatio, saltProfile: 'endurance', solved };
-}
 
 function readInputs() {
   const flavor = findFlavoring($('in-flavor-preset').value) ?? FLAVORINGS[0];
   const capRaw = $('in-cap').value;
   const carbRatio = Number($('in-carb-ratio').value) || 0;
-  const salt = resolveSalt(carbRatio, flavor);
   return {
-    salt,
     onHand: {
       maltodextrin: Number($('in-malto').value) || 0,
       fructose: Number($('in-fructose').value) || 0,
       flavoring: Number($('in-flavoring').value) || 0,
       salt: Number($('in-salt').value) || 0,
     },
-    saltProfile: salt.saltProfile,
-    saltRatio: salt.saltRatio,
+    saltProfile: $('in-salt-profile').value,
     scoopGrams: Number($('in-scoop').value) || 1,
     carbRatio,
     maxBatchGrams: capRaw === '' ? undefined : Number(capRaw),
@@ -285,66 +247,14 @@ function renderRatioReadout() {
   readout.innerHTML = `${shape} — ${verdict}`;
 }
 
-// Only speak up when there's something to act on, and say it in numbers the
-// reader can use. The solved salt percentage is already in the calculator and
-// the sodium figure in the facts panel — restating the arithmetic is noise.
-const MEANINGFUL_GAP = 0.1; // fraction of target worth mentioning
-
-function renderSodiumSolve(inputs, recipe, targetCarbs) {
-  const { estimate, mode } = inputs.salt;
-  const advice = $('sodium-solve-detail');
-
-  // What the mix actually delivers, whatever the reason — a capped solve and
-  // a preset that doesn't suit the conditions leave you short the same way.
-  const delivered = recipe.perGram.carbsG > 0
-    ? (recipe.perGram.sodiumMg / recipe.perGram.carbsG) * targetCarbs
-    : 0;
-  const need = estimate.targetMgPerHour;
-  const gap = need - delivered;
-
-  $('sodium-estimate').textContent = mode === 'solved'
-    ? `These conditions suggest about ${formatMg(need)} of sodium per hour, which the salt level above is set to deliver.`
-    : `These conditions suggest about ${formatMg(need)} of sodium per hour.`;
-
-  // A batch you've already mixed is fixed — conditions change ride to ride,
-  // the jar doesn't. So the advice is what to add today, not how to
-  // reformulate. Reformulating is only useful for the *next* batch.
-  if (gap > need * MEANINGFUL_GAP) {
-    advice.hidden = false;
-    advice.innerHTML = `This mix carries <strong>${formatMg(delivered)}/hr</strong> of sodium. For these conditions, add roughly <strong>${formatMg(gap)}/hr</strong> on top — a salt tab or electrolyte capsule alongside your bottle.`;
-    return;
-  }
-
-  if (delivered > need * (1 + MEANINGFUL_GAP)) {
-    advice.hidden = false;
-    advice.innerHTML = `This mix carries <strong>${formatMg(delivered)}/hr</strong> of sodium, more than these conditions call for. No harm in it, but nothing to add.`;
-    return;
-  }
-
-  advice.hidden = true;
-}
-
-function renderSweatCue() {
-  const level = findSweatSodium($('in-sweat-sodium').value);
-  $('sweat-sodium-cue').textContent = level ? level.cue : '';
-  const rate = SWEAT_RATES.find((r) => r.id === $('in-sweat-rate').value);
-  $('sweat-rate-hint').textContent = rate ? `≈ ${rate.litresPerHour} L/hr of sweat` : '';
-  $('salt-profile-note').textContent = $('in-salt-profile').value === 'solved'
-    ? 'Solved from your conditions above.'
-    : 'A fixed percentage. Set this to match a batch you already made.';
-}
-
-function initConditions() {
-  $('in-sweat-rate').innerHTML = SWEAT_RATES
-    .map((r) => `<option value="${r.id}">${r.label}</option>`).join('');
-  $('in-sweat-rate').value = 'moderate';
-
-  $('in-sweat-sodium').innerHTML = SWEAT_SODIUM_LEVELS
-    .map((s) => `<option value="${s.id}">${s.label}</option>`).join('');
-  $('in-sweat-sodium').value = 'average';
-
-  ['in-sweat-rate', 'in-sweat-sodium'].forEach((id) =>
-    $(id).addEventListener('change', recalculate));
+// A batch is mixed in advance and can't know Saturday's weather. Salt level is
+// a general choice here; reading conditions on the day — including whether to
+// take extra salt — is what the bottle planner is for.
+function renderSaltNote() {
+  const profile = SALT_PROFILES[$('in-salt-profile').value];
+  $('salt-profile-note').textContent = profile
+    ? `${profile.note} Adjust for conditions on the day, not in the jar.`
+    : '';
 }
 
 function recalculate() {
@@ -355,8 +265,7 @@ function recalculate() {
   const serving = servingFor(recipe, targetCarbs, scoopGrams);
 
   renderRatioReadout();
-  renderSweatCue();
-  renderSodiumSolve(inputs, recipe, targetCarbs);
+  renderSaltNote();
   renderFactsPanel(recipe, serving, targetCarbs);
   renderRecipeGrid(recipe);
   renderHourlyGrid(recipe);
@@ -533,7 +442,6 @@ function openTargetedPanel() {
 
 function init() {
   initFlavorPresets();
-  initConditions();
   initTuning();
   initProducts();
   initResearch();
