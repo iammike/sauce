@@ -344,7 +344,9 @@ a:hover { color: var(--strawberry-dark); }
 main {
   max-width: 72rem;
   margin: 0 auto;
-  padding: 0 1.5rem;
+  /* The footer used to provide the space under the last panel. Without it the
+     page ended flush against that panel's rule. */
+  padding: 0 1.5rem 4rem;
 }
 
 .panel {
@@ -357,6 +359,9 @@ main {
    its padding box, while panel borders sit inside main's padding.
    :last-child, not :last-of-type — the calculator is the only <section> among
    <details> siblings, so :last-of-type matched it too and ate its padding. */
+/* The last panel's rule closes the page; its own bottom padding would just
+   stack on main's. :last-child, not :last-of-type — the calculator is the
+   only <section> among <details> siblings and would otherwise match too. */
 main > .panel:last-child { padding-bottom: 0; }
 
 .panel__eyebrow {
