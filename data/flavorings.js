@@ -18,6 +18,7 @@
 // encoder (src/share.js). It is deliberately explicit rather than derived
 // from array position, so reordering or removing an entry can never silently
 // change what an existing shared link decodes to. Only ever append new ids.
+// (7 was lemon juice powder, dropped — do not reuse it.)
 
 export const FLAVORINGS = [
   {
@@ -91,20 +92,6 @@ export const FLAVORINGS = [
     note: 'Negligible mass and calories — add drop by drop to taste rather than scaling with the batch ratios.',
   },
   {
-    id: 'lemon-powder',
-    shortName: 'Lemon juice powder',
-    pricePerGram: 18 / 283,
-    priceBasis: '~$18 / 10 oz (283 g)',
-    priceConfidence: 'estimated',
-    shareId: 7,
-    name: 'Lemon juice powder',
-    ratio: 0.10,
-    carbFraction: 0.9,
-    sugarFraction: 0.35,
-    confidence: 'estimated',
-    note: 'Dehydrated lemon juice — the citrus option that actually works in a dry batch, unlike the bottled liquid. Tart rather than sweet, which cuts through maltodextrin better than a fruit powder does. Start below the default ratio and work up; it is sharper than it looks.',
-  },
-  {
     id: 'citrus-juice',
     shortName: 'Lemon or lime juice',
     pricePerGram: 0,
@@ -122,7 +109,7 @@ export const FLAVORINGS = [
     carbFraction: 0,
     sugarFraction: 0,
     confidence: 'estimated',
-    note: 'Cheap, easy to find, and it cuts the sweetness of a maltodextrin mix better than most powders. Being a liquid it cannot go in the jar — keep the batch unflavoured and add roughly 30 ml (2 tbsp) per bottle when you mix. Bottled juice from concentrate is fine and keeps far longer than fresh.',
+    note: 'Probably the best-value flavouring here, and most kitchens already have a bottle. It goes in the bottle rather than the jar, which turns out to be the advantage: you can dial it up or down ride to ride instead of committing a whole batch to one flavour. Roughly 30 ml (2 tbsp) per bottle to start. Juice from concentrate is fine and keeps far longer than fresh.',
   },
   {
     id: 'unflavored',

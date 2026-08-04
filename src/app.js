@@ -171,7 +171,7 @@ function renderRecipeGrid(recipe) {
   const perBottleNote = $('flavor-per-bottle');
   if (flavor?.perBottle) {
     perBottleNote.hidden = false;
-    perBottleNote.innerHTML = `<strong>${flavor.name} goes in the bottle, not the jar.</strong> Keep the batch unflavoured and add about ${flavor.perBottleMl} ml per bottle when you mix — a liquid would spoil a dry mix.`;
+    perBottleNote.innerHTML = `<strong>${flavor.name} goes in the bottle, not the jar.</strong> Mix the batch unflavoured and add about ${flavor.perBottleMl} ml per bottle — which means you can change the flavour, or skip it, without committing the whole batch.`;
   } else {
     perBottleNote.hidden = true;
   }
