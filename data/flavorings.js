@@ -33,7 +33,7 @@ export const FLAVORINGS = [
     carbFraction: 1,
     sugarFraction: 0.6,
     confidence: 'tested',
-    note: 'The tested Daddy Pig Industries recipe baseline. ~60% of the powder’s mass is sugar; the rest is fiber/acid.',
+    note: 'The tested baseline for this recipe. ~60% of the powder’s mass is sugar; the rest is fiber/acid.',
   },
   {
     id: 'other-freeze-dried-fruit',

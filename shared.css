@@ -902,7 +902,6 @@ html { scroll-behavior: smooth; }
   font-size: 0.8rem;
   color: var(--ink-soft);
   display: flex;
-  justify-content: space-between;
   flex-wrap: wrap;
   gap: 1rem;
 }
