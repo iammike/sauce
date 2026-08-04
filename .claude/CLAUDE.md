@@ -21,7 +21,8 @@
 
 ## One page, two jobs
 - The day-of planner (`src/ride.js`, `src/ride-app.js`) sits first on `index.html` as `#planner`, above the batch calculator, because it's the weekly-use tool and a separate page made it hard to find. `ride.html` is a redirect stub
-- It deliberately assumes the **standard mix** and **average sweat** even though the calculator's real formulation is right there on the same page — it must not start reading it. Precision is the calculator's job; this one's job is being fast
+- It reads the batch on screen via `updateRidePlanner(recipe.perGram)`, so it follows any change to ratio or salt level. `baseRecipeProfile()` is the fallback when nothing is passed. (It used to assume the standard mix — that made sense when it was a separate page with no access to the batch, and stopped making sense once both were on one page)
+- It still estimates sodium from **conditions only** — no sweat profile, no salt solving. That part stays coarse on purpose
 - Duration, not distance: the carb guidance is duration-based, and deriving duration from distance needs a speed guess that adds more error than it removes
 - Salt advice is rounded to 50 mg and expressed in countable capsules. Don't make it look precise
 - `src/ride-app.js` exports `initRidePlanner()` rather than self-starting, and `src/app.js` calls it. One page, one bundle
@@ -34,6 +35,10 @@
 - State the fact and stop. No "three questions, one answer", no "from a batch that won't mix to a stomach that won't settle", no explaining why a sentence is about to be useful
 - Counts in copy go stale — "three questions" survived a fourth input being added. Prefer no count to a wrong one
 - Trim, don't gut: the substance in the cost catches and troubleshooting entries is the point; it's the framing around it that goes
+
+## Label sizes
+- `data/label-sizes.js` drives the sheet dimensions; `wide: true` switches to a two-column layout with brand and artwork on the left, facts on the right. That's the wrap-a-tub format, printed landscape on one sheet
+- `@page { size: auto }` so a landscape sheet isn't clipped by a portrait page
 
 ## Prose gets a measure, structure doesn't
 - `--measure` (40rem, ~78 characters) holds panel intros and troubleshooting bodies. Full-width prose on this page runs ~134 characters, well past the readable 45-75

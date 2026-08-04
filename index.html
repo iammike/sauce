@@ -146,7 +146,7 @@
         <span class="panel__blurb">A printable 3&Prime;&times;4&Prime; jar label built from this batch.</span>
       </summary>
       <div class="panel__body">
-          <p>A serving is one hour of fueling at your serving basis. Ingredients are listed by descending weight.</p>
+          <p>A serving is one hour of fueling at your serving basis. Ingredients are listed by descending weight. The wrap format prints on one sheet and goes round the tub.</p>
 
       <div class="input-grid" style="max-width:40rem;">
         <div class="field">
@@ -164,6 +164,11 @@
         <div class="field">
           <label for="in-label-date">Batch date</label>
           <input type="date" id="in-label-date">
+        </div>
+        <div class="field field--select">
+          <label for="in-label-size">Label size</label>
+          <select id="in-label-size"></select>
+          <span class="field-hint" id="label-size-note"></span>
         </div>
         <div class="field">
           <label for="in-scoop">Your scoop size (g) <span class="field-hint">optional</span></label>
@@ -188,47 +193,49 @@
 
       <div class="label-stage">
         <article class="label-sheet" id="label-sheet" aria-label="Printable batch label">
-          <header class="label-sheet__head">
-            <p class="label-sheet__name" id="lb-name">The Sauce</p>
-            <p class="label-sheet__flavor" id="lb-flavor">Strawberry</p>
-          </header>
+          <div class="label-sheet__brand">
+            <header class="label-sheet__head">
+              <p class="label-sheet__name" id="lb-name">The Sauce</p>
+              <p class="label-sheet__flavor" id="lb-flavor">Strawberry</p>
+            </header>
 
-          <dl class="label-facts">
-            <p class="label-facts__title">Supplement Facts</p>
-            <div class="label-facts__meta">
-              <span>Serving size</span><span class="data" id="lb-serving">— g</span>
-            </div>
-            <div class="label-facts__meta label-facts__thick">
-              <span>Servings per container</span><span class="data" id="lb-servings">—</span>
-            </div>
-            <div class="label-facts__cal">
-              <span>Calories</span><span id="lb-calories">—</span>
-            </div>
-            <div class="label-facts__row label-facts__row--bold">
-              <dt>Total Carbohydrate</dt><dd id="lb-carbs">— g</dd>
-            </div>
-            <div class="label-facts__row label-facts__row--indent">
-              <dt>Total Sugars</dt><dd id="lb-sugars">— g</dd>
-            </div>
-            <div class="label-facts__row label-facts__row--bold">
-              <dt>Sodium</dt><dd id="lb-sodium">— mg</dd>
-            </div>
-          </dl>
+            <figure class="label-sheet__art" id="lb-art-wrap" hidden>
+              <img id="lb-art" alt="">
+            </figure>
+          </div>
 
-          <figure class="label-sheet__art" id="lb-art-wrap" hidden>
-            <img id="lb-art" alt="">
-          </figure>
+          <div class="label-sheet__data">
+            <dl class="label-facts">
+              <p class="label-facts__title">Supplement Facts</p>
+              <div class="label-facts__meta">
+                <span>Serving size</span><span class="data" id="lb-serving">— g</span>
+              </div>
+              <div class="label-facts__meta label-facts__thick">
+                <span>Servings per container</span><span class="data" id="lb-servings">—</span>
+              </div>
+              <div class="label-facts__cal">
+                <span>Calories</span><span id="lb-calories">—</span>
+              </div>
+              <div class="label-facts__row label-facts__row--bold">
+                <dt>Total Carbohydrate</dt><dd id="lb-carbs">— g</dd>
+              </div>
+              <div class="label-facts__row label-facts__row--indent">
+                <dt>Total Sugars</dt><dd id="lb-sugars">— g</dd>
+              </div>
+              <div class="label-facts__row label-facts__row--bold">
+                <dt>Sodium</dt><dd id="lb-sodium">— mg</dd>
+              </div>
+            </dl>
 
-          <p class="label-sheet__note" id="lb-note" hidden></p>
+            <p class="label-sheet__note" id="lb-note" hidden></p>
+            <p class="label-sheet__directions" id="lb-directions"></p>
+            <p class="label-sheet__ingredients"><strong>Ingredients:</strong> <span id="lb-ingredients">—</span></p>
 
-          <p class="label-sheet__directions" id="lb-directions"></p>
-
-          <p class="label-sheet__ingredients"><strong>Ingredients:</strong> <span id="lb-ingredients">—</span></p>
-
-          <footer class="label-sheet__foot">
-            <span id="lb-maker"></span>
-            <span class="data" id="lb-batch">—</span>
-          </footer>
+            <footer class="label-sheet__foot">
+              <span id="lb-maker"></span>
+              <span class="data" id="lb-batch">—</span>
+            </footer>
+          </div>
         </article>
       </div>
       </div>
@@ -239,7 +246,7 @@
         <span class="panel__blurb">Already have a batch? What to pack for a specific ride.</span>
       </summary>
       <div class="panel__body">
-      <p>Assumes the standard mix rather than your exact formulation.</p>
+      <p>Uses the batch above, so it follows any changes you make to the recipe.</p>
 
       <form id="ride-form" novalidate>
         <div class="input-grid" style="max-width:58rem;">

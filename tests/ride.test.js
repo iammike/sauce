@@ -4,6 +4,7 @@ import {
   baseRecipeProfile, carbTargetFor, sodiumNeedFor, planRide, concentrationBand,
 } from '../src/ride.js';
 import { CARB_INTAKE_TIERS } from '../src/hourly.js';
+import { computeRecipe } from '../src/calculator.js';
 
 const plan = (o) => planRide({ durationHours: 3, intensityId: 'moderate', weatherId: 'mild', ...o });
 
@@ -192,5 +193,36 @@ describe('bottle plan', () => {
   it('grams per bottle is consistent with the concentration', () => {
     const p = planRide({ durationHours: 4, intensityId: 'hard', weatherId: 'warm', bottleMl: 620 });
     expect(p.gramsPerBottle).toBeCloseTo((p.concentrationPercent / 100) * 620, 6);
+  });
+});
+
+describe('using the batch on screen', () => {
+  it('follows a supplied per-gram profile instead of the standard mix', () => {
+    // A saltier, less carb-dense batch should change both answers.
+    const custom = { carbsG: 0.80, sugarsG: 0.3, sodiumMg: 14, calories: 3.2 };
+    const standard = planRide({ durationHours: 3, intensityId: 'moderate', weatherId: 'mild' });
+    const mine = planRide({ durationHours: 3, intensityId: 'moderate', weatherId: 'mild', perGram: custom });
+
+    // Fewer carbs per gram means more powder for the same carb target.
+    expect(mine.mixGramsPerHour).toBeGreaterThan(standard.mixGramsPerHour);
+    // More sodium per gram means less to add on top.
+    expect(mine.sodiumFromMix).toBeGreaterThan(standard.sodiumFromMix);
+  });
+
+  it('falls back to the standard recipe when no batch is supplied', () => {
+    const a = planRide({ durationHours: 3, intensityId: 'moderate', weatherId: 'mild' });
+    const b = planRide({ durationHours: 3, intensityId: 'moderate', weatherId: 'mild', perGram: baseRecipeProfile() });
+    expect(a.mixGramsPerHour).toBeCloseTo(b.mixGramsPerHour, 9);
+  });
+
+  it('reflects a real batch built by the calculator', () => {
+    const recipe = computeRecipe({
+      onHand: { maltodextrin: 5000, fructose: 5000, flavoring: 5000, salt: 5000 },
+      saltProfile: 'hot', maxBatchGrams: 1900, scoopGrams: 46, carbRatio: 0.5,
+    });
+    const plan = planRide({ durationHours: 3, intensityId: 'moderate', weatherId: 'mild', perGram: recipe.perGram });
+    // A hot-profile batch carries more sodium than the endurance default.
+    const standard = planRide({ durationHours: 3, intensityId: 'moderate', weatherId: 'mild' });
+    expect(plan.sodiumFromMix).toBeGreaterThan(standard.sodiumFromMix);
   });
 });

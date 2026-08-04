@@ -10,7 +10,8 @@ import { batchCost, costPerGramCarb, compareAtCarbTarget } from './cost.js';
 import { PRICED_AS_OF, INGREDIENT_COSTS, HOMEMADE_LIMITATION } from '../data/costs.js';
 import { SALT_PROFILES } from './calculator.js';
 import { initDisclosureAnimation } from './disclosure.js';
-import { initRidePlanner } from './ride-app.js';
+import { initRidePlanner, updateRidePlanner } from './ride-app.js';
+import { LABEL_SIZES, findLabelSize } from '../data/label-sizes.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -229,6 +230,7 @@ function recalculate() {
   renderRecipeGrid(recipe);
   renderLabel(recipe, serving, targetCarbs);
   renderCost(recipe, findFlavoring($('in-flavor-preset').value) ?? FLAVORINGS[0], targetCarbs);
+  updateRidePlanner(recipe.perGram);
 }
 
 function initTuning() {
@@ -367,7 +369,26 @@ function loadArtwork(file) {
   reader.readAsDataURL(file);
 }
 
+// The sheet is sized in inches so the preview matches the printer; the wide
+// format also rearranges into two columns.
+function applyLabelSize() {
+  const size = findLabelSize($('in-label-size').value);
+  const sheet = $('label-sheet');
+  sheet.style.width = `${size.widthIn}in`;
+  sheet.style.height = `${size.heightIn}in`;
+  sheet.classList.toggle('label-sheet--wide', size.wide);
+  $('label-size-note').textContent = size.wide
+    ? 'Prints landscape on one sheet. Brand on the left, facts on the right.'
+    : `Prints at ${size.widthIn} × ${size.heightIn} in.`;
+}
+
 function initLabel() {
+  $('in-label-size').innerHTML = LABEL_SIZES
+    .map((x) => `<option value="${x.id}">${x.label}</option>`).join('');
+  $('in-label-size').value = '3x4';
+  $('in-label-size').addEventListener('change', () => { applyLabelSize(); recalculate(); });
+  applyLabelSize();
+
   const dateInput = $('in-label-date');
   if (!dateInput.value) dateInput.value = new Date().toISOString().slice(0, 10);
 

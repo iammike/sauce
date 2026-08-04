@@ -922,6 +922,7 @@ html { scroll-behavior: smooth; }
   overflow-x: auto;
 }
 
+/* Width and height are set from the chosen format in app.js. */
 .label-sheet {
   width: 3in;
   height: 4in;
@@ -936,6 +937,45 @@ html { scroll-behavior: smooth; }
   font-family: 'Karla', sans-serif;
   box-shadow: 0 8px 20px var(--shadow);
 }
+
+/* Wide formats wrap a tub, so the brand sits beside the facts rather than
+   above them — otherwise the panel is a thin strip across a very wide sheet. */
+.label-sheet--wide {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.3in;
+  align-items: start;
+}
+
+.label-sheet--wide .label-sheet__brand,
+.label-sheet--wide .label-sheet__data {
+  display: flex;
+  flex-direction: column;
+  gap: 0.07in;
+  height: 100%;
+}
+
+.label-sheet--wide .label-sheet__name { font-size: 0.7in; }
+.label-sheet--wide .label-sheet__flavor { font-size: 0.2in; }
+.label-sheet--wide .label-facts { font-size: 0.13in; }
+.label-sheet--wide .label-facts__title { font-size: 0.24in; }
+.label-sheet--wide .label-facts__cal { font-size: 0.24in; }
+.label-sheet--wide .label-sheet__directions,
+.label-sheet--wide .label-sheet__ingredients { font-size: 0.11in; }
+.label-sheet--wide .label-sheet__foot { font-size: 0.1in; }
+.label-sheet--wide .label-sheet__art { flex: 1 1 auto; }
+
+/* Stacked by default: brand on top, facts below. */
+.label-sheet__brand,
+.label-sheet__data {
+  display: flex;
+  flex-direction: column;
+  gap: 0.07in;
+  min-height: 0;
+}
+
+.label-sheet__brand { flex: 0 1 auto; }
+.label-sheet__data { flex: 1 1 auto; }
 
 .label-sheet__head {
   border-bottom: 3px solid #111;
@@ -1059,7 +1099,9 @@ html { scroll-behavior: smooth; }
 }
 
 /* Print: the label only, at true size. */
-@page { margin: 0.4in; }
+/* size: auto lets the sheet dictate orientation — a landscape wrap label
+   would otherwise be clipped by a portrait page. */
+@page { margin: 0.4in; size: auto; }
 
 @media print {
   body > *:not(main),

@@ -5,12 +5,17 @@ import { formatGrams, formatMg, formatCount } from './format.js';
 
 const $ = (id) => document.getElementById(id);
 
+// Per-gram nutrition of the batch currently on screen. The calculator pushes
+// this in; until it does, planRide falls back to the standard recipe.
+let currentPerGram = null;
+
 function readInputs() {
   return {
     durationHours: Number($('in-duration').value) || 0,
     intensityId: $('in-intensity').value,
     weatherId: $('in-weather').value,
     bottleMl: findBottle($('in-bottle').value)?.ml ?? 750,
+    perGram: currentPerGram ?? undefined,
   };
 }
 
@@ -75,7 +80,13 @@ function render() {
     ${salt}
     ${gut}`;
 
-  $('ride-caveat').textContent = 'Estimates, and they assume you finish what you carry. Based on the standard mix and average sweat.';
+  $('ride-caveat').textContent = 'Estimates, and they assume you finish what you carry. Uses the batch above and an average sweat rate.';
+}
+
+/** Called by the calculator whenever the batch changes. */
+export function updateRidePlanner(perGram) {
+  currentPerGram = perGram;
+  if ($('ride-form')) render();
 }
 
 export function initRidePlanner() {

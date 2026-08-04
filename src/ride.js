@@ -1,12 +1,12 @@
 // Day-of bottle planning: how long are you out, how hard, how hot.
 //
-// Deliberately simpler than the batch calculator. It assumes the base recipe
-// rather than reading your actual formulation, and it estimates sodium from
-// conditions alone — no sweat profile, no salt solving. The point is a number
-// in ten seconds while you're filling bottles, not an accurate model.
+// Simpler than the batch calculator: it estimates sodium need from conditions
+// alone, with no sweat profile and no salt solving. The point is a number in
+// ten seconds while you're filling bottles.
 //
-// Anything more precise lives on the batch calculator, which knows what you
-// actually mixed.
+// It does use the batch on screen when one is passed in — the calculator is
+// right there, so assuming a standard mix would be wrong for anyone who has
+// changed the ratio or salt level. `baseRecipeProfile()` is the fallback.
 
 import { computeRecipe, DEFAULT_CARB_RATIO, DEFAULT_FLAVOR_RATIO } from './calculator.js';
 import { CARB_INTAKE_TIERS, DUAL_TRANSPORT_TYPICAL } from './hourly.js';
@@ -117,8 +117,8 @@ export function sodiumNeedFor(intensityId, weatherId) {
 }
 
 /** The whole plan for one ride. */
-export function planRide({ durationHours, intensityId, weatherId, bottleMl = 750 }) {
-  const perGram = baseRecipeProfile();
+export function planRide({ durationHours, intensityId, weatherId, bottleMl = 750, perGram }) {
+  perGram = perGram ?? baseRecipeProfile();
   const { tier, gramsPerHour } = carbTargetFor(durationHours, intensityId);
 
   const mixGramsPerHour = perGram.carbsG > 0 ? gramsPerHour / perGram.carbsG : 0;
