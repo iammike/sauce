@@ -235,7 +235,6 @@ function initTuning() {
   $('tuning-list').innerHTML = TUNING.map((t) => `
     <details class="tuning-item" id="tune-${t.id}">
       <summary>
-        ${t.tag ? `<span class="tuning-item__tag">${t.tag}</span>` : ''}
         <span class="tuning-item__symptom">${t.symptom}</span>
       </summary>
       <div class="tuning-item__body">

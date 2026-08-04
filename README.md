@@ -6,9 +6,9 @@ printable nutrition label.
 **Live:** [sauce.iammike.org](https://sauce.iammike.org/)
 
 One page. The batch calculator is the tool, open at the top; everything else
-is a collapsed panel below it, in the order you'd meet them: **bottle
-planner** (what to pack once you have a batch), **label**, **troubleshooting**,
-then reference — **what to buy**, **cost**, **the science**.
+is a collapsed panel below it, split into what you *do* — **label** the jar
+you just made, then the **bottle planner** for a given ride — and what you
+*look up*: **what to buy**, **cost**, **troubleshooting**, **the science**.
 
 `ride.html` is a redirect to `#planner`, kept so the old URL still works.
 

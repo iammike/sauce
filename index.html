@@ -17,13 +17,13 @@
       <span class="wordmark__sauce display">Sauce</span>
     </a>
     <nav class="site-nav" aria-label="Primary">
-      <a href="#planner">Today's ride</a>
       <a href="#calculator">Make a batch</a>
-      <a href="#tuning">Troubleshooting</a>
       <a href="#label">Label</a>
+      <a href="#planner">Bottle planner</a>
+      <a href="#buy">What to buy</a>
       <a href="#cost">Cost</a>
-      <a href="#buy">Where to buy</a>
-      <a href="#research">Research</a>
+      <a href="#tuning">Troubleshooting</a>
+      <a href="#research">Science</a>
     </nav>
   </header>
 
@@ -140,41 +140,6 @@
       <h3 class="display" style="font-size:1.1rem;margin:2rem 0 0.75rem;">Weigh out</h3>
       <div class="card-grid" id="recipe-grid" aria-live="polite"></div>
     </section>
-    <details class="panel panel--collapsible" id="planner">
-      <summary>
-        <span class="panel__title">Bottle planner</span>
-        <span class="panel__blurb">Already have a batch? What to pack for a specific ride.</span>
-      </summary>
-      <div class="panel__body">
-      <p>Three questions, one answer. Assumes the standard mix rather than reading your exact formulation, which is close enough for filling bottles.</p>
-
-      <form id="ride-form" novalidate>
-        <div class="input-grid" style="max-width:58rem;">
-          <div class="field">
-            <label for="in-duration">How long are you out? (hours)</label>
-            <input type="number" id="in-duration" min="0.25" max="24" step="0.25" value="3" inputmode="decimal">
-          </div>
-          <div class="field field--select">
-            <label for="in-intensity">How hard?</label>
-            <select id="in-intensity"></select>
-            <span class="field-hint" id="intensity-note"></span>
-          </div>
-          <div class="field field--select">
-            <label for="in-weather">How hot?</label>
-            <select id="in-weather"></select>
-            <span class="field-hint" id="weather-note"></span>
-          </div>
-          <div class="field field--select">
-            <label for="in-bottle">Bottle size</label>
-            <select id="in-bottle"></select>
-          </div>
-        </div>
-      </form>
-
-      <div class="ride-answer" id="ride-answer" aria-live="polite"></div>
-      <p class="field-hint" id="ride-caveat"></p>
-      </div>
-    </details>
     <details class="panel panel--collapsible" id="label">
       <summary>
         <span class="panel__title">Make a label</span>
@@ -268,14 +233,39 @@
       </div>
       </div>
     </details>
-    <details class="panel panel--collapsible" id="tuning">
+    <details class="panel panel--collapsible" id="planner">
       <summary>
-        <span class="panel__title">Troubleshooting</span>
-        <span class="panel__blurb">Ten things that go wrong, and what to change — from a batch that won't mix to a stomach that won't settle.</span>
+        <span class="panel__title">Bottle planner</span>
+        <span class="panel__blurb">Already have a batch? What to pack for a specific ride.</span>
       </summary>
       <div class="panel__body">
-        <p>Roughly in the order you'd meet them: making the batch, mixing a bottle, getting the taste right, then how it actually feels once you're riding.</p>
-        <div class="tuning-list" id="tuning-list"></div>
+      <p>Three questions, one answer. Assumes the standard mix rather than reading your exact formulation, which is close enough for filling bottles.</p>
+
+      <form id="ride-form" novalidate>
+        <div class="input-grid" style="max-width:58rem;">
+          <div class="field">
+            <label for="in-duration">How long are you out? (hours)</label>
+            <input type="number" id="in-duration" min="0.25" max="24" step="0.25" value="3" inputmode="decimal">
+          </div>
+          <div class="field field--select">
+            <label for="in-intensity">How hard?</label>
+            <select id="in-intensity"></select>
+            <span class="field-hint" id="intensity-note"></span>
+          </div>
+          <div class="field field--select">
+            <label for="in-weather">How hot?</label>
+            <select id="in-weather"></select>
+            <span class="field-hint" id="weather-note"></span>
+          </div>
+          <div class="field field--select">
+            <label for="in-bottle">Bottle size</label>
+            <select id="in-bottle"></select>
+          </div>
+        </div>
+      </form>
+
+      <div class="ride-answer" id="ride-answer" aria-live="polite"></div>
+      <p class="field-hint" id="ride-caveat"></p>
       </div>
     </details>
     <details class="panel panel--collapsible" id="buy">
@@ -308,6 +298,16 @@
       <div class="card-grid" id="cost-breakdown"></div>
 
       <p class="field-hint" id="cost-note"></p>
+      </div>
+    </details>
+    <details class="panel panel--collapsible" id="tuning">
+      <summary>
+        <span class="panel__title">Troubleshooting</span>
+        <span class="panel__blurb">Ten things that go wrong, and what to change — from a batch that won't mix to a stomach that won't settle.</span>
+      </summary>
+      <div class="panel__body">
+        <p>Roughly in the order you'd meet them: making the batch, mixing a bottle, getting the taste right, then how it actually feels once you're riding.</p>
+        <div class="tuning-list" id="tuning-list"></div>
       </div>
     </details>
     <details class="panel panel--collapsible" id="research">

@@ -753,18 +753,6 @@ html { scroll-behavior: smooth; }
 
 .tuning-item[open] summary { border-bottom: 1px solid var(--rule); }
 
-.tuning-item__tag {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.64rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  background: var(--input-yellow);
-  color: #171512;
-  border: 1px solid var(--input-yellow-border);
-  padding: 0.1rem 0.4rem;
-  white-space: nowrap;
-}
-
 .tuning-item__body { padding: 0.9rem 1rem 1rem; }
 .tuning-item__body > p { max-width: var(--measure); }
 

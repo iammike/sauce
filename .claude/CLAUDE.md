@@ -44,6 +44,11 @@
 ## Don't use :last-of-type on panels
 - Panels are a mix of `<section>` and `<details>`, so `:last-of-type` matches the last of *each* type — it silently hit the calculator (the only remaining section) and ate its bottom padding, running the rule into the Weigh Out cells. Use `main > .panel:last-child`
 
+## Page order: do it, then look it up
+- **Do:** make a batch (open) &rarr; label the jar &rarr; bottle planner for a given ride
+- **Look up:** what to buy &rarr; cost &rarr; troubleshooting &rarr; the science
+- The nav must mirror this order exactly — it teaches the shape of the page, and a stale nav says the opposite of what the page does
+
 ## Section responsibilities
 - **Calculator** owns every input that changes the batch — including planned carb intake and sweat conditions, because the salt solve reads them. **Per hour** is a pure readout with no inputs at all; if you find yourself adding a control there, it belongs above
 - A collapsible panel's `panel__blurb` stays visible when it's open, so the body must not restate it. Three of them opened with a paraphrase of their own summary, which reads like a stutter

@@ -8,13 +8,6 @@
 
 export const TUNING = [
   {
-    id: 'scoop-calibration',
-    symptom: 'You do not know what your scoop weighs',
-    fix: 'Weigh it. Fill your scoop the way you actually fill it — same packing, same level-off — tip it onto a kitchen scale, and enter that number as your scoop size.',
-    why: 'There is no standard scoop. The same scoop holds different weights depending on how packed the powder is, and this mix runs roughly 0.6–0.7 g per cc, so a scoop sold as "60 cc" lands somewhere near 36–42 g. Every per-scoop number on this page — carbs, sodium, calories — is only as accurate as this one input.',
-    tag: 'Start here',
-  },
-  {
     id: 'uneven-batch',
     symptom: 'The batch is not evenly mixed',
     fix: 'Leave the container at least a third empty and shake it properly — end over end, not side to side, for a good minute. Top the container up only after mixing.',
@@ -25,6 +18,12 @@ export const TUNING = [
     symptom: 'Clumping in the bottle or not dissolving',
     fix: 'Add powder to water rather than water to powder, and mix in stages. Warm water dissolves it faster.',
     why: 'Maltodextrin gels on contact when water hits a dry pile, sealing the outside and leaving dry powder trapped inside. Adding powder into moving water keeps the particles separated. This is a mixing-technique problem, not a formulation one — no ratio change will fix it.',
+  },
+  {
+    id: 'scoop-calibration',
+    symptom: 'You want to scoop rather than weigh every time',
+    fix: 'Weigh your scoop once. Fill it the way you actually fill it — same packing, same level-off — tip it onto the scale, and use that number.',
+    why: 'There is no standard scoop. The same scoop holds different weights depending on how packed the powder is, and this mix runs roughly 0.6–0.7 g per cc, so a scoop sold as "60 cc" lands somewhere near 36–42 g. Every per-scoop number on this page — carbs, sodium, calories — is only as accurate as this one input.',
   },
   {
     id: 'too-sweet',
