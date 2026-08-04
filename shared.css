@@ -435,11 +435,39 @@ main {
   gap: 0.3rem;
 }
 
+/* The note and the field it describes must never split across rows — with an
+   auto-fit grid they otherwise can, which would leave the arrow pointing at
+   nothing. Pairing them makes the direction knowable, so the arrow can flip
+   when they stack. */
+.field-pair {
+  grid-column: span 2;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 700px) {
+  .field-pair {
+    grid-column: span 1;
+    grid-template-columns: 1fr;
+  }
+}
+
 /* A cell that carries context rather than an input, so it keeps the grid's
    rhythm instead of interrupting it with a box. */
 .field--note {
   justify-content: flex-start;
   padding-top: 1.35rem;
+  position: relative;
+}
+
+.field__note-title::after {
+  content: ' →';
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+@media (max-width: 700px) {
+  .field__note-title::after { content: ' ↓'; }
 }
 
 .field__note-title {

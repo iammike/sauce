@@ -120,14 +120,16 @@
             <input type="number" id="in-target-carbs" min="10" max="200" step="5" value="75">
             <span class="field-hint">Doesn't change the mix — defines one serving as an hour at this rate, for the label. <a href="ride.html">Bottle planner</a></span>
           </div>
-          <div class="field field--note">
-            <span class="field__note-title">Advanced</span>
-            <span class="field-hint">The tested recipe is 0.65 g of fructose per gram of maltodextrin. There's rarely a reason to move it.</span>
-          </div>
-          <div class="field">
-            <label for="in-carb-ratio">Fructose ratio <span class="field-hint">per 1 g malto</span></label>
-            <input type="number" id="in-carb-ratio" min="0" max="1.5" step="0.05" value="0.65" inputmode="decimal">
-            <span class="field-hint" id="ratio-readout"></span>
+          <div class="field-pair">
+            <div class="field field--note">
+              <span class="field__note-title">Advanced</span>
+              <span class="field-hint">The tested recipe is 0.65 g of fructose per gram of maltodextrin. There's rarely a reason to move it.</span>
+            </div>
+            <div class="field">
+              <label for="in-carb-ratio">Fructose ratio <span class="field-hint">per 1 g malto</span></label>
+              <input type="number" id="in-carb-ratio" min="0" max="1.5" step="0.05" value="0.65" inputmode="decimal">
+              <span class="field-hint" id="ratio-readout"></span>
+            </div>
           </div>
         </div>
         <p class="field-hint" id="calc-limiting"></p>

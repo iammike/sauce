@@ -44,6 +44,10 @@ export function initDisclosureAnimation(root = document) {
     if (!summary || !body) return;
 
     summary.addEventListener('click', (event) => {
+      // A link in the summary has to navigate. preventDefault here would
+      // swallow it and just toggle the panel instead.
+      if (event.target.closest('a')) return;
+
       // Mid-animation clicks would fight the running transition.
       if (details.dataset.animating === '1') {
         event.preventDefault();
