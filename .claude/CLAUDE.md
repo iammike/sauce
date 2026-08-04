@@ -40,9 +40,10 @@
 - `data/label-sizes.js` drives the sheet dimensions; `wide: true` switches to a two-column layout with brand and artwork on the left, facts on the right. That's the wrap-a-tub format, printed landscape on one sheet
 - `@page { size: auto }` so a landscape sheet isn't clipped by a portrait page
 
-## Prose gets a measure, structure doesn't
-- `--measure` (40rem, ~78 characters) holds panel intros and troubleshooting bodies. Full-width prose on this page runs ~134 characters, well past the readable 45-75
-- Bars, grids and controls do span full width — the constraint is on text, not containers
+## Horizontal space
+- Input grids all run the full content width and let `auto-fit` pick the columns. Per-panel caps made identical controls different sizes in different sections
+- `--measure` (40rem) applies only to **sustained** prose — troubleshooting bodies. Short intros and blurbs read fine running wider; capping them just wraps them early with dead space alongside
+- If a blurb or intro wraps, shorten the copy rather than widening the container
 
 ## Careful with string replace on CSS selectors
 - A bare `.panel__title {` matched twice and spliced a new rule into the middle of the `:target` selector, leaving every collapsible heading permanently strawberry. Match on enough context to be unique, and check the occurrence count
