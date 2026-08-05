@@ -347,9 +347,7 @@ a:hover { color: var(--strawberry-dark); }
 main {
   max-width: 72rem;
   margin: 0 auto;
-  /* The footer used to provide the space under the last panel. Without it the
-     page ended flush against that panel's rule. */
-  padding: 0 1.5rem 4rem;
+  padding: 0 1.5rem 2rem;
 }
 
 .panel {
@@ -893,6 +891,18 @@ html { scroll-behavior: smooth; }
 }
 
 /* ---------- Footer ---------- */
+
+/* ---------- Footer ---------- */
+
+.site-footer {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 0 1.5rem 3rem;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+
+.site-footer a { color: var(--strawberry); }
 
 /* ---------- Label creator ----------
    A real label at real dimensions (3in x 4in), not a styled page. Sized in
