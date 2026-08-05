@@ -380,6 +380,22 @@ function applyLabelSize() {
   $('label-size-note').textContent = size.wide
     ? 'Prints landscape on one sheet. Brand on the left, facts on the right.'
     : `Prints at ${size.widthIn} × ${size.heightIn} in.`;
+  fitLabelPreview();
+}
+
+// A wrap-the-tub sheet is 11in wide — on a phone the 1:1 preview shows a
+// sliver and a tall column of blank stage. Scale it down to fit instead.
+// `zoom` rather than `transform` because it shrinks the layout box too, so
+// the stage doesn't keep the full-size height. Print is unaffected: the print
+// stylesheet resets it, so the sheet still comes out at true size.
+function fitLabelPreview() {
+  const stage = document.querySelector('.label-stage');
+  const sheet = $('label-sheet');
+  if (!stage) return;
+  sheet.style.zoom = '';
+  const room = stage.clientWidth - 2 * parseFloat(getComputedStyle(stage).paddingLeft);
+  const natural = sheet.getBoundingClientRect().width;
+  if (natural > room && room > 0) sheet.style.zoom = room / natural;
 }
 
 function initLabel() {
@@ -396,6 +412,12 @@ function initLabel() {
     .forEach((id) => $(id).addEventListener('input', recalculate));
 
   $('in-label-art').addEventListener('change', (e) => loadArtwork(e.target.files[0]));
+
+  // A collapsed <details> gives its children zero width, so the fit can only
+  // be measured once the panel is actually open — and again if the viewport
+  // changes underneath it.
+  document.getElementById('label').addEventListener('toggle', fitLabelPreview);
+  window.addEventListener('resize', fitLabelPreview);
 
   $('print-label-btn').addEventListener('click', () => {
     const title = document.title;
