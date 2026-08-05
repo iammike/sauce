@@ -902,7 +902,15 @@ html { scroll-behavior: smooth; }
   color: var(--ink-soft);
 }
 
+.site-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
 .site-footer a { color: var(--strawberry); }
+.site-footer__by { white-space: nowrap; }
 
 /* ---------- Label creator ----------
    A real label at real dimensions (3in x 4in), not a styled page. Sized in
