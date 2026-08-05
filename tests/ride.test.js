@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   INTENSITIES, WEATHER, SALT_CAPSULE_MG, CONCENTRATION_BANDS,
   baseRecipeProfile, carbTargetFor, sodiumNeedFor, planRide, concentrationBand,
+  drinkingRateFor, MAX_FLUID_L_PER_HOUR,
 } from '../src/ride.js';
 import { CARB_INTAKE_TIERS } from '../src/hourly.js';
 import { computeRecipe } from '../src/calculator.js';
@@ -224,5 +225,42 @@ describe('using the batch on screen', () => {
     // A hot-profile batch carries more sodium than the endurance default.
     const standard = planRide({ durationHours: 3, intensityId: 'moderate', weatherId: 'mild' });
     expect(plan.sodiumFromMix).toBeGreaterThan(standard.sodiumFromMix);
+  });
+});
+
+describe('drinkingRateFor', () => {
+  it('is well below the sweat rate — riders do not replace losses in full', () => {
+    // The original bug: sweat rate was used directly as drinking rate, which
+    // overstated bottles by roughly a third.
+    const d = drinkingRateFor('moderate', 'mild');
+    expect(d.litresPerHour).toBeLessThan(d.sweatLitresPerHour);
+    expect(d.litresPerHour / d.sweatLitresPerHour).toBeCloseTo(0.75, 2);
+  });
+
+  it('never exceeds what the stomach can absorb', () => {
+    for (const i of INTENSITIES) {
+      for (const w of WEATHER) {
+        expect(drinkingRateFor(i.id, w.id).litresPerHour).toBeLessThanOrEqual(MAX_FLUID_L_PER_HOUR);
+      }
+    }
+  });
+
+  it('flags the cases where sweat outpaces absorption', () => {
+    expect(drinkingRateFor('hard', 'hot').limitedByStomach).toBe(true);
+    expect(drinkingRateFor('moderate', 'mild').limitedByStomach).toBe(false);
+  });
+
+  it('puts a mild moderate ride near one 620 ml bottle an hour', () => {
+    // Sanity anchor: a rider who drinks a large bottle an hour should come out
+    // slightly above this estimate, not far below it.
+    const bottlesPerHour = drinkingRateFor('moderate', 'mild').litresPerHour * 1000 / 620;
+    expect(bottlesPerHour).toBeGreaterThan(0.6);
+    expect(bottlesPerHour).toBeLessThan(1.1);
+  });
+
+  it('keeps a three-hour ride within a plausible bottle count', () => {
+    const p = planRide({ durationHours: 3, intensityId: 'moderate', weatherId: 'mild', bottleMl: 620 });
+    expect(p.bottlesNeeded).toBeGreaterThan(1.5);
+    expect(p.bottlesNeeded).toBeLessThan(3.5);
   });
 });

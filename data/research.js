@@ -52,6 +52,14 @@ export const RESEARCH = [
     note: 'The evidence behind intakes above 90 g/hr. Oxidation keeps rising at 120 g/hr with maltodextrin plus fructose, and the gut adapts to repeated exposure — though field intakes of 120–200 g/hr still outpace the evidence, and measured performance gains taper above roughly 78 g/hr in recreationally trained riders.',
   },
   {
+    id: 'gastric-emptying',
+    role: 'How much you can actually drink',
+    name: 'Gastric emptying and intestinal absorption during cycling',
+    source: 'Various; see Rehrer et al. and Gisolfi et al.',
+    url: 'https://pubmed.ncbi.nlm.nih.gov/8775576/',
+    note: 'Gastric emptying during cycling runs about 18–20 ml/min, so roughly 1.0–1.2 litres an hour is the ceiling on what can be absorbed regardless of how much is drunk. Riders also replace only about 73% of what they sweat rather than matching it. Both figures feed the bottle count.',
+  },
+  {
     id: 'sweat-rate',
     role: 'Sweat rate and sodium loss',
     name: 'Sweat rate & sodium loss overview',

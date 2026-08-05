@@ -25,10 +25,36 @@ export const WEATHER = [
 ];
 
 // Average sweat sodium. Individual values range from roughly 500 to 1300
-// mg/L, which is exactly the variation this page declines to model — the
-// batch calculator asks about it if you want that precision.
+// mg/L, which is exactly the variation this page declines to model.
 const AVERAGE_SWEAT_SODIUM_MG_PER_L = 950;
 const REPLACEMENT_FRACTION = 0.65;
+
+// How much of the sweat lost actually gets drunk. Riders do not replace their
+// losses in full — measured fluid replacement in cycling sits near 73%, which
+// leaves a small body-mass deficit rather than a matched intake. Treating
+// sweat rate as drinking rate overstated bottles by roughly a third.
+const FLUID_REPLACEMENT_FRACTION = 0.75;
+
+// Gastric emptying during cycling runs about 18-20 ml/min, so roughly 1.0-1.2
+// litres an hour is the ceiling on what can be absorbed however much is
+// drunk. Without this, hot and hard predicted 2 L/hr — more than the stomach
+// can pass.
+export const MAX_FLUID_L_PER_HOUR = 1.2;
+
+/** Litres an hour a rider will actually drink in these conditions. */
+export function drinkingRateFor(intensityId, weatherId) {
+  const intensity = findIntensity(intensityId) ?? INTENSITIES[1];
+  const weather = findWeather(weatherId) ?? WEATHER[1];
+  const sweatLitres = weather.litresPerHour * intensity.sweatFactor;
+  const wanted = sweatLitres * FLUID_REPLACEMENT_FRACTION;
+  return {
+    litresPerHour: Math.min(wanted, MAX_FLUID_L_PER_HOUR),
+    // True when sweat outpaces what can be absorbed — a real situation in
+    // heat, and worth saying rather than quietly capping.
+    limitedByStomach: wanted > MAX_FLUID_L_PER_HOUR,
+    sweatLitresPerHour: sweatLitres,
+  };
+}
 
 // Common cycling bottle sizes. Volume matters less for dividing the powder up
 // — that's arithmetic — than for concentration, which is the usual culprit
@@ -157,15 +183,13 @@ export function planRide({ durationHours, intensityId, weatherId, bottleMl = 750
 /**
  * How the powder lands in bottles.
  *
- * Fluid volume comes from the same sweat estimate used for sodium — how much
- * you ought to be drinking — rather than another question. That makes the
- * concentration figure meaningful without a fourth input.
+ * Fluid comes from the drinking rate, not the sweat rate — see
+ * drinkingRateFor. Sodium still works off sweat, because that is what is
+ * actually lost.
  */
 function bottlePlan({ intensityId, weatherId, durationHours, totalMixGrams, bottleMl }) {
-  const intensity = findIntensity(intensityId) ?? INTENSITIES[1];
-  const weather = findWeather(weatherId) ?? WEATHER[1];
-
-  const fluidMl = weather.litresPerHour * intensity.sweatFactor * durationHours * 1000;
+  const drinking = drinkingRateFor(intensityId, weatherId);
+  const fluidMl = drinking.litresPerHour * durationHours * 1000;
   if (!(fluidMl > 0) || !(bottleMl > 0)) return { concentrationPercent: 0 };
 
   const concentrationPercent = (totalMixGrams / fluidMl) * 100;
@@ -178,5 +202,7 @@ function bottlePlan({ intensityId, weatherId, durationHours, totalMixGrams, bott
     gramsPerBottle: (totalMixGrams / fluidMl) * bottleMl,
     concentrationPercent,
     concentration: concentrationBand(concentrationPercent),
+    litresPerHour: drinking.litresPerHour,
+    limitedByStomach: drinking.limitedByStomach,
   };
 }

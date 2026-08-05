@@ -25,6 +25,7 @@
 - It still estimates sodium from **conditions only** — no sweat profile, no salt solving. That part stays coarse on purpose
 - Duration, not distance: the carb guidance is duration-based, and deriving duration from distance needs a speed guess that adds more error than it removes
 - Salt advice is rounded to 50 mg and expressed in countable capsules. Don't make it look precise
+- **Sweat rate and drinking rate are different numbers.** Sodium comes off sweat (what you lose); bottles come off `drinkingRateFor()` (what you actually drink — about 75% of losses, capped at 1.2 L/hr by gastric emptying). Using sweat rate for both overstated bottles by roughly a third and once predicted 2 L/hr, past what a stomach can pass
 - `src/ride-app.js` exports `initRidePlanner()` rather than self-starting, and `src/app.js` calls it. One page, one bundle
 
 ## Disclosure animation is JS, deliberately

@@ -65,6 +65,12 @@ function render() {
     ? `<p class="ride-answer__detail"><strong>${plan.concentration.label}</strong> at ${plan.concentrationPercent.toFixed(0)}%. ${plan.concentration.note}</p>`
     : `<p class="ride-answer__detail"><span class="warn">${plan.concentration.label}</span> at ${plan.concentrationPercent.toFixed(0)}%. ${plan.concentration.note}</p>`;
 
+  // When sweat outpaces absorption there is no bottle strategy that keeps up,
+  // which is worth saying rather than just printing a capped number.
+  const fluid = plan.limitedByStomach
+    ? `<p class="ride-answer__detail"><span class="warn">You will lose fluid faster than you can absorb it.</span> Around 1.2 L/hr is the ceiling on what the stomach passes, so expect to finish down on fluid and drink afterwards.</p>`
+    : '';
+
   const gut = plan.needsTrainedGut
     ? `<p class="ride-answer__detail"><span class="warn">${plan.carbsPerHour} g/hr is a high rate.</span> Practise it in training before relying on it.</p>`
     : '';
@@ -76,6 +82,7 @@ function render() {
     </div>
     <p class="ride-answer__detail">That's <strong>${formatGrams(plan.mixGramsPerHour)} an hour</strong>, giving you ${plan.carbsPerHour} g of carbs per hour and ${plan.totalCarbs} g across the ride.</p>
     ${bottles}
+    ${fluid}
     ${strength}
     ${salt}
     ${gut}`;
