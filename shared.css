@@ -421,21 +421,44 @@ main > .panel:last-child { padding-bottom: 0; }
   border-bottom: 3px solid var(--rule);
 }
 
+/* Title and blurb stack in one column, toggle pinned in the next, so the
+   toggle always sits at the top right no matter how the text wraps.
+   This was a wrapping flex row with `margin-left: auto` on the toggle: it
+   sat beside the blurb when all three fit on one line and dropped onto a
+   line of its own when they didn't — inconsistent between panels and
+   between widths, and the orphaned line left a tall gap above the body.
+   Ends up where the troubleshooting entries already sat, though those get
+   there by staying on one line rather than by being placed.
+   Stacking the blurb costs ~28px per header on desktop, where it used to
+   sit inline. Taken deliberately: one arrangement at every width beats a
+   header that reflows into a different shape partway down the page. */
 .panel--collapsible > summary {
   list-style: none;
   cursor: pointer;
   padding: 1.75rem 0;
-  display: flex;
-  align-items: baseline;
-  gap: 1rem;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  /* Wider than the old 1rem so the toggle can't crowd a long title; rows
+     tighter than it, because a blurb belongs to the title above it. */
+  column-gap: 1.5rem;
+  row-gap: 0.4rem;
 }
+
+/* Anything added to a summary later stacks in the text column by default.
+   Without this it auto-places into row 2 column 2 — underneath the toggle,
+   hard against the right edge. */
+.panel--collapsible > summary > * { grid-column: 1; }
 
 .panel--collapsible > summary::-webkit-details-marker { display: none; }
 
 .panel--collapsible > summary::after {
   content: '+';
-  margin-left: auto;
+  grid-column: 2;
+  grid-row: 1;
+  /* Both sides of the row must opt in or baseline alignment silently
+     degrades to `start` — a baseline group of one aligns against nothing.
+     The title opts in below. */
+  align-self: baseline;
   font-family: 'IBM Plex Mono', monospace;
   font-size: 1.5rem;
   color: var(--strawberry);
@@ -444,7 +467,17 @@ main > .panel:last-child { padding-bottom: 0; }
 
 .panel--collapsible[open] > summary::after { content: '–'; }
 
-.panel--collapsible > summary .panel__title { margin: 0; }
+.panel--collapsible > summary .panel__title {
+  margin: 0;
+  grid-column: 1;
+  grid-row: 1;
+  align-self: baseline;
+}
+
+.panel--collapsible > summary .panel__blurb {
+  grid-column: 1;
+  grid-row: 2;
+}
 
 .panel__blurb {
   font-size: 0.9rem;
