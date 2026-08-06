@@ -10,11 +10,19 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      # 20.9 is the floor engines.node declares, and the reason jsdom is held
+      # at ~26 — 28 needs require(esm), which lands in 20.19. Testing only the
+      # newest version would let a future bump quietly break local dev, since
+      # the constraint exists for a machine CI never runs on.
+      matrix:
+        node-version: ['20.9', '22']
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: ${{ matrix.node-version }}
           cache: npm
       - run: npm ci
       - run: npm test

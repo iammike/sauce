@@ -408,7 +408,13 @@ function initLabel() {
   const dateInput = $('in-label-date');
   if (!dateInput.value) dateInput.value = new Date().toISOString().slice(0, 10);
 
-  ['in-label-name', 'in-label-flavor', 'in-label-maker', 'in-label-date', 'in-label-note']
+  // in-scoop belongs here too. It sits in this panel rather than the
+  // calculator because the directions line is its only consumer, which also
+  // puts it outside #calc-form and so outside that form's input listener —
+  // without this, changing your scoop size left the printed directions
+  // quoting the old one until some unrelated input forced a re-render.
+  ['in-label-name', 'in-label-flavor', 'in-label-maker', 'in-label-date',
+    'in-label-note', 'in-scoop']
     .forEach((id) => $(id).addEventListener('input', recalculate));
 
   $('in-label-art').addEventListener('change', (e) => loadArtwork(e.target.files[0]));
