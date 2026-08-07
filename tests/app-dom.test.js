@@ -11,10 +11,6 @@
 // shared window, and a stale hashchange listener will happily open a panel and
 // make an anchor test pass with the code under test deleted. Verified by
 // mutation, not assumed.
-//
-// jsdom is pinned to 26 because 28 require()s an ESM-only dependency, which
-// throws ERR_REQUIRE_ESM on Node below 20.19 / 22.12. CI is on 22, but local
-// Node 20.9 is not, and a test you can't run locally is a test you stop running.
 
 import { describe, it, expect, beforeEach, afterAll, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
@@ -66,11 +62,10 @@ async function loadApp({ hash = '' } = {}) {
   // there. Anything missing shows up as a ReferenceError at import, which is
   // the same failure a stray Node-only assumption would produce.
   //
-  // defineProperty, not assignment: Node 21+ ships some of these as getter-only
-  // accessors on globalThis, and a plain assignment throws in strict mode
-  // (which ESM always is). `navigator` is the one that bites today — it does
-  // not exist at all on Node 20, so assignment works locally and dies on the
-  // Node 22 that CI runs. Assume the list of such globals will grow.
+  // defineProperty, not assignment: from Node 21 on, some of these exist on
+  // globalThis as getter-only accessors, and a plain assignment to one throws
+  // in strict mode (which ESM always is). `navigator` is the one that bites
+  // today. Assume the list will grow.
   defineGlobal('window', window);
   for (const name of ['document', 'location', 'getComputedStyle',
     'requestAnimationFrame', 'cancelAnimationFrame', 'Event', 'Element',
