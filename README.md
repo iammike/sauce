@@ -52,6 +52,11 @@ Supplement Facts panel. From there:
 
 ## Develop
 
+Needs **Node 22.12–22.x, or 24+** — 23 is rejected, not just old. `.npmrc` sets
+`engine-strict`, so an unsupported Node stops at `npm install` naming the
+version required, rather than failing later inside the test run. The floor is
+jsdom's: it needs `require(esm)`.
+
 ```bash
 npm install
 npm run build   # bundle src/app.js + shared.css into dist/

@@ -12,12 +12,28 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      # 20.9 is the floor engines.node declares, and the reason jsdom is held
-      # at ~26 — 28 needs require(esm), which lands in 20.19. Testing only the
-      # newest version would let a future bump quietly break local dev, since
-      # the constraint exists for a machine CI never runs on.
+      # Every version band engines.node (">=22.12 <23 || >=24") permits:
+      # its floor, the maintenance line deploy.yml runs on, and Active LTS.
+      #
+      # 22.12 is pinned because '22' resolves to the newest 22.x, so nothing
+      # would otherwise run the declared floor — and a dependency raising its
+      # own floor above engines.node, while staying below whatever '22'
+      # resolves to, would pass CI while being broken for anyone on a version
+      # package.json claims to support. .npmrc makes engines enforced rather
+      # than advisory, so an untested band is a promise npm keeps on our
+      # behalf without anything checking it.
+      #
+      # The floor is 22.12 because jsdom is CJS but require()s ESM-only
+      # dependencies, so it needs require(esm) — which landed in 20.19 and
+      # 22.12. Node 20 is excluded for being EOL (2026-04-30) and untested
+      # here, not because it cannot work. 23 the range rejects outright; 25
+      # the range permits but no job runs, because it is EOL.
+      #
+      # This list is not self-maintaining: `>=24` is open-ended, so a new
+      # even-numbered major is installable the day it ships with nothing
+      # having run it. Add an entry when one lands.
       matrix:
-        node-version: ['20.9', '22']
+        node-version: ['22.12', '22', '24']
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
