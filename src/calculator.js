@@ -25,6 +25,13 @@ export const SALT_PROFILES = {
   hot: { ratio: 0.085, label: 'Hot / heavy sweat', note: 'As salty as the mix takes before you taste it.' },
 };
 
+// Named rather than left as "the first key" — SALT_PROFILES is ordered by
+// increasing salt concentration (moderate, endurance, hot), not by which one
+// is the default, so Object.keys(SALT_PROFILES)[0] would silently pick
+// 'moderate'. This is the one every caller falling back to "the tested
+// recipe" should use.
+export const DEFAULT_SALT_PROFILE = 'endurance';
+
 // Sodium citrate dihydrate. (Table salt/NaCl is ~393 mg Na/g — do not use that
 // figure here; an earlier version of the source spreadsheet did, and overstated
 // sodium by ~40%.)

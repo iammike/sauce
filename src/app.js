@@ -8,10 +8,11 @@ import { PRODUCTS } from '../data/products.js';
 import { RESEARCH, findResearch } from '../data/research.js';
 import { batchCost, costPerGramCarb, compareAtCarbTarget } from './cost.js';
 import { PRICED_AS_OF, INGREDIENT_COSTS, HOMEMADE_LIMITATION } from '../data/costs.js';
-import { SALT_PROFILES } from './calculator.js';
+import { SALT_PROFILES, DEFAULT_SALT_PROFILE } from './calculator.js';
 import { initDisclosureAnimation } from './disclosure.js';
 import { initRidePlanner, updateRidePlanner } from './ride-app.js';
 import { LABEL_SIZES, findLabelSize } from '../data/label-sizes.js';
+import { saveCalcFormState, restoreCalcFormState } from './persist.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -19,6 +20,7 @@ function readInputs() {
   const flavor = findFlavoring($('in-flavor-preset').value) ?? FLAVORINGS[0];
   const capRaw = $('in-cap').value;
   const carbRatio = Number($('in-carb-ratio').value) || 0;
+  const saltProfileValue = $('in-salt-profile').value;
   return {
     onHand: {
       maltodextrin: Number($('in-malto').value) || 0,
@@ -26,7 +28,18 @@ function readInputs() {
       flavoring: Number($('in-flavoring').value) || 0,
       salt: Number($('in-salt').value) || 0,
     },
-    saltProfile: $('in-salt-profile').value,
+    // ratiosFor() throws on a name SALT_PROFILES doesn't define, which would
+    // otherwise abort init() and blank the whole page. initSaltProfiles()
+    // below builds this select's options from SALT_PROFILES directly, so
+    // that can no longer happen through markup drift — this fallback is for
+    // a value that reaches the select some other way: an in-flight tab from
+    // before a profile was renamed, or persist.js restoring a stale record.
+    // hasOwnProperty, not `in` — `in` walks the prototype chain, so
+    // 'constructor' would resolve to Object.prototype.constructor and slip
+    // through with an undefined .ratio instead of being rejected.
+    saltProfile: Object.prototype.hasOwnProperty.call(SALT_PROFILES, saltProfileValue)
+      ? saltProfileValue
+      : DEFAULT_SALT_PROFILE,
     scoopGrams: Number($('in-scoop').value) || 1,
     carbRatio,
     maxBatchGrams: capRaw === '' ? undefined : Number(capRaw),
@@ -210,8 +223,18 @@ function renderRatioReadout() {
 // A batch is mixed in advance and can't know Saturday's weather. Salt level is
 // a general choice here; reading conditions on the day — including whether to
 // take extra salt — is what the bottle planner is for.
-function renderSaltNote() {
-  const profile = SALT_PROFILES[$('in-salt-profile').value];
+//
+// Takes the already-resolved profile name rather than reading and resolving
+// $('in-salt-profile').value again itself. A second independent resolution
+// of the same select can disagree with the first: readInputs() falls back to
+// DEFAULT_SALT_PROFILE for a value SALT_PROFILES doesn't define (a bad
+// persisted record, or an in-flight tab from before a profile was renamed),
+// but a second direct read here saw the raw unresolved value, found no
+// profile, and blanked the note — while the batch below it was computed at
+// the fallback's numbers. The note said nothing was wrong; the sodium figure
+// was quietly for a different salt level than the one the select displayed.
+function renderSaltNote(saltProfile) {
+  const profile = SALT_PROFILES[saltProfile];
   $('salt-profile-note').textContent = profile
     ? `${profile.note} Adjust for conditions on the day, not in the jar.`
     : '';
@@ -225,7 +248,7 @@ function recalculate() {
   const serving = servingFor(recipe, targetCarbs, scoopGrams);
 
   renderRatioReadout();
-  renderSaltNote();
+  renderSaltNote(inputs.saltProfile);
   renderFactsPanel(recipe, serving, targetCarbs);
   renderRecipeGrid(recipe);
   renderLabel(recipe, serving, targetCarbs);
@@ -251,6 +274,20 @@ function initFlavorPresets() {
   const select = $('in-flavor-preset');
   select.innerHTML = FLAVORINGS.map((f) => `<option value="${f.id}">${f.shortName ?? f.name}</option>`).join('');
   select.value = 'strawberry';
+}
+
+// Built from SALT_PROFILES rather than left as hand-written <option>s in
+// index.html, the same reason initFlavorPresets() builds from FLAVORINGS: a
+// hand-maintained option list can name a value SALT_PROFILES doesn't define,
+// which used to throw inside ratiosFor() and blank the page, and — after that
+// was given a fallback in readInputs() — could instead render silently at the
+// wrong salt level with no error. Building the options here removes the
+// drift entirely rather than only detecting it.
+function initSaltProfiles() {
+  const select = $('in-salt-profile');
+  select.innerHTML = Object.entries(SALT_PROFILES)
+    .map(([id, profile]) => `<option value="${id}">${profile.label}</option>`).join('');
+  select.value = DEFAULT_SALT_PROFILE;
 }
 
 function renderProductCards(list) {
@@ -446,20 +483,36 @@ function openTargetedPanel() {
   }
 }
 
+// Recalculate and persist together, so every listener that changes the
+// batch keeps the saved copy in sync rather than needing its own hook.
+function handleCalcFormChange() {
+  recalculate();
+  saveCalcFormState();
+}
+
 function init() {
   initFlavorPresets();
+  initSaltProfiles();
   initTuning();
   initProducts();
   initResearch();
   initLabel();
 
-  document.getElementById('calc-form').addEventListener('input', recalculate);
+  // Must run after initFlavorPresets()/initSaltProfiles() set both selects'
+  // options, and before the first recalculate() reads the form — otherwise a
+  // saved flavoring or salt profile would be overwritten by the select's own
+  // default.
+  restoreCalcFormState();
+
+  // in-target-carbs needs no listener of its own: it's a plain number input
+  // inside #calc-form, already covered by the form-level 'input' listener
+  // below via bubbling.
+  document.getElementById('calc-form').addEventListener('input', handleCalcFormChange);
   // Selects need an explicit change listener. The form's 'input' listener
   // happens to cover them in current browsers, but relying on that made the
   // salt level silently not recalculate when driven programmatically.
   ['in-flavor-preset', 'in-salt-profile'].forEach((id) =>
-    $(id).addEventListener('change', recalculate));
-  $('in-target-carbs').addEventListener('input', recalculate);
+    $(id).addEventListener('change', handleCalcFormChange));
 
   recalculate();
   initRidePlanner();

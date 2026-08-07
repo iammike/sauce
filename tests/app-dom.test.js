@@ -22,6 +22,7 @@ import { FLAVORINGS } from '../data/flavorings.js';
 import { TUNING } from '../data/tuning.js';
 import { PRODUCTS, ASSOCIATES_TAG } from '../data/products.js';
 import { LABEL_SIZES } from '../data/label-sizes.js';
+import { SALT_PROFILES } from '../src/calculator.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const html = readFileSync(resolve(root, 'index.html'), 'utf8');
@@ -45,13 +46,24 @@ let current = null;
  *
  * runScripts is left off, so the page's own bundle stays inert and the module
  * under test is the only thing touching the DOM.
+ *
+ * localStorage, likewise, has to be seeded before app.js imports — that's
+ * what "already has saved state" means for a page load. Setting it
+ * afterwards would test whatever save/restore triggers app.js has already
+ * wired up, not whether it reads a prior visit correctly.
  */
-async function loadApp({ hash = '' } = {}) {
+async function loadApp({ hash = '', seedLocalStorage } = {}) {
   const dom = new JSDOM(html, {
     url: `https://sauce.iammike.org/${hash}`,
     pretendToBeVisual: true,
   });
   const { window } = dom;
+
+  if (seedLocalStorage) {
+    for (const [key, value] of Object.entries(seedLocalStorage)) {
+      window.localStorage.setItem(key, value);
+    }
+  }
 
   // jsdom implements neither, and init() calls both.
   window.matchMedia = () => ({ matches: false, addEventListener() {}, removeEventListener() {} });
@@ -69,7 +81,8 @@ async function loadApp({ hash = '' } = {}) {
   defineGlobal('window', window);
   for (const name of ['document', 'location', 'getComputedStyle',
     'requestAnimationFrame', 'cancelAnimationFrame', 'Event', 'Element',
-    'HTMLElement', 'FileReader', 'File', 'Blob', 'Image', 'DOMParser', 'navigator']) {
+    'HTMLElement', 'FileReader', 'File', 'Blob', 'Image', 'DOMParser',
+    'navigator', 'localStorage']) {
     const value = window[name];
     defineGlobal(name, typeof value === 'function' && !/^[A-Z]/.test(name)
       ? value.bind(window)
@@ -201,6 +214,165 @@ describe('inputs drive outputs', () => {
   });
 });
 
+// persist.js's own unit tests (tests/persist.test.js) cover validation and
+// fallback in isolation. What only a full page load can prove is the wiring:
+// that restoreCalcFormState() actually runs during init(), in time to affect
+// the first render, and that the listeners app.js attaches actually call
+// saveCalcFormState() rather than just recalculate().
+describe('persisted calculator inputs', () => {
+  const STORAGE_KEY = 'sauce.calcForm.v1';
+
+  // persist.js's NUMBER_FIELDS/SELECT_FIELDS is a hand-maintained match to
+  // #calc-form's actual controls, not derived from them — a control added to
+  // the form with no matching entry there just silently never persists, with
+  // nothing else in the suite positioned to notice. This is the coupling
+  // test that stands in for deriving the list structurally.
+  it('persists every control #calc-form actually has, and nothing extra', () => {
+    setValue('in-malto', '2000'); // force a save — nothing is written on load alone
+    const formIds = [...document.getElementById('calc-form').elements]
+      .map((el) => el.id).filter(Boolean);
+    const saved = Object.keys(JSON.parse(localStorage.getItem(STORAGE_KEY)));
+    expect(saved.sort()).toEqual(formIds.sort());
+  });
+
+  it('restores a saved batch before the first render', async () => {
+    // in-cap is cleared too, so maltodextrin decides the batch rather than
+    // the container limit. At the default 1814 g on hand, maltodextrin
+    // itself is the limiting ingredient and the card reads exactly 1814 g.
+    // At 5000 g it exceeds what the on-hand fructose can match at the tested
+    // ratio, so fructose takes over as the limit and the card settles lower
+    // — but still above 1814 g. That's only reachable if the restored value
+    // was in the input *before* init()'s first recalculate(), not just
+    // sitting in the field waiting for a change event that never fires on
+    // page load.
+    const w = await loadApp({
+      seedLocalStorage: { [STORAGE_KEY]: JSON.stringify({ 'in-malto': '5000', 'in-cap': '' }) },
+    });
+    const maltoCard = w.document.querySelector('#recipe-grid .card');
+    expect(maltoCard.querySelector('.card__eyebrow').textContent).toMatch(/Maltodextrin/);
+    expect(parseFloat(maltoCard.querySelector('.card__value').textContent)).toBeGreaterThan(1814);
+  });
+
+  it('restores a saved value across every field, not just one', async () => {
+    await loadApp({
+      seedLocalStorage: {
+        [STORAGE_KEY]: JSON.stringify({ 'in-malto': '2222', 'in-salt-profile': 'hot', 'in-target-carbs': '90' }),
+      },
+    });
+    expect($('in-malto').value).toBe('2222');
+    expect($('in-salt-profile').value).toBe('hot');
+    expect($('in-target-carbs').value).toBe('90');
+  });
+
+  it('does not let a saved flavoring get stamped over by the select default', async () => {
+    // initFlavorPresets() hardcodes the select to 'strawberry' while building
+    // its options. Restoring has to run after that, or a saved non-default
+    // flavoring would be silently overwritten the moment the page loads.
+    await loadApp({
+      seedLocalStorage: { [STORAGE_KEY]: JSON.stringify({ 'in-flavor-preset': 'unflavored' }) },
+    });
+    expect($('in-flavor-preset').value).toBe('unflavored');
+    expect($('fp-flavor-name').textContent).not.toMatch(/strawberry/i);
+  });
+
+  it('falls back to the markup defaults when nothing is saved', async () => {
+    await loadApp();
+    expect($('in-malto').value).toBe('1814');
+  });
+
+  it('falls back to the markup defaults when the saved record is corrupt', async () => {
+    await loadApp({ seedLocalStorage: { [STORAGE_KEY]: '{not json' } });
+    expect($('in-malto').value).toBe('1814');
+  });
+
+  it('saves a change made through the wired-up form', () => {
+    setValue('in-malto', '3300');
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    expect(saved['in-malto']).toBe('3300');
+  });
+
+  it('saves a change made through the salt profile select', () => {
+    setValue('in-salt-profile', 'hot', 'change');
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    expect(saved['in-salt-profile']).toBe('hot');
+  });
+
+  it('a later save does not resurrect an earlier value for a field that changed', () => {
+    setValue('in-malto', '1000');
+    setValue('in-malto', '2000');
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    expect(saved['in-malto']).toBe('2000');
+  });
+
+  // The round trip that actually matters: what a real second visit does.
+  it('round-trips a change across a reload', async () => {
+    setValue('in-malto', '4200');
+    setValue('in-salt-profile', 'hot', 'change');
+    const saved = localStorage.getItem(STORAGE_KEY);
+
+    const w = await loadApp({ seedLocalStorage: { [STORAGE_KEY]: saved } });
+    expect(w.document.getElementById('in-malto').value).toBe('4200');
+    expect(w.document.getElementById('in-salt-profile').value).toBe('hot');
+  });
+});
+
+// The select's options are now built from SALT_PROFILES by initSaltProfiles()
+// (mirroring initFlavorPresets()), so the two can no longer drift apart
+// through markup edits — but readInputs() still guards the value it actually
+// consumes, the same way findFlavoring(...) ?? FLAVORINGS[0] does for
+// flavoring. That guard is what these tests hold in place: it has to keep
+// working for a value that reaches the select some other way (an in-flight
+// tab that hasn't reloaded since a profile was renamed, or persist.js
+// restoring a stale record), and it has to reject a prototype-chain name the
+// same way share.js's identical guard does. Both tests bypass persist.js and
+// set the select directly, so they're exercising readInputs() itself, not
+// persist.js's already-covered validation.
+describe('an unrecognised salt profile does not blank the page', () => {
+  // dispatchEvent() does not rethrow a listener's exception synchronously —
+  // jsdom (like a real browser) reports it as an uncaught exception on window
+  // instead, so try/catch around dispatchEvent can never see it. window's own
+  // 'error' event is the reliable way to detect it directly, rather than
+  // inferring a throw indirectly from stale render output.
+  function selectUnrecognisedProfile(value) {
+    let uncaught = null;
+    window.addEventListener('error', (e) => { uncaught = e.error ?? e.message; });
+    const select = $('in-salt-profile');
+    select.innerHTML += `<option value="${value}">${value}</option>`;
+    select.value = value;
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+    return uncaught;
+  }
+
+  it('falls back rather than throwing when the select holds a value SALT_PROFILES does not define', () => {
+    expect(selectUnrecognisedProfile('experimental')).toBeNull();
+    // Not just "didn't throw" — the note and the sodium figure it explains
+    // have to agree on which profile was actually used. An earlier version
+    // of this fallback resolved the select's value in readInputs() but left
+    // renderSaltNote() resolving it separately: readInputs() fell back to
+    // 'endurance' and computed endurance sodium, while renderSaltNote() saw
+    // the same unrecognised value, found no match, and blanked the note — a
+    // page that rendered fine but silently mismatched what it displayed
+    // against what it computed, for the one figure this tool is most
+    // careful about being right. Checking the note names the profile
+    // specifically, not just that it's non-empty, is what would catch a
+    // regression to that state.
+    expect($('salt-profile-note').textContent).toContain(SALT_PROFILES.endurance.note);
+    expect(parseFloat($('fp-batch').textContent)).toBeGreaterThan(0);
+    expect($('calc-limiting').textContent.trim()).not.toBe('');
+  });
+
+  // `hasOwnProperty`, not `in` — `in` walks the prototype chain, so
+  // SALT_PROFILES['constructor'] is truthy (Object.prototype.constructor)
+  // with an undefined .ratio, which renders "undefined" into the note and
+  // 0 mg sodium rather than falling back. share.js has the identical guard
+  // for the identical reason; this pins it at the second live call site.
+  it('rejects a prototype-chain property name rather than treating it as a match', () => {
+    expect(selectUnrecognisedProfile('constructor')).toBeNull();
+    expect($('salt-profile-note').textContent).toContain(SALT_PROFILES.endurance.note);
+    expect($('fp-sodium').textContent).not.toMatch(/undefined|NaN/);
+  });
+});
+
 describe('fructose ratio readout', () => {
   it.each([
     [0, /glucose only/i],
@@ -246,6 +418,17 @@ describe('populated controls and lists', () => {
   it('offers every flavouring in the dropdown', () => {
     const ids = [...$('in-flavor-preset').options].map((o) => o.value);
     expect(ids).toEqual(FLAVORINGS.map((f) => f.id));
+  });
+
+  // Built by initSaltProfiles() from SALT_PROFILES rather than hand-written
+  // in index.html, precisely so this can never drift — a value that's a live
+  // option but isn't a SALT_PROFILES key used to be reachable through a
+  // hand-maintained markup list and threw inside ratiosFor(), then (after
+  // that got a fallback) rendered silently at the wrong salt level. This
+  // pins that the two are identical, not just that neither currently throws.
+  it('offers exactly the salt profiles SALT_PROFILES defines', () => {
+    const ids = [...$('in-salt-profile').options].map((o) => o.value);
+    expect(ids).toEqual(Object.keys(SALT_PROFILES));
   });
 
   it('renders every troubleshooting entry', () => {
