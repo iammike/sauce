@@ -37,4 +37,12 @@ describe('FLAVORINGS table', () => {
     expect(findFlavoring('strawberry').ratio).toBe(0.2);
     expect(findFlavoring('nonexistent')).toBeUndefined();
   });
+
+  // tests/app-dom.test.js identifies which flavoring renderCost() actually
+  // used by checking $('cost-note') contains a specific priceBasis string —
+  // an assertion that's only meaningful if no two entries share one.
+  it('has a unique priceBasis per entry', () => {
+    const bases = FLAVORINGS.map((f) => f.priceBasis);
+    expect(new Set(bases).size).toBe(bases.length);
+  });
 });
