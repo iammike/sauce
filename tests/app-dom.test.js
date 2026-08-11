@@ -412,6 +412,78 @@ describe('per-bottle flavourings', () => {
     setValue('in-flavor-preset', inJar.id, 'change');
     expect($('flavor-per-bottle').hidden).toBe(true);
   });
+
+  // recalculate() resolves the flavor select exactly once and threads it
+  // into readInputs(), renderRecipeGrid() and renderCost(). Before #16,
+  // renderRecipeGrid() re-resolved it independently with no `?? FLAVORINGS[0]`
+  // fallback, unlike the other two call sites — invisible under the real
+  // FLAVORINGS order, because strawberry (index 0, the fallback for an
+  // unrecognised value everywhere) isn't perBottle either, so the buggy and
+  // fixed code produce identical output there. The bug only shows up if
+  // FLAVORINGS[0] *is* perBottle, which is why this mocks the module rather
+  // than asserting against the real array: a test that can only fail when
+  // production data happens to be reordered a specific way isn't testing the
+  // wiring, it's testing data/flavorings.js's current ordering. Confirmed
+  // the real-array version doesn't discriminate at all — it passed against
+  // the pre-#16 code too, for exactly this reason — which is why it's mocked.
+  it('resolves an unrecognised flavoring the same way everywhere, not just in the facts panel', async () => {
+    vi.doMock('../data/flavorings.js', async () => {
+      const actual = await vi.importActual('../data/flavorings.js');
+      const reordered = [...actual.FLAVORINGS].sort((a, b) => (b.perBottle ? 1 : 0) - (a.perBottle ? 1 : 0));
+      return { ...actual, FLAVORINGS: reordered, findFlavoring: (id) => reordered.find((f) => f.id === id) };
+    });
+    try {
+      const w = await loadApp();
+      // From the mocked module, not the real top-level FLAVORINGS import —
+      // the two happen to agree (Array#sort is stable, so the first
+      // perBottle entry in declaration order is always reordered[0]), but
+      // asserting against the mock's own order is what this test is
+      // actually about, not a coincidence borrowed from the real one.
+      const fallback = (await import('../data/flavorings.js')).FLAVORINGS[0];
+      expect(fallback?.perBottle).toBe(true);
+
+      // dispatchEvent() does not rethrow synchronously (see the salt-profile
+      // tests above), so a throw anywhere in the render chain has to be
+      // caught this way or not at all. Not redundant with the priceBasis
+      // assertion below, which only catches a throw early enough to leave
+      // #cost-note holding stale text (a throw in renderCost() itself does,
+      // since it's read before that text is rewritten — but updateRidePlanner
+      // is the last call in recalculate(), after every other assertion here
+      // has already passed, and nothing checks its output).
+      let uncaught = null;
+      w.addEventListener('error', (e) => { uncaught = e.error ?? e.message; });
+
+      // The default flavoring is the markup literal 'strawberry'
+      // (initFlavorPresets()), not FLAVORINGS[0] — so even under the mocked,
+      // perBottle-led order, the initial render is still strawberry and the
+      // note starts hidden. Pinning that is what makes "hidden === false"
+      // below a real assertion: if that default ever became positional, the
+      // note would already be visible before the select changes, and this
+      // test would stop being able to tell the fix from the bug it replaced.
+      expect($('flavor-per-bottle').hidden).toBe(true);
+
+      const select = $('in-flavor-preset');
+      select.innerHTML += '<option value="unrecognised">Unrecognised</option>';
+      select.value = 'unrecognised';
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+
+      expect(uncaught).toBeNull();
+      expect($('fp-flavor-name').textContent).toBe(fallback.name);
+      const flavoringCard = [...document.querySelectorAll('#recipe-grid .card')]
+        .find((c) => c.querySelector('.card__eyebrow').textContent.includes(fallback.name));
+      expect(flavoringCard).toBeDefined();
+      expect($('flavor-per-bottle').hidden).toBe(false);
+      expect($('flavor-per-bottle').textContent).toContain(fallback.name);
+      // Not just non-empty — #cost-note holds text from the initial render
+      // regardless of whether this update ran, so a throw inside renderCost()
+      // wouldn't blank it. Naming the fallback's own priceBasis is the one
+      // assertion that can only pass if renderCost() actually priced the
+      // batch using the same flavoring the other two panels are showing.
+      expect($('cost-note').textContent).toContain(fallback.priceBasis);
+    } finally {
+      vi.doUnmock('../data/flavorings.js');
+    }
+  });
 });
 
 describe('populated controls and lists', () => {

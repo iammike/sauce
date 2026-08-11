@@ -16,8 +16,7 @@ import { saveCalcFormState, restoreCalcFormState } from './persist.js';
 
 const $ = (id) => document.getElementById(id);
 
-function readInputs() {
-  const flavor = findFlavoring($('in-flavor-preset').value) ?? FLAVORINGS[0];
+function readInputs(flavor) {
   const capRaw = $('in-cap').value;
   const carbRatio = Number($('in-carb-ratio').value) || 0;
   const saltProfileValue = $('in-salt-profile').value;
@@ -159,7 +158,7 @@ function renderCost(recipe, flavor, targetCarbs) {
   $('cost-note').textContent = `Ingredient prices as of ${PRICED_AS_OF} (${INGREDIENT_COSTS.maltodextrin.basis}, ${INGREDIENT_COSTS.fructose.basis}, ${INGREDIENT_COSTS.salt.basis}, flavoring ${flavor.priceBasis}). Prices move — treat these as ballpark, not quotes.`;
 }
 
-function renderRecipeGrid(recipe) {
+function renderRecipeGrid(recipe, flavor) {
   const grid = $('recipe-grid');
   const rows = [
     ['maltodextrin', 'Maltodextrin'],
@@ -179,9 +178,8 @@ function renderRecipeGrid(recipe) {
     `;
   }).join('');
 
-  const flavor = findFlavoring($('in-flavor-preset').value);
   const perBottleNote = $('flavor-per-bottle');
-  if (flavor?.perBottle) {
+  if (flavor.perBottle) {
     perBottleNote.hidden = false;
     perBottleNote.innerHTML = `<strong>${flavor.name} goes in the bottle, not the jar.</strong> Mix the batch unflavoured and add about ${flavor.perBottleMl} ml per bottle — which means you can change the flavour, or skip it, without committing the whole batch.`;
   } else {
@@ -241,7 +239,13 @@ function renderSaltNote(saltProfile) {
 }
 
 function recalculate() {
-  const inputs = readInputs();
+  // Resolved once here rather than separately in readInputs(),
+  // renderRecipeGrid() and renderCost() — three independent reads of the
+  // same select used to disagree on the fallback for an unrecognised value
+  // (renderRecipeGrid() had none at all), the same failure shape already
+  // fixed for the salt-profile select. See #16.
+  const flavor = findFlavoring($('in-flavor-preset').value) ?? FLAVORINGS[0];
+  const inputs = readInputs(flavor);
   const recipe = computeRecipe(inputs);
   const targetCarbs = Number($('in-target-carbs').value) || DEFAULT_TARGET_CARBS;
   const scoopGrams = Number($('in-scoop').value) || 0;
@@ -250,9 +254,9 @@ function recalculate() {
   renderRatioReadout();
   renderSaltNote(inputs.saltProfile);
   renderFactsPanel(recipe, serving, targetCarbs);
-  renderRecipeGrid(recipe);
+  renderRecipeGrid(recipe, flavor);
   renderLabel(recipe, serving, targetCarbs);
-  renderCost(recipe, findFlavoring($('in-flavor-preset').value) ?? FLAVORINGS[0], targetCarbs);
+  renderCost(recipe, flavor, targetCarbs);
   updateRidePlanner(recipe.perGram);
 }
 
