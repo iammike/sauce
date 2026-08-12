@@ -65,9 +65,21 @@ async function loadApp({ hash = '', seedLocalStorage } = {}) {
     }
   }
 
-  // jsdom implements neither, and init() calls both.
+  // jsdom implements none of these, and app.js calls all of them.
   window.matchMedia = () => ({ matches: false, addEventListener() {}, removeEventListener() {} });
   window.Element.prototype.scrollIntoView = function scrollIntoView() {};
+  // downloadLabelPng() calls createObjectURL on the real Blob exportLabelPng()
+  // resolves with (or the mock stands in for in tests) — jsdom's URL has no
+  // implementation of either at all, not even a stub that throws usefully.
+  let objectUrlCount = 0;
+  window.URL.createObjectURL = () => `blob:mock-${++objectUrlCount}`;
+  // Records what was revoked (window.__revokedUrls) rather than a bare
+  // no-op, so a test can confirm downloadLabelPng() actually revokes the
+  // URL it created — including on the path where a.click() throws, where
+  // this is the only observable difference between the try/finally that's
+  // supposed to guarantee it and a plain call after click() that wouldn't.
+  window.__revokedUrls = [];
+  window.URL.revokeObjectURL = (url) => window.__revokedUrls.push(url);
 
   // app.js and its imports reach for these unqualified, the way page scripts
   // do. In a browser they're on the global object; here they have to be put
@@ -78,11 +90,19 @@ async function loadApp({ hash = '', seedLocalStorage } = {}) {
   // globalThis as getter-only accessors, and a plain assignment to one throws
   // in strict mode (which ESM always is). `navigator` is the one that bites
   // today. Assume the list will grow.
+  //
+  // URL is the one entry here that's easy to think is unnecessary, since
+  // Node's own global already has a URL class — bare `URL` in app.js resolves
+  // to that pre-existing global unless this list overrides it, silently
+  // bypassing window.URL.createObjectURL's stub above. Node's native
+  // URL.createObjectURL then does its own strict check on the Blob argument
+  // and rejects a jsdom-realm Blob as not a "real" one, even though it's
+  // exactly the Blob type this file's own `Blob` binding hands out.
   defineGlobal('window', window);
   for (const name of ['document', 'location', 'getComputedStyle',
     'requestAnimationFrame', 'cancelAnimationFrame', 'Event', 'Element',
     'HTMLElement', 'FileReader', 'File', 'Blob', 'Image', 'DOMParser',
-    'navigator', 'localStorage']) {
+    'navigator', 'localStorage', 'URL']) {
     const value = window[name];
     defineGlobal(name, typeof value === 'function' && !/^[A-Z]/.test(name)
       ? value.bind(window)
@@ -772,6 +792,191 @@ describe('optional label fields', () => {
     setValue('in-scoop', 12);
     expect($('fp-serving-size').textContent).toBe(before.serving);
     expect($('lb-directions').textContent).not.toBe(before.directions);
+  });
+});
+
+// exportLabelPng() itself needs a real browser (see tests/label-export.test.js
+// for why — no canvas, no layout engine in jsdom). What's tested here is
+// app.js's side of the button: the status text and disabled state around the
+// call, and that success/failure are told apart correctly. Mocking
+// ../src/label-export.js the same way #16's regression test mocks
+// data/flavorings.js — a fake exportLabelPng, the real labelFileName.
+describe('downloading the label as a PNG', () => {
+  async function loadWithMockExport(exportLabelPng) {
+    vi.doMock('../src/label-export.js', async () => {
+      const actual = await vi.importActual('../src/label-export.js');
+      return { ...actual, exportLabelPng };
+    });
+    return loadApp();
+  }
+
+  it('shows a rendering state, then reverts to the default status on success', async () => {
+    let resolveExport;
+    const exportLabelPng = vi.fn(() => new Promise((resolve) => { resolveExport = resolve; }));
+    try {
+      await loadWithMockExport(exportLabelPng);
+      // jsdom's <a>.click() doesn't understand the download attribute and
+      // logs an ignorable "navigation to another Document" warning trying to
+      // follow a blob: URL as if it were a real link. Harmless, but noisy —
+      // stubbed out the same way the filename test below has to anyway.
+      const originalClick = window.HTMLAnchorElement.prototype.click;
+      window.HTMLAnchorElement.prototype.click = function click() {};
+      try {
+        const btn = $('download-label-btn');
+        const status = $('download-label-status');
+        const defaultStatus = status.textContent;
+
+        btn.dispatchEvent(new Event('click', { bubbles: true }));
+        await Promise.resolve(); // let the click handler's synchronous prefix run
+        expect(status.textContent).toBe('Rendering…');
+        expect(btn.disabled).toBe(true);
+
+        resolveExport(new Blob(['fake-png-bytes'], { type: 'image/png' }));
+        await new Promise((r) => setTimeout(r, 0));
+
+        expect(exportLabelPng).toHaveBeenCalledTimes(1);
+        expect(status.textContent).toBe(defaultStatus);
+        expect(btn.disabled).toBe(false);
+        // downloadLabelPng()'s own setTimeout(revoke, 0) is scheduled from
+        // inside the microtask that resumes it once exportLabelPng()
+        // resolves — which happens *while* this test's own setTimeout(r, 0)
+        // above is already sitting in the timer queue (its executor ran
+        // synchronously before the `await` yielded). So it's scheduled one
+        // tick later than this test's own wait and needs a second one to
+        // actually have run by the time this asserts on it.
+        await new Promise((r) => setTimeout(r, 0));
+        // The object URL created for the download is revoked, not leaked —
+        // one PNG blob's worth (megabytes, at the wide format's 300 DPI)
+        // retained for the rest of the page's life per download otherwise.
+        expect(window.__revokedUrls).toEqual(['blob:mock-1']);
+      } finally {
+        window.HTMLAnchorElement.prototype.click = originalClick;
+      }
+    } finally {
+      vi.doUnmock('../src/label-export.js');
+    }
+  });
+
+  it('still removes the anchor and revokes the object URL if the click itself throws', async () => {
+    // Nothing in this app is expected to make a.click() throw — this pins
+    // the try/finally around it existing at all, not a real scenario. The
+    // finally is what stands between a click failure and a stray anchor
+    // left in the document plus a permanently leaked object URL.
+    const exportLabelPng = vi.fn(() => Promise.resolve(new Blob(['x'], { type: 'image/png' })));
+    let clickedAnchor = null;
+    try {
+      await loadWithMockExport(exportLabelPng);
+      const originalClick = window.HTMLAnchorElement.prototype.click;
+      window.HTMLAnchorElement.prototype.click = function click() {
+        clickedAnchor = this;
+        throw new Error('extension blocked the click');
+      };
+      try {
+        $('download-label-btn').dispatchEvent(new Event('click', { bubbles: true }));
+        await new Promise((r) => setTimeout(r, 0));
+        // See the matching comment in the success-path test above — the
+        // revoke's own setTimeout(0) is scheduled one tick later than this.
+        await new Promise((r) => setTimeout(r, 0));
+
+        expect(clickedAnchor).not.toBeNull();
+        expect(document.body.contains(clickedAnchor)).toBe(false);
+        expect(window.__revokedUrls).toEqual(['blob:mock-1']);
+        expect($('download-label-status').textContent).toContain('extension blocked the click');
+        expect($('download-label-btn').disabled).toBe(false);
+      } finally {
+        window.HTMLAnchorElement.prototype.click = originalClick;
+      }
+    } finally {
+      vi.doUnmock('../src/label-export.js');
+    }
+  });
+
+  it('reports the failure and still re-enables the button, rather than leaving it stuck on "Rendering…"', async () => {
+    const exportLabelPng = vi.fn(() => Promise.reject(new Error('no font metrics available')));
+    try {
+      await loadWithMockExport(exportLabelPng);
+      const btn = $('download-label-btn');
+      const status = $('download-label-status');
+
+      btn.dispatchEvent(new Event('click', { bubbles: true }));
+      await new Promise((r) => setTimeout(r, 0));
+
+      expect(status.textContent).toContain('no font metrics available');
+      expect(btn.disabled).toBe(false);
+    } finally {
+      vi.doUnmock('../src/label-export.js');
+    }
+  });
+
+  it('names the download after the current product name', async () => {
+    const exportLabelPng = vi.fn(() => Promise.resolve(new Blob(['x'], { type: 'image/png' })));
+    let clickedAnchor = null;
+    // Patched after loadWithMockExport, not before: each load builds a brand
+    // new window with its own HTMLAnchorElement class, so patching the bare
+    // `window` reference beforehand patches whatever window a previous test
+    // left behind (or nothing, on the first test) — not the one this load is
+    // about to create.
+    try {
+      await loadWithMockExport(exportLabelPng);
+      let wasInDocumentDuringClick = null;
+      const originalClick = window.HTMLAnchorElement.prototype.click;
+      window.HTMLAnchorElement.prototype.click = function click() {
+        clickedAnchor = this;
+        wasInDocumentDuringClick = document.body.contains(this);
+      };
+      try {
+        setValue('in-label-name', 'Rocket Fuel');
+        $('download-label-btn').dispatchEvent(new Event('click', { bubbles: true }));
+        await new Promise((r) => setTimeout(r, 0));
+
+        expect(clickedAnchor).not.toBeNull();
+        expect(clickedAnchor.download).toBe('Rocket Fuel label.png');
+        // Firefox has historically required the download-triggering anchor
+        // to actually be in the document at click() time — appended right
+        // before, and removed right after so it doesn't linger.
+        expect(wasInDocumentDuringClick).toBe(true);
+        expect(document.body.contains(clickedAnchor)).toBe(false);
+      } finally {
+        window.HTMLAnchorElement.prototype.click = originalClick;
+      }
+    } finally {
+      vi.doUnmock('../src/label-export.js');
+    }
+  });
+
+  it('recovers to the real default status on a second, successful attempt after a failure', async () => {
+    // downloadStatusDefault is captured once in initLabel(), specifically so
+    // a retry after a failed attempt doesn't mistake the leftover error text
+    // for the default. Reading it fresh inside downloadLabelPng() itself
+    // would pass this test's *first* click but fail the second — pinning the
+    // actual regression this variable exists to prevent, not just its shape.
+    const exportLabelPng = vi.fn()
+      .mockRejectedValueOnce(new Error('no font metrics available'))
+      .mockResolvedValueOnce(new Blob(['x'], { type: 'image/png' }));
+    try {
+      await loadWithMockExport(exportLabelPng);
+      const originalClick = window.HTMLAnchorElement.prototype.click;
+      window.HTMLAnchorElement.prototype.click = function click() {};
+      try {
+        const btn = $('download-label-btn');
+        const status = $('download-label-status');
+        const defaultStatus = status.textContent;
+
+        btn.dispatchEvent(new Event('click', { bubbles: true }));
+        await new Promise((r) => setTimeout(r, 0));
+        expect(status.textContent).toContain('no font metrics available');
+
+        btn.dispatchEvent(new Event('click', { bubbles: true }));
+        await new Promise((r) => setTimeout(r, 0));
+
+        expect(exportLabelPng).toHaveBeenCalledTimes(2);
+        expect(status.textContent).toBe(defaultStatus);
+      } finally {
+        window.HTMLAnchorElement.prototype.click = originalClick;
+      }
+    } finally {
+      vi.doUnmock('../src/label-export.js');
+    }
   });
 });
 

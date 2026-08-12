@@ -842,6 +842,19 @@ html { scroll-behavior: smooth; }
   color: var(--paper);
 }
 
+/* :disabled has to come after :hover to win — otherwise a disabled button
+   the pointer happens to be resting on (the common case: click Download,
+   it disables itself while "Rendering…" shows, cursor hasn't moved) still
+   shows the inverted hover colors instead of looking inert. */
+.btn:disabled {
+  cursor: default;
+  opacity: 0.5;
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.btn--outline:disabled { background: transparent; color: var(--ink); }
+
 /* ---------- References ---------- */
 
 .reference-list {
@@ -1166,6 +1179,7 @@ html { scroll-behavior: smooth; }
   justify-content: space-between;
   gap: 0.08in;
   font-size: 0.075in;
+  overflow-wrap: anywhere;
 }
 
 /* Print: the label only, at true size. */

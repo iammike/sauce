@@ -1,7 +1,7 @@
 # The Sauce
 
 Homemade endurance hydration mix calculator, hourly fueling guide, and
-printable nutrition label.
+printable/downloadable nutrition label.
 
 **Live:** [sauce.iammike.org](https://sauce.iammike.org/)
 
@@ -20,11 +20,17 @@ Supplement Facts panel. From there:
 - **Troubleshooting** — symptom-driven guidance (`data/tuning.js`), ordered by
   when you'd hit each problem: making the batch, mixing a bottle, taste, then
   how it feels on the bike.
-- **Label** — a printable label, sized for a jar or to wrap the tub, whose
-  serving is *one hour of fueling* at your carb target, so "servings per
-  container" tells you how many hours the jar holds. Ingredients are derived from the batch and ordered by
-  descending weight, as food labels require. Optional artwork never leaves the
-  browser, and print rules isolate the label at true size.
+- **Label** — a printable *or downloadable-PNG* label, sized for a jar or to
+  wrap the tub, whose serving is *one hour of fueling* at your carb target,
+  so "servings per container" tells you how many hours the jar holds.
+  Ingredients are derived from the batch and ordered by descending weight, as
+  food labels require. Optional artwork never leaves the browser, print rules
+  isolate the label at true size, and the PNG export (rendered client-side to
+  a `<canvas>`, no server involved) matches that same true size at 300 DPI —
+  good for a phone, a text message, or a sticker printer. A label packed with
+  a note, a maker name, and artwork all at once can outgrow its own declared
+  size; print and the on-screen preview both let that spill past the border,
+  but the PNG has no "outside" to spill into and clips it at the edge.
 - **Cost** — what an hour of fueling costs to make, against Gatorade
   Endurance, Maurten 320, and regular Gatorade, normalised per gram of
   carbohydrate. Plus where the money actually goes: flavoring is ~10% of the
