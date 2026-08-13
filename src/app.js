@@ -2,7 +2,7 @@ import { computeRecipe } from './calculator.js';
 import { planForCarbTarget, ratioStatus, FRUCTOSE_RATIO_OPTIMAL,
   DEFAULT_TARGET_CARBS, sodiumStatus } from './hourly.js';
 import { formatGrams, formatMg, formatCalories, formatCount } from './format.js';
-import { FLAVORINGS, findFlavoring } from '../data/flavorings.js';
+import { FLAVORINGS, findFlavoring, DEFAULT_FLAVORING_ID } from '../data/flavorings.js';
 import { TUNING } from '../data/tuning.js';
 import { PRODUCTS } from '../data/products.js';
 import { RESEARCH, findResearch } from '../data/research.js';
@@ -17,7 +17,7 @@ import { exportLabelPng, labelFileName } from './label-export.js';
 
 const $ = (id) => document.getElementById(id);
 
-function readInputs(flavor) {
+function readInputs(flavor, scoopGrams) {
   const capRaw = $('in-cap').value;
   const carbRatio = Number($('in-carb-ratio').value) || 0;
   const saltProfileValue = $('in-salt-profile').value;
@@ -40,7 +40,7 @@ function readInputs(flavor) {
     saltProfile: Object.prototype.hasOwnProperty.call(SALT_PROFILES, saltProfileValue)
       ? saltProfileValue
       : DEFAULT_SALT_PROFILE,
-    scoopGrams: Number($('in-scoop').value) || 1,
+    scoopGrams,
     carbRatio,
     maxBatchGrams: capRaw === '' ? undefined : Number(capRaw),
     flavorName: flavor.name,
@@ -245,11 +245,16 @@ function recalculate() {
   // same select used to disagree on the fallback for an unrecognised value
   // (renderRecipeGrid() had none at all), the same failure shape already
   // fixed for the salt-profile select. See #16.
-  const flavor = findFlavoring($('in-flavor-preset').value) ?? FLAVORINGS[0];
-  const inputs = readInputs(flavor);
+  const flavor = findFlavoring($('in-flavor-preset').value) ?? findFlavoring(DEFAULT_FLAVORING_ID);
+  // Same reasoning for in-scoop: readInputs() and this function used to read
+  // it separately with different fallbacks (1 vs. 0). Harmless today only
+  // because recipe.perScoop (readInputs()'s consumer) isn't rendered
+  // anywhere — see #19 — but resolving it once, the same way flavor is
+  // above, means the two can't quietly disagree if that ever changes.
+  const scoopGrams = Number($('in-scoop').value) || 0;
+  const inputs = readInputs(flavor, scoopGrams);
   const recipe = computeRecipe(inputs);
   const targetCarbs = Number($('in-target-carbs').value) || DEFAULT_TARGET_CARBS;
-  const scoopGrams = Number($('in-scoop').value) || 0;
   const serving = servingFor(recipe, targetCarbs, scoopGrams);
 
   renderRatioReadout();
@@ -278,7 +283,7 @@ function initTuning() {
 function initFlavorPresets() {
   const select = $('in-flavor-preset');
   select.innerHTML = FLAVORINGS.map((f) => `<option value="${f.id}">${f.shortName ?? f.name}</option>`).join('');
-  select.value = 'strawberry';
+  select.value = DEFAULT_FLAVORING_ID;
 }
 
 // Built from SALT_PROFILES rather than left as hand-written <option>s in

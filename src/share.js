@@ -16,13 +16,12 @@
 // interpolated into HTML — callers assign it to form values only.
 
 import { SALT_PROFILES, DEFAULT_CARB_RATIO, DEFAULT_SALT_PROFILE } from './calculator.js';
-import { FLAVORINGS } from '../data/flavorings.js';
+import { FLAVORINGS, DEFAULT_FLAVORING_ID } from '../data/flavorings.js';
 import { DEFAULT_TARGET_CARBS } from './hourly.js';
 
 export const CARB_RATIO_BOUNDS = { min: 0, max: 1.5 };
 export const TARGET_CARB_BOUNDS = { min: 10, max: 200 };
-export { DEFAULT_TARGET_CARBS, DEFAULT_SALT_PROFILE };
-export const DEFAULT_FLAVORING_ID = 'strawberry';
+export { DEFAULT_TARGET_CARBS, DEFAULT_SALT_PROFILE, DEFAULT_FLAVORING_ID };
 
 function clampNumber(raw, { min, max }, fallback) {
   // A missing param is null and an empty one is '', both of which Number()
