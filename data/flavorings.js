@@ -130,6 +130,18 @@ export const FLAVORINGS = [
   },
 ];
 
+// Named rather than FLAVORINGS[0], the same reason src/calculator.js's
+// DEFAULT_SALT_PROFILE isn't Object.keys(SALT_PROFILES)[0]: "strawberry" is
+// first today because it's the tested baseline for an actual flavoring (see
+// header comment above — "unflavored" further down is also
+// confidence: 'tested', trivially, since skipping the slot entirely leaves
+// nothing to measure), not because array position is meant to encode a
+// default. Before this existed, src/app.js's unrecognised-value fallback
+// read FLAVORINGS[0] directly — a reorder for an unrelated reason
+// (alphabetising, grouping by perBottle) would have silently changed what
+// that fallback resolved to, with nothing tying the two together.
+export const DEFAULT_FLAVORING_ID = 'strawberry';
+
 export function findFlavoring(id) {
   return FLAVORINGS.find((f) => f.id === id);
 }

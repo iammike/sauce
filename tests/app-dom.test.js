@@ -285,9 +285,10 @@ describe('persisted calculator inputs', () => {
   });
 
   it('does not let a saved flavoring get stamped over by the select default', async () => {
-    // initFlavorPresets() hardcodes the select to 'strawberry' while building
-    // its options. Restoring has to run after that, or a saved non-default
-    // flavoring would be silently overwritten the moment the page loads.
+    // initFlavorPresets() sets the select to DEFAULT_FLAVORING_ID while
+    // building its options. Restoring has to run after that, or a saved
+    // non-default flavoring would be silently overwritten the moment the
+    // page loads.
     await loadApp({
       seedLocalStorage: { [STORAGE_KEY]: JSON.stringify({ 'in-flavor-preset': 'unflavored' }) },
     });
@@ -339,8 +340,8 @@ describe('persisted calculator inputs', () => {
 // The select's options are now built from SALT_PROFILES by initSaltProfiles()
 // (mirroring initFlavorPresets()), so the two can no longer drift apart
 // through markup edits — but readInputs() still guards the value it actually
-// consumes, the same way findFlavoring(...) ?? FLAVORINGS[0] does for
-// flavoring. That guard is what these tests hold in place: it has to keep
+// consumes, the same way findFlavoring(...) ?? findFlavoring(DEFAULT_FLAVORING_ID)
+// does for flavoring. That guard is what these tests hold in place: it has to keep
 // working for a value that reaches the select some other way (an in-flight
 // tab that hasn't reloaded since a profile was renamed, or persist.js
 // restoring a stale record), and it has to reject a prototype-chain name the
@@ -436,17 +437,28 @@ describe('per-bottle flavourings', () => {
   // recalculate() resolves the flavor select exactly once and threads it
   // into readInputs(), renderRecipeGrid() and renderCost(). Before #16,
   // renderRecipeGrid() re-resolved it independently with no `?? FLAVORINGS[0]`
-  // fallback, unlike the other two call sites — invisible under the real
-  // FLAVORINGS order, because strawberry (index 0, the fallback for an
-  // unrecognised value everywhere) isn't perBottle either, so the buggy and
-  // fixed code produce identical output there. The bug only shows up if
-  // FLAVORINGS[0] *is* perBottle, which is why this mocks the module rather
-  // than asserting against the real array: a test that can only fail when
-  // production data happens to be reordered a specific way isn't testing the
-  // wiring, it's testing data/flavorings.js's current ordering. Confirmed
-  // the real-array version doesn't discriminate at all — it passed against
-  // the pre-#16 code too, for exactly this reason — which is why it's mocked.
-  it('resolves an unrecognised flavoring the same way everywhere, not just in the facts panel', async () => {
+  // fallback at all, unlike the other two call sites at the time — invisible
+  // under the real FLAVORINGS order, because strawberry (then the fallback
+  // for an unrecognised value everywhere, by array position) isn't perBottle
+  // either, so the buggy and fixed code produced identical output there. The
+  // bug only showed up if FLAVORINGS[0] *was* perBottle, which is why this
+  // mocks the module rather than asserting against the real array: a test
+  // that can only fail when production data happens to be reordered a
+  // specific way isn't testing the wiring, it's testing
+  // data/flavorings.js's current ordering. Confirmed the real-array version
+  // doesn't discriminate at all — it passed against the pre-#16 code too,
+  // for exactly this reason — which is why it's mocked. (#20 later replaced
+  // that positional fallback with the named DEFAULT_FLAVORING_ID this test
+  // now asserts against — see the block comment above it.)
+  it('resolves an unrecognised flavoring to the named default everywhere, not to FLAVORINGS[0]', async () => {
+    // Reorders the table so a perBottle entry sits first — before #20, the
+    // unrecognised-value fallback in recalculate() read FLAVORINGS[0]
+    // directly, so this reorder would have silently made an *unrecognised*
+    // selection resolve to a perBottle flavoring instead of strawberry, even
+    // though the select's own initial default (initFlavorPresets(), a
+    // separate hardcoded 'strawberry' literal at the time) didn't move.
+    // DEFAULT_FLAVORING_ID ties both to the same named id instead, so this
+    // reorder should now change nothing observable.
     vi.doMock('../data/flavorings.js', async () => {
       const actual = await vi.importActual('../data/flavorings.js');
       const reordered = [...actual.FLAVORINGS].sort((a, b) => (b.perBottle ? 1 : 0) - (a.perBottle ? 1 : 0));
@@ -454,13 +466,14 @@ describe('per-bottle flavourings', () => {
     });
     try {
       const w = await loadApp();
-      // From the mocked module, not the real top-level FLAVORINGS import —
-      // the two happen to agree (Array#sort is stable, so the first
-      // perBottle entry in declaration order is always reordered[0]), but
-      // asserting against the mock's own order is what this test is
-      // actually about, not a coincidence borrowed from the real one.
-      const fallback = (await import('../data/flavorings.js')).FLAVORINGS[0];
-      expect(fallback?.perBottle).toBe(true);
+      const mocked = await import('../data/flavorings.js');
+      // Confirms the mock actually moved something — otherwise this test
+      // couldn't tell "resolves by id" apart from "still FLAVORINGS[0] by
+      // coincidence".
+      const perBottleFirst = mocked.FLAVORINGS[0];
+      expect(perBottleFirst.perBottle).toBe(true);
+      expect(perBottleFirst.id).not.toBe(mocked.DEFAULT_FLAVORING_ID);
+      const strawberry = mocked.findFlavoring(mocked.DEFAULT_FLAVORING_ID);
 
       // dispatchEvent() does not rethrow synchronously (see the salt-profile
       // tests above), so a throw anywhere in the render chain has to be
@@ -473,33 +486,45 @@ describe('per-bottle flavourings', () => {
       let uncaught = null;
       w.addEventListener('error', (e) => { uncaught = e.error ?? e.message; });
 
-      // The default flavoring is the markup literal 'strawberry'
-      // (initFlavorPresets()), not FLAVORINGS[0] — so even under the mocked,
-      // perBottle-led order, the initial render is still strawberry and the
-      // note starts hidden. Pinning that is what makes "hidden === false"
-      // below a real assertion: if that default ever became positional, the
-      // note would already be visible before the select changes, and this
-      // test would stop being able to tell the fix from the bug it replaced.
+      // Even under the mocked, perBottle-led order, the initial render is
+      // still strawberry (not the reordered table's first entry) and the
+      // note starts hidden.
       expect($('flavor-per-bottle').hidden).toBe(true);
 
       const select = $('in-flavor-preset');
       select.innerHTML += '<option value="unrecognised">Unrecognised</option>';
+
+      // Move to a real, distinguishable flavoring first — the reordered
+      // table's own perBottle entry — and confirm the panels actually
+      // followed it. Without this step, every assertion below would already
+      // be true before the 'unrecognised' switch even fires (strawberry is
+      // also the initial-render state), which would make this test pass
+      // whether or not the fallback ran at all.
+      select.value = perBottleFirst.id;
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+      expect($('fp-flavor-name').textContent).toBe(perBottleFirst.name);
+      expect($('flavor-per-bottle').hidden).toBe(false);
+      expect($('flavor-per-bottle').textContent).toContain(perBottleFirst.name);
+      expect($('cost-note').textContent).toContain(perBottleFirst.priceBasis);
+
       select.value = 'unrecognised';
       select.dispatchEvent(new Event('change', { bubbles: true }));
 
       expect(uncaught).toBeNull();
-      expect($('fp-flavor-name').textContent).toBe(fallback.name);
+      expect($('fp-flavor-name').textContent).toBe(strawberry.name);
       const flavoringCard = [...document.querySelectorAll('#recipe-grid .card')]
-        .find((c) => c.querySelector('.card__eyebrow').textContent.includes(fallback.name));
+        .find((c) => c.querySelector('.card__eyebrow').textContent.includes(strawberry.name));
       expect(flavoringCard).toBeDefined();
-      expect($('flavor-per-bottle').hidden).toBe(false);
-      expect($('flavor-per-bottle').textContent).toContain(fallback.name);
-      // Not just non-empty — #cost-note holds text from the initial render
-      // regardless of whether this update ran, so a throw inside renderCost()
-      // wouldn't blank it. Naming the fallback's own priceBasis is the one
-      // assertion that can only pass if renderCost() actually priced the
-      // batch using the same flavoring the other two panels are showing.
-      expect($('cost-note').textContent).toContain(fallback.priceBasis);
+      // Now a real assertion: this was flipped to false by the step above,
+      // so it can only be true again here if the 'unrecognised' switch
+      // actually re-resolved to strawberry (not perBottle) rather than
+      // simply leaving the prior render untouched.
+      expect($('flavor-per-bottle').hidden).toBe(true);
+      // Likewise: #cost-note held the perBottle entry's priceBasis a moment
+      // ago, so finding strawberry's here requires renderCost() to have
+      // actually re-run with the fallback's flavoring, not just left stale
+      // text in place.
+      expect($('cost-note').textContent).toContain(strawberry.priceBasis);
     } finally {
       vi.doUnmock('../data/flavorings.js');
     }
@@ -776,6 +801,44 @@ describe('optional label fields', () => {
     const big = scoopCount();
     setValue('in-scoop', 23);
     expect(scoopCount()).toBeCloseTo(big * 2, 0);
+  });
+
+  // recipe.perScoop — readInputs()'s consumer of scoopGrams — isn't rendered
+  // anywhere (grams stay the unit everywhere else, same as the comment
+  // above), so the printed-directions tests above can't see this half of
+  // #19 at all: they only exercise recalculate()'s own copy, the one
+  // servingFor() actually receives. Spying on computeRecipe() is the only
+  // way to see what readInputs() itself is being called with. Not mocking
+  // its behavior away — it still delegates to the real implementation — so
+  // the rest of recalculate() keeps rendering normally around it.
+  it('resolves the same scoop size everywhere, not just in the printed directions', async () => {
+    let receivedScoopGrams;
+    vi.doMock('../src/calculator.js', async () => {
+      const actual = await vi.importActual('../src/calculator.js');
+      return {
+        ...actual,
+        computeRecipe: (inputs) => {
+          receivedScoopGrams = inputs.scoopGrams;
+          return actual.computeRecipe(inputs);
+        },
+      };
+    });
+    try {
+      await loadApp();
+      setValue('in-scoop', '');
+      // Pinned to the literal recalculate() now resolves for a blank field —
+      // the same 0 servingFor() has always received — not derived from it:
+      // this test can't see servingFor()'s own value to compare against
+      // directly, only what reaches computeRecipe(). Before #19, this would
+      // have been 1: readInputs() had its own, independent `|| 1` fallback
+      // for the same blank #in-scoop field.
+      expect(receivedScoopGrams).toBe(0);
+
+      setValue('in-scoop', '46');
+      expect(receivedScoopGrams).toBe(46);
+    } finally {
+      vi.doUnmock('../src/calculator.js');
+    }
   });
 
   it('divides an hour of mix by the scoop size', () => {

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { computeRecipe } from '../src/calculator.js';
-import { FLAVORINGS, findFlavoring } from '../data/flavorings.js';
+import { FLAVORINGS, findFlavoring, DEFAULT_FLAVORING_ID } from '../data/flavorings.js';
 
 describe('FLAVORINGS table', () => {
   it('has well-formed entries', () => {
@@ -36,6 +36,15 @@ describe('FLAVORINGS table', () => {
   it('findFlavoring looks up by id', () => {
     expect(findFlavoring('strawberry').ratio).toBe(0.2);
     expect(findFlavoring('nonexistent')).toBeUndefined();
+  });
+
+  // DEFAULT_FLAVORING_ID is a named id specifically so it can't silently
+  // drift out of sync with the table it's meant to point into — the same
+  // thing this file already guards for src/calculator.js's
+  // DEFAULT_SALT_PROFILE/SALT_PROFILES pair. Every ?? findFlavoring(...)
+  // fallback in src/app.js depends on this actually resolving.
+  it('DEFAULT_FLAVORING_ID names a real entry in FLAVORINGS', () => {
+    expect(findFlavoring(DEFAULT_FLAVORING_ID)).toBeDefined();
   });
 
   // tests/app-dom.test.js identifies which flavoring renderCost() actually
