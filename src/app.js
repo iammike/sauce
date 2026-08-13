@@ -13,6 +13,7 @@ import { initDisclosureAnimation } from './disclosure.js';
 import { initRidePlanner, updateRidePlanner } from './ride-app.js';
 import { LABEL_SIZES, findLabelSize } from '../data/label-sizes.js';
 import { saveCalcFormState, restoreCalcFormState } from './persist.js';
+import { exportLabelPng, labelFileName } from './label-export.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -439,12 +440,19 @@ function fitLabelPreview() {
   if (natural > room && room > 0) sheet.style.zoom = room / natural;
 }
 
+// Captured once, before any click can overwrite #download-label-status with
+// "Rendering…" or an error — reading it fresh inside downloadLabelPng()
+// itself would, on a second attempt after a failure, capture the leftover
+// error text as if it were the default and never recover from it.
+let downloadStatusDefault = '';
+
 function initLabel() {
   $('in-label-size').innerHTML = LABEL_SIZES
     .map((x) => `<option value="${x.id}">${x.label}</option>`).join('');
   $('in-label-size').value = '3x4';
   $('in-label-size').addEventListener('change', () => { applyLabelSize(); recalculate(); });
   applyLabelSize();
+  downloadStatusDefault = $('download-label-status').textContent;
 
   const dateInput = $('in-label-date');
   if (!dateInput.value) dateInput.value = new Date().toISOString().slice(0, 10);
@@ -472,6 +480,49 @@ function initLabel() {
     window.print();
     document.title = title;
   });
+
+  $('download-label-btn').addEventListener('click', downloadLabelPng);
+}
+
+async function downloadLabelPng() {
+  const btn = $('download-label-btn');
+  const status = $('download-label-status');
+  btn.disabled = true;
+  status.textContent = 'Rendering…';
+  try {
+    const blob = await exportLabelPng();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = labelFileName($('in-label-name').value);
+    // Historically, Firefox only honored the download attribute on an
+    // anchor that's actually in the document — Chrome never required it,
+    // but appending (and removing right after) costs nothing here.
+    document.body.appendChild(a);
+    try {
+      a.click();
+    } finally {
+      // In finally, not just after click(): a throwing click() (unlikely,
+      // but nothing stops a browser extension or a test double from doing
+      // it) would otherwise leave the anchor stuck in the document and the
+      // object URL never revoked.
+      a.remove();
+      // Deferred rather than revoked synchronously: a download triggered by
+      // an object URL isn't guaranteed to have actually started reading the
+      // blob by the time click() returns in every browser.
+      setTimeout(() => URL.revokeObjectURL(url), 0);
+    }
+    status.textContent = downloadStatusDefault;
+  } catch (err) {
+    // Nothing here touches the network — rendering is canvas-only, off the
+    // already-loaded page — so a failure here is a real bug, not an
+    // offline/blocked-request case. Say so rather than leaving "Rendering…"
+    // stuck, and surface the actual message for a bug report. err is
+    // whatever exportLabelPng() rejected with, not necessarily an Error.
+    status.textContent = `Couldn't render the PNG — ${err && err.message ? err.message : err}`;
+  } finally {
+    btn.disabled = false;
+  }
 }
 
 // A link into a collapsed section has to open it, or it scrolls to a closed
