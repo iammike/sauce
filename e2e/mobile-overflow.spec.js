@@ -11,11 +11,21 @@ for (const width of MOBILE_WIDTHS) {
     await page.setViewportSize({ width, height: 800 });
     await page.goto('/');
 
-    const { scrollWidth, innerWidth } = await page.evaluate(() => ({
+    // A blank/broken page (failed build, JS throw mid-render — see
+    // dom-contract.test.js) has no overflow either, and would pass the
+    // check below silently. Confirm the calculator actually rendered first.
+    await expect(page.locator('#calculator')).toBeVisible();
+
+    await page.evaluate(() => document.fonts.ready);
+
+    const { scrollWidth, clientWidth } = await page.evaluate(() => ({
       scrollWidth: document.documentElement.scrollWidth,
-      innerWidth: window.innerWidth,
+      // clientWidth, not window.innerWidth: innerWidth includes the
+      // scrollbar gutter on a classic (non-overlay) scrollbar, which reads
+      // as false overflow in headed mode even though headless hides it.
+      clientWidth: document.documentElement.clientWidth,
     }));
 
-    expect(scrollWidth).toBe(innerWidth);
+    expect(scrollWidth).toBe(clientWidth);
   });
 }

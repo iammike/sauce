@@ -437,7 +437,12 @@ main > .panel:last-child { padding-bottom: 0; }
   cursor: pointer;
   padding: 1.75rem 0;
   display: grid;
-  grid-template-columns: 1fr auto;
+  /* minmax(0, 1fr), not 1fr: a bare 1fr track's minimum is auto
+     (min-content), so an unbreakable title word (e.g. "Troubleshooting")
+     forces the track past the viewport instead of wrapping — invisible
+     with the real webfont at every width tried, but a fallback sans-serif
+     is wide enough to overflow at 320px. */
+  grid-template-columns: minmax(0, 1fr) auto;
   /* Wider than the old 1rem so the toggle can't crowd a long title; rows
      tighter than it, because a blurb belongs to the title above it. */
   column-gap: 1.5rem;

@@ -65,9 +65,11 @@ jsdom's: it needs `require(esm)`.
 
 ```bash
 npm install
-npm run build   # bundle src/app.js + shared.css into dist/
-npm run serve   # http://localhost:8000
-npm test        # vitest
+npm run build     # bundle src/app.js + shared.css into dist/
+npm run serve     # http://localhost:8000
+npm test          # vitest
+npx playwright install chromium   # one-time, for the next line
+npm run test:e2e  # real-browser checks (e2e/) — builds dist/ first, then Playwright
 ```
 
 ## Deploy
