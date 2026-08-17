@@ -5,9 +5,11 @@
     "build": "node build.js",
     "serve": "python3 -m http.server 8000",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:e2e": "npm run build && playwright test"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "esbuild": "^0.27.3",
     "jsdom": "^28.1.0",
     "vitest": "^3.0.0"
