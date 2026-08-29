@@ -1,8 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { computeRecipe, DEFAULT_CARB_RATIO } from '../src/calculator.js';
+import { computeRecipe, DEFAULT_CARB_RATIO, SALT_PROFILES } from '../src/calculator.js';
 import { RECIPES, findRecipe } from '../data/recipes.js';
 import { findFlavoring } from '../data/flavorings.js';
-import { SALT_PROFILES } from '../src/calculator.js';
 
 const PANTRY = { maltodextrin: 2300, fructose: 2000, flavoring: 500, salt: 400 };
 

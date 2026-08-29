@@ -216,10 +216,15 @@ const RATIO_MARKET_NAMES = {
 // Morton's band because it's the only ratio in that band with a head-to-head
 // result behind it.
 function renderRatioReadout() {
-  // Rounded before both the display and the equality below: a share link (see
-  // src/share.js) clamps to a range without rounding, so an arbitrary URL
-  // float would otherwise print in full and miss the measured-best match.
-  const ratio = Number(Number($('in-carb-ratio').value).toFixed(2)) || 0;
+  // Read exactly the way readInputs() reads it — same Number(...) || 0, no
+  // rounding. A version of this rounded to 2dp to make the equality below
+  // tolerant of a long float, and that quietly classified 1.004 as in-band,
+  // 0.596 as in-band and 0.054 as glucose-only: the readout described a
+  // different number than the batch beside it was computed from. The
+  // equality is worth less than that parity. A long float can now only
+  // arrive from a hand-edited long-form share link (the packed token already
+  // rounds, src/share.js), and all it costs there is the parenthetical.
+  const ratio = Number($('in-carb-ratio').value) || 0;
   const readout = $('ratio-readout');
   const status = ratioStatus(ratio);
 

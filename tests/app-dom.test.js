@@ -432,13 +432,19 @@ describe('fructose ratio readout', () => {
     expect($('ratio-readout').textContent).not.toMatch(/sold as|classic/i);
   });
 
-  // A share link clamps to a range without rounding (src/share.js), so an
-  // arbitrary float can reach this field. Unrounded it printed in full and
-  // missed the measured-best match.
-  it('rounds a long float rather than printing it', () => {
-    setValue('in-carb-ratio', 0.8000000000000001);
-    expect($('ratio-readout').textContent).toMatch(/measured best/);
-    expect($('ratio-readout').textContent).not.toMatch(/0\.80000/);
+  // The readout must classify the same number the batch beside it is computed
+  // from. Rounding to 2dp here to make the measured-best equality tolerant
+  // put the two out of step at every threshold: 1.004 and 0.596 both read as
+  // in-band, and 0.054 read as glucose-only. CLAUDE.md records that this
+  // function may re-read in-carb-ratio precisely because it applies the same
+  // Number(...) || 0 that readInputs() does — so this pins that.
+  it.each([
+    [1.004, /above the optimal/i],
+    [0.596, /below the optimal/i],
+    [0.054, /below the optimal/i],
+  ])('classifies %s from the value itself, not a rounded one', (ratio, expected) => {
+    setValue('in-carb-ratio', ratio);
+    expect($('ratio-readout').textContent).toMatch(expected);
   });
 
   // In-band is not the same claim as measured-best: Morton's 0.6-1.0 is a
