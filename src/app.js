@@ -1,5 +1,6 @@
 import { computeRecipe } from './calculator.js';
 import { planForCarbTarget, ratioStatus, FRUCTOSE_RATIO_OPTIMAL,
+  FRUCTOSE_RATIO_MEASURED_BEST, FRUCTOSE_RATIO_SOURCE_ID,
   DEFAULT_TARGET_CARBS, sodiumStatus } from './hourly.js';
 import { formatGrams, formatMg, formatCalories, formatCount } from './format.js';
 import { FLAVORINGS, findFlavoring, DEFAULT_FLAVORING_ID } from '../data/flavorings.js';
@@ -197,10 +198,32 @@ function statusPillClass(status) {
   return `status-pill status-pill--${status}`;
 }
 
-// Express the fructose ratio the way the research talks about it, as
-// glucose:fructose — maltodextrin digests to glucose, so 0.5 is the classic
-// 2:1 and 0.8 is the ~1.25:1 used by modern high-carb products.
+// How the market writes each ratio, but only where it actually writes one.
+// There is no single mechanical glucose-first form to compute: a 0.5 mix is
+// sold as 2:1 and never as 1:0.5, while a 0.8 mix is sold as 1:0.8. Deriving
+// one label for every value printed ratios nobody uses, so the readout names
+// the landmarks and stays quiet between them.
+const RATIO_MARKET_NAMES = {
+  0.5: 'the classic 2:1',
+  0.8: 'sold as 1:0.8',
+  1: 'sold as 1:1',
+};
+
+// The control asks for the ratio the way the research writes it — fructose
+// first, glucose held at 1 — so the readout carries what the control can't:
+// where the number sits against the evidence, and what it's called on a
+// product label if it's called anything. 0.8 is named separately from
+// Morton's band because it's the only ratio in that band with a head-to-head
+// result behind it.
 function renderRatioReadout() {
+  // Read exactly the way readInputs() reads it — same Number(...) || 0, no
+  // rounding. A version of this rounded to 2dp to make the equality below
+  // tolerant of a long float, and that quietly classified 1.004 as in-band,
+  // 0.596 as in-band and 0.054 as glucose-only: the readout described a
+  // different number than the batch beside it was computed from. The
+  // equality is worth less than that parity. A long float can now only
+  // arrive from a hand-edited long-form share link (the packed token already
+  // rounds, src/share.js), and all it costs there is the parenthetical.
   const ratio = Number($('in-carb-ratio').value) || 0;
   const readout = $('ratio-readout');
   const status = ratioStatus(ratio);
@@ -210,13 +233,17 @@ function renderRatioReadout() {
     return;
   }
 
-  const shape = `${(1 / ratio).toFixed(2)}:1 glucose:fructose`;
-  const verdict = {
-    optimal: '<span class="ok">in the optimal band</span>',
-    below: `below the optimal ${FRUCTOSE_RATIO_OPTIMAL.min}–${FRUCTOSE_RATIO_OPTIMAL.max}`,
-    above: `above the optimal ${FRUCTOSE_RATIO_OPTIMAL.min}–${FRUCTOSE_RATIO_OPTIMAL.max}`,
-  }[status];
-  readout.innerHTML = `${shape} — ${verdict}`;
+  const source = `<a href="#ref-${FRUCTOSE_RATIO_SOURCE_ID}">measured best</a>`;
+  const band = `${FRUCTOSE_RATIO_OPTIMAL.min.toFixed(1)}–${FRUCTOSE_RATIO_OPTIMAL.max.toFixed(1)}`;
+  const verdict = ratio === FRUCTOSE_RATIO_MEASURED_BEST
+    ? `<span class="ok">The ${source}</span>`
+    : {
+      optimal: `<span class="ok">In the optimal ${band}</span>. ${FRUCTOSE_RATIO_MEASURED_BEST} is the ${source}`,
+      below: `Below the optimal ${band}`,
+      above: `Above the optimal ${band}`,
+    }[status];
+  const market = RATIO_MARKET_NAMES[ratio];
+  readout.innerHTML = market ? `${verdict} (${market})` : verdict;
 }
 
 // A batch is mixed in advance and can't know Saturday's weather. Salt level is

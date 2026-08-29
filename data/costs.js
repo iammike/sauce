@@ -94,7 +94,7 @@ export const COMMERCIAL_PRODUCTS = [
 // every other product here has its drawback spelled out.
 export const HOMEMADE_LIMITATION = 'Nothing checks your work — get the sodium wrong and there is no label to catch it. Ingredients come in kilogram bags, so the up-front cost is high and you commit to four of them before knowing whether you like it. Ride on a batch before it matters.';
 
-// Why the mix is mostly maltodextrin rather than sugar. Osmolality depends on
+// Why the mix leans on maltodextrin rather than sugar. Osmolality depends on
 // particle count, not mass: maltodextrin is a polymer, so each molecule
 // carries many glucose units while counting once osmotically. That is what
 // lets a drink be carb-dense without being hypertonic.

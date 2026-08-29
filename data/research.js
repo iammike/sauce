@@ -44,6 +44,14 @@ export const RESEARCH = [
     note: 'Why this mix combines maltodextrin and fructose at all. Glucose and fructose absorb via separate intestinal transporters (SGLT1 and GLUT5), lifting the oxidation ceiling from ~60 g/hr to ~90 g/hr.',
   },
   {
+    id: 'obrien-2013',
+    role: 'Which ratio, head to head',
+    name: 'Fructose–maltodextrin ratio governs exogenous and other CHO oxidation and performance',
+    source: "O'Brien, Stannard, Clarke & Rowlands · Med Sci Sports Exerc, 2013",
+    url: 'https://pubmed.ncbi.nlm.nih.gov/23949097/',
+    note: 'The head-to-head trial behind the 0.8 default. Twelve cyclists rode equiosmotic drinks at fructose:maltodextrin ratios of 0.5, 0.8 and 1.25, all delivering 90 g/hr. The 0.8 drink oxidised 18% more exogenous carbohydrate than 0.5 and 5.2% more than 1.25, with sprint power about 3% higher than either. 1.25 placing between the other two is the other half of the result: more fructose is not simply better.',
+  },
+  {
     id: 'podlogar-wallis-2022',
     role: 'Evidence above 90 g/hr',
     name: 'New Horizons in Carbohydrate Research',

@@ -1,15 +1,17 @@
 # Recipe source & derivation
 
-The calculator's ratios and nutrition math are ported from a tested batch,
-originally worked out in a
+The calculator's nutrition math is ported from a tested batch, originally
+worked out in a
 [Google Sheet](https://docs.google.com/spreadsheets/d/1ynXY85EZxoiSmAzm9cJSymFrC8IUvmYh5mTmx6V6oKU/edit).
+The fructose ratio has since moved off that batch to 0.800 on the evidence
+below; everything else still comes from it.
 
 ## Fixed ratios (grams per 1g maltodextrin)
 
 | Ingredient | Ratio | Notes |
 |---|---|---|
 | Maltodextrin | 1.000 | Primary carb (complex), the reference unit |
-| Fructose | 0.650 | Second carb transporter (glucose/fructose co-transport) |
+| Fructose | 0.800 | Second carb transporter (glucose/fructose co-transport). Was 0.650 in the batch originally mixed |
 | Flavoring | varies | Free slot — see `data/flavorings.js`. Strawberry freeze-dried powder (ratio 0.2) is the only ratio that's been tested in a real batch |
 | Salt (sodium citrate dihydrate) | 0.046 / 0.065 / 0.085 | moderate / endurance / hot profile |
 
@@ -43,7 +45,7 @@ That is what makes a carb-dense drink possible at all. A sugar-based sports
 drink can't simply be concentrated into a fuel: raising its carb content
 raises osmolality proportionally, which slows gastric emptying and provokes GI
 distress. It's the mechanism behind the whole product category, and the reason
-maltodextrin is ~52% of this mix rather than more fructose.
+maltodextrin is ~48% of this mix rather than more fructose.
 
 ## Hourly targets
 
@@ -66,8 +68,23 @@ Anything past ~60 g/hr requires both glucose and fructose; glucose alone
 saturates SGLT1 there regardless of how much you drink.
 
 The same review puts the optimal fructose-to-glucose ratio at **0.6–1.0**,
-which maps directly onto this calculator's `carbRatio`. The tested house
-recipe at 0.65 sits inside that band; the classic 2:1 (0.5) sits just below.
+which maps directly onto this calculator's `carbRatio`. The classic 2:1 (0.5)
+sits just below it.
+
+Within that band, 0.8 is the only point tried against its neighbours directly.
+O'Brien, Stannard, Clarke & Rowlands
+([*Med Sci Sports Exerc* 2013;45(9):1814–24](https://pubmed.ncbi.nlm.nih.gov/23949097/))
+rode 12 cyclists on equiosmotic drinks at fructose:maltodextrin ratios of 0.5,
+0.8 and 1.25, all delivering 90 g/hr. The 0.8 drink oxidised 18% more exogenous
+carbohydrate than 0.5 and 5.2% more than 1.25, with sprint power about 3%
+higher than either. 1.25 placing between the other two is the other half of the
+result: 0.8 is a peak, not a floor.
+
+0.65 → 0.800 moves about five percentage points of the carb load from polymer
+to monomer, so the finished drink goes from roughly 310 to roughly 330 mOsm/L
+at 75 g carbs in 750 ml — near-isotonic to mildly hypertonic. Small, but it is
+the same axis the bottle planner warns about, so dilute rather than concentrate
+if it stops going down.
 
 ### Why the targets aren't per-kilogram
 

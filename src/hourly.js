@@ -63,7 +63,17 @@ export const DUAL_TRANSPORT_TRAINED = 120;
 // digests to glucose, this maps directly onto the calculator's carbRatio.
 // Encompasses both common formulations: 2:1 glucose:fructose (0.5) sits just
 // below it, and 1:0.8 (0.8) sits inside.
+//
+// The literature writes it fructose-first with glucose held at 1 (0.8:1) —
+// the number the calculator stores. Product labels write the same thing
+// glucose-first (1:0.8). The control reads the literature's way, the readout
+// translates.
 export const FRUCTOSE_RATIO_OPTIMAL = { min: 0.6, max: 1.0 };
+
+// 0.8 is the only point inside Morton's band tried against its neighbours
+// directly — O'Brien et al. 2013, where it beat both 0.5 and 1.25.
+export const FRUCTOSE_RATIO_MEASURED_BEST = 0.8;
+export const FRUCTOSE_RATIO_SOURCE_ID = 'obrien-2013';
 
 /** Where a fructose ratio sits relative to the evidence-backed optimal band. */
 export function ratioStatus(carbRatio) {

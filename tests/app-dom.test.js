@@ -22,7 +22,8 @@ import { FLAVORINGS } from '../data/flavorings.js';
 import { TUNING } from '../data/tuning.js';
 import { PRODUCTS, ASSOCIATES_TAG } from '../data/products.js';
 import { LABEL_SIZES } from '../data/label-sizes.js';
-import { SALT_PROFILES } from '../src/calculator.js';
+import { SALT_PROFILES, DEFAULT_CARB_RATIO } from '../src/calculator.js';
+import { FRUCTOSE_RATIO_MEASURED_BEST, FRUCTOSE_RATIO_SOURCE_ID } from '../src/hourly.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const html = readFileSync(resolve(root, 'index.html'), 'utf8');
@@ -256,21 +257,28 @@ describe('persisted calculator inputs', () => {
   });
 
   it('restores a saved batch before the first render', async () => {
-    // in-cap is cleared too, so maltodextrin decides the batch rather than
-    // the container limit. At the default 1814 g on hand, maltodextrin
-    // itself is the limiting ingredient and the card reads exactly 1814 g.
-    // At 5000 g it exceeds what the on-hand fructose can match at the tested
-    // ratio, so fructose takes over as the limit and the card settles lower
-    // — but still above 1814 g. That's only reachable if the restored value
-    // was in the input *before* init()'s first recalculate(), not just
-    // sitting in the field waiting for a change event that never fires on
-    // page load.
+    // in-cap is cleared too, so an ingredient decides the batch rather than
+    // the container limit. 900 g of maltodextrin is less than the on-hand
+    // fructose can match, so maltodextrin is the limit and the card reads
+    // exactly 900 g. Any other number means the restored value wasn't in the
+    // input before init()'s first recalculate() — a change event never fires
+    // on page load, so a late restore leaves the field right and the batch
+    // computed off the markup default.
+    //
+    // Deliberately a value *below* the default rather than above: what the
+    // batch tops out at depends on the carb ratio, and pinning this test to
+    // that would make an unrelated ratio change look like a persistence bug.
     const w = await loadApp({
-      seedLocalStorage: { [STORAGE_KEY]: JSON.stringify({ 'in-malto': '5000', 'in-cap': '' }) },
+      seedLocalStorage: { [STORAGE_KEY]: JSON.stringify({ 'in-malto': '900', 'in-cap': '' }) },
     });
     const maltoCard = w.document.querySelector('#recipe-grid .card');
     expect(maltoCard.querySelector('.card__eyebrow').textContent).toMatch(/Maltodextrin/);
-    expect(parseFloat(maltoCard.querySelector('.card__value').textContent)).toBeGreaterThan(1814);
+    expect(parseFloat(maltoCard.querySelector('.card__value').textContent)).toBe(900);
+    // Orthogonal to the gram figure, which is 1900/sumRatio when the restore
+    // lands late — a number that moves with the carb and flavoring ratios and
+    // could one day coincide with 900. The limiting ingredient can't: a late
+    // restore leaves in-cap at its markup default, so this reads as the cap.
+    expect(w.document.getElementById('calc-limiting').textContent).toMatch(/Maltodextrin/);
   });
 
   it('restores a saved value across every field, not just one', async () => {
@@ -398,16 +406,83 @@ describe('fructose ratio readout', () => {
   it.each([
     [0, /glucose only/i],
     [0.3, /below the optimal/i],
-    [0.8, /optimal band/i],
+    [0.7, /in the optimal/i],
     [1.5, /above the optimal/i],
   ])('describes a ratio of %s', (ratio, expected) => {
     setValue('in-carb-ratio', ratio);
     expect($('ratio-readout').textContent).toMatch(expected);
   });
 
-  it('states the glucose:fructose shape once there is fructose', () => {
+  // The market has two conventions and they are not interchangeable: 0.5 is
+  // sold as 2:1 and never as 1:0.5, 0.8 is sold as 1:0.8. One computed
+  // glucose-first form gets one of them wrong, so only real names are printed.
+  it('names a ratio the way the market names it, not by formula', () => {
     setValue('in-carb-ratio', 0.5);
-    expect($('ratio-readout').textContent).toMatch(/2\.00:1 glucose:fructose/);
+    expect($('ratio-readout').textContent).toMatch(/the classic 2:1/);
+    expect($('ratio-readout').textContent).not.toMatch(/1:0\.5/);
+
+    setValue('in-carb-ratio', FRUCTOSE_RATIO_MEASURED_BEST);
+    expect($('ratio-readout').textContent).toMatch(/sold as 1:0\.8/);
+  });
+
+  // Every other value has no market name, and inventing one is the bug above.
+  it('stays quiet about labelling for a ratio nothing is sold at', () => {
+    setValue('in-carb-ratio', 0.65);
+    expect($('ratio-readout').textContent).toMatch(/in the optimal/i);
+    expect($('ratio-readout').textContent).not.toMatch(/sold as|classic/i);
+  });
+
+  // The readout must classify the same number the batch beside it is computed
+  // from. Rounding to 2dp here to make the measured-best equality tolerant
+  // put the two out of step at every threshold: 1.004 and 0.596 both read as
+  // in-band, and 0.054 read as glucose-only. CLAUDE.md records that this
+  // function may re-read in-carb-ratio precisely because it applies the same
+  // Number(...) || 0 that readInputs() does — so this pins that.
+  it.each([
+    [1.004, /above the optimal/i],
+    [0.596, /below the optimal/i],
+    [0.054, /below the optimal/i],
+  ])('classifies %s from the value itself, not a rounded one', (ratio, expected) => {
+    setValue('in-carb-ratio', ratio);
+    expect($('ratio-readout').textContent).toMatch(expected);
+  });
+
+  // In-band is not the same claim as measured-best: Morton's 0.6-1.0 is a
+  // band, and 0.8 is the only point in it that has been ridden against its
+  // neighbours. Saying only "in the optimal band" at 0.8 loses that.
+  it('singles out the one ratio with a head-to-head result behind it', () => {
+    setValue('in-carb-ratio', FRUCTOSE_RATIO_MEASURED_BEST);
+    expect($('ratio-readout').textContent).toMatch(/measured best/i);
+    expect($('ratio-readout').textContent).not.toMatch(/in the optimal/i);
+
+    setValue('in-carb-ratio', 0.7);
+    expect($('ratio-readout').textContent).toMatch(/in the optimal/i);
+    expect($('ratio-readout').textContent).toMatch(/0\.8 is the measured best/i);
+  });
+
+  // The number IS the change here, and it exists in three places with nothing
+  // tying them together: index.html's markup default (what users get),
+  // DEFAULT_CARB_RATIO (the share.js/ride.js fallback), and
+  // FRUCTOSE_RATIO_MEASURED_BEST (what the readout calls the measured best).
+  // Same drift the persistence field-list test closes, one layer up.
+  it('ships the markup default the calculator falls back to', () => {
+    expect($('in-carb-ratio').value).toBe(String(DEFAULT_CARB_RATIO));
+  });
+
+  // src/calculator.js says "0.8 is a peak, not a floor — don't drift the
+  // default above it", on O'Brien's 1.25 arm placing between 0.5 and 0.8.
+  // Nothing enforced it.
+  it('never ships a default above the measured best', () => {
+    expect(DEFAULT_CARB_RATIO).toBeLessThanOrEqual(FRUCTOSE_RATIO_MEASURED_BEST);
+  });
+
+  // The source link is the site's rule for a health claim: an anchor to the
+  // reference on the page, not a tooltip and not a code comment.
+  it('links the claim to its reference on the page', () => {
+    setValue('in-carb-ratio', FRUCTOSE_RATIO_MEASURED_BEST);
+    const link = $('ratio-readout').querySelector('a');
+    expect(link.getAttribute('href')).toBe(`#ref-${FRUCTOSE_RATIO_SOURCE_ID}`);
+    expect(document.getElementById(link.getAttribute('href').slice(1))).not.toBeNull();
   });
 });
 
