@@ -90,7 +90,7 @@ export const COMMERCIAL_PRODUCTS = [
     basis: '~$4.50 / 4 lb (1814 g), pure sucrose; no label dilution to quote',
     confidence: 'estimated',
     note: 'The cheapest carbohydrate there is, and a real fuel rather than a joke one: sucrose is glucose and fructose bonded 1:1, so it hits the optimal ratio band with one ingredient. It carries no sodium at all, so a salt source is not optional alongside it.',
-    limitation: 'Sweetness is the practical limit, not the ratio. Gram for gram of carbohydrate it lands somewhere between a sixth and two thirds sweeter than this mix, and you cannot dial it back — the ratio is welded at 1:1. That is a lot of sweet to still be drinking at hour four. On concentration it beats loose glucose, but only draws level with this mix: 75 g of carbohydrate in 750 ml is about 292 mOsm/L as sucrose against 286 as this mix, before either gets its salt. The gap only opens at low fructose ratios, where the mix drops to 238 and sugar cannot follow.',
+    limitation: 'No sodium, a ratio welded at 1:1, and sweeter than this mix with no way to dial it back. Concentration is a wash at the standard ratio — see Troubleshooting.',
   },
   {
     id: 'gatorade-regular',

@@ -350,12 +350,19 @@ function initProducts() {
 // string that was never on screen. It's the mechanism behind half the
 // limitations in the cost grid (and the answer to "why not just table
 // sugar"), so it belongs under them. It states figures on the page, so it
-// carries a Source anchor like every other numeric claim here — the note is
-// a constant in our own data file, never user input, so innerHTML is safe.
+// carries a Source anchor like every other numeric claim here.
+//
+// Built as nodes rather than innerHTML, and the id is used directly rather
+// than read back off findResearch() — a missing entry would otherwise throw
+// mid-init and leave every panel below it blank, which is the failure this
+// repo already has a dom-contract test for. A bad id now degrades to a dead
+// anchor, which the test catches loudly instead.
 function initOsmolalityNote() {
-  const source = findResearch(OSMOLALITY_SOURCE_ID);
-  $('osmolality-note').innerHTML =
-    `${OSMOLALITY_NOTE} <a href="#ref-${source.id}">Source</a>`;
+  const el = $('osmolality-note');
+  const link = document.createElement('a');
+  link.href = `#ref-${OSMOLALITY_SOURCE_ID}`;
+  link.textContent = 'Source';
+  el.replaceChildren(`${OSMOLALITY_NOTE} `, link);
 }
 
 function initResearch() {
