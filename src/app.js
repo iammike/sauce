@@ -1,4 +1,5 @@
 import { computeRecipe } from './calculator.js';
+import { CARB_BASES, DEFAULT_CARB_BASE, findCarbBase } from '../data/carb-bases.js';
 import { planForCarbTarget, ratioStatus, FRUCTOSE_RATIO_OPTIMAL,
   FRUCTOSE_RATIO_MEASURED_BEST, FRUCTOSE_RATIO_SOURCE_ID,
   DEFAULT_TARGET_CARBS, sodiumStatus } from './hourly.js';
@@ -19,17 +20,25 @@ import { exportLabelPng, labelFileName } from './label-export.js';
 
 const $ = (id) => document.getElementById(id);
 
-function readInputs(flavor, scoopGrams) {
+// Takes the resolved base rather than re-reading the select, the same rule
+// #16/#19/#20 established for the flavouring and scoop size.
+function readInputs(flavor, scoopGrams, base) {
   const capRaw = $('in-cap').value;
-  const carbRatio = Number($('in-carb-ratio').value) || 0;
+  // Sucrose is glucose and fructose bonded 1:1 — the molecule fixes the
+  // ratio, so the control's value is ignored rather than trusted here.
+  const carbRatio = base.adjustableRatio
+    ? Number($('in-carb-ratio').value) || 0
+    : base.fixedCarbRatio;
   const saltProfileValue = $('in-salt-profile').value;
   return {
     onHand: {
       maltodextrin: Number($('in-malto').value) || 0,
       fructose: Number($('in-fructose').value) || 0,
+      sucrose: Number($('in-sucrose').value) || 0,
       flavoring: Number($('in-flavoring').value) || 0,
       salt: Number($('in-salt').value) || 0,
     },
+    carbBase: base.id,
     // ratiosFor() throws on a name SALT_PROFILES doesn't define, which would
     // otherwise abort init() and blank the whole page. initSaltProfiles()
     // below builds this select's options from SALT_PROFILES directly, so
@@ -55,6 +64,7 @@ function readInputs(flavor, scoopGrams) {
 const LIMITING_LABELS = {
   maltodextrin: 'Maltodextrin',
   fructose: 'Fructose',
+  sucrose: 'Table sugar',
   flavoring: 'Flavoring',
   salt: 'Sodium citrate',
   cap: 'your batch-size cap',
@@ -95,7 +105,7 @@ function renderFactsPanel(recipe, serving, targetCarbs) {
 
 const money = (v) => `$${v.toFixed(2)}`;
 
-function renderCost(recipe, flavor, targetCarbs) {
+function renderCost(recipe, flavor, targetCarbs, base) {
   const cost = batchCost(recipe.recipeGrams, flavor.pricePerGram);
   // A per-bottle flavouring adds nothing to the batch but isn't free to use.
   // Assume roughly a bottle an hour, which is what the planner assumes too.
@@ -111,7 +121,15 @@ function renderCost(recipe, flavor, targetCarbs) {
 
   const rows = [
     {
-      name: 'The Sauce', perHour: mine, mine: true, confidence: 'actual',
+      // Only as confident as its least confident ingredient — the sugar base
+      // is priced 'estimated', and claiming 'actual' over it would be the
+      // same overstatement the rest of this panel is careful to avoid.
+      name: 'The Sauce',
+      perHour: mine,
+      mine: true,
+      confidence: base.parts.every((p) => INGREDIENT_COSTS[p.key]?.confidence === 'actual')
+        ? 'actual'
+        : 'estimated',
       note: `Your mix, at ${money(cost.total)} for the whole ${formatGrams(recipe.actualBatch)} batch.`,
       sodiumMgPerHour: mineSodium,
       litresPerHour: null,
@@ -138,7 +156,7 @@ function renderCost(recipe, flavor, targetCarbs) {
   // Share of spend rarely matches share of weight — that contrast is the
   // actually useful thing here.
   const labels = {
-    maltodextrin: 'Maltodextrin', fructose: 'Fructose',
+    ...Object.fromEntries(base.parts.map((p) => [p.key, p.name])),
     flavoring: flavor.name, salt: 'Sodium citrate',
   };
   $('cost-breakdown').innerHTML = Object.entries(cost.perIngredient)
@@ -158,14 +176,24 @@ function renderCost(recipe, flavor, targetCarbs) {
       `;
     }).join('');
 
-  $('cost-note').textContent = `Ingredient prices as of ${PRICED_AS_OF} (${INGREDIENT_COSTS.maltodextrin.basis}, ${INGREDIENT_COSTS.fructose.basis}, ${INGREDIENT_COSTS.salt.basis}, flavoring ${flavor.priceBasis}). Prices move — treat these as ballpark, not quotes.`;
+  // Bases are listed from the base itself, not named literally — a sugar
+  // batch quoting maltodextrin and fructose prices would be quoting the cost
+  // of ingredients that aren't in it.
+  const priceBases = base.parts
+    .map((p) => INGREDIENT_COSTS[p.key]?.basis)
+    .filter(Boolean)
+    .join(', ');
+  $('cost-note').textContent = `Ingredient prices as of ${PRICED_AS_OF} (${priceBases}, ${INGREDIENT_COSTS.salt.basis}, flavoring ${flavor.priceBasis}). Prices move — treat these as ballpark, not quotes.`;
 }
 
-function renderRecipeGrid(recipe, flavor) {
+// Takes the resolved base for the same reason it takes the resolved flavour:
+// the carbs listed here must be the carbs the batch was computed from. A
+// hardcoded list rendered "Maltodextrin —" next to a sugar batch and left the
+// sugar itself off the card grid entirely.
+function renderRecipeGrid(recipe, flavor, base) {
   const grid = $('recipe-grid');
   const rows = [
-    ['maltodextrin', 'Maltodextrin'],
-    ['fructose', 'Fructose'],
+    ...base.parts.map((p) => [p.key, p.name]),
     ['flavoring', recipe.flavorName],
     ['salt', 'Sodium citrate'],
   ];
@@ -216,7 +244,34 @@ const RATIO_MARKET_NAMES = {
 // product label if it's called anything. 0.8 is named separately from
 // Morton's band because it's the only ratio in that band with a head-to-head
 // result behind it.
-function renderRatioReadout() {
+// Shows only the on-hand boxes the chosen base actually uses, and locks the
+// ratio control when the base fixes it. Locked rather than hidden: "why can't
+// I change this" is the obvious question, and a disabled field with a reason
+// beside it answers it where a missing field wouldn't.
+function renderCarbBase(base) {
+  const used = new Set(base.parts.map((p) => p.key));
+  for (const el of document.querySelectorAll('[data-carb-part]')) {
+    el.hidden = !used.has(el.dataset.carbPart);
+  }
+  $('carb-base-note').textContent = base.note;
+
+  $('carb-ratio-note').textContent = base.ratioHint;
+
+  // The input keeps the user's own number whatever the base — writing the
+  // fixed value into it destroyed that number, and because
+  // handleCalcFormChange() saves right after recalculating, the overwrite
+  // reached localStorage on the same event. Merely looking at the sugar
+  // option permanently reset a 0.5 batch to 1.0. The fixed value is shown
+  // in a separate element instead, and the input is swapped out for it.
+  const ratio = $('in-carb-ratio');
+  const fixed = $('carb-ratio-fixed');
+  ratio.hidden = !base.adjustableRatio;
+  ratio.disabled = !base.adjustableRatio;
+  fixed.hidden = base.adjustableRatio;
+  fixed.textContent = base.adjustableRatio ? '' : String(base.fixedCarbRatio);
+}
+
+function renderRatioReadout(base) {
   // Read exactly the way readInputs() reads it — same Number(...) || 0, no
   // rounding. A version of this rounded to 2dp to make the equality below
   // tolerant of a long float, and that quietly classified 1.004 as in-band,
@@ -225,12 +280,21 @@ function renderRatioReadout() {
   // equality is worth less than that parity. A long float can now only
   // arrive from a hand-edited long-form share link (the packed token already
   // rounds, src/share.js), and all it costs there is the parenthetical.
-  const ratio = Number($('in-carb-ratio').value) || 0;
+  const ratio = base.adjustableRatio
+    ? Number($('in-carb-ratio').value) || 0
+    : base.fixedCarbRatio;
   const readout = $('ratio-readout');
   const status = ratioStatus(ratio);
 
   if (status === 'none') {
     readout.innerHTML = '<span class="warn">Glucose only — caps you near 60 g/hr</span>';
+    return;
+  }
+
+  // A base that fixes the ratio gets a statement, not advice: nudging toward
+  // 0.8 is useless when the molecule decides and the control is disabled.
+  if (!base.adjustableRatio) {
+    readout.textContent = base.fixedRatioNote;
     return;
   }
 
@@ -280,17 +344,20 @@ function recalculate() {
   // anywhere — see #19 — but resolving it once, the same way flavor is
   // above, means the two can't quietly disagree if that ever changes.
   const scoopGrams = Number($('in-scoop').value) || 0;
-  const inputs = readInputs(flavor, scoopGrams);
+  // Resolved once for the same reason as the flavouring above.
+  const base = findCarbBase($('in-carb-base').value) ?? findCarbBase(DEFAULT_CARB_BASE);
+  const inputs = readInputs(flavor, scoopGrams, base);
   const recipe = computeRecipe(inputs);
   const targetCarbs = Number($('in-target-carbs').value) || DEFAULT_TARGET_CARBS;
   const serving = servingFor(recipe, targetCarbs, scoopGrams);
 
-  renderRatioReadout();
+  renderCarbBase(base);
+  renderRatioReadout(base);
   renderSaltNote(inputs.saltProfile);
   renderFactsPanel(recipe, serving, targetCarbs);
-  renderRecipeGrid(recipe, flavor);
-  renderLabel(recipe, serving, targetCarbs);
-  renderCost(recipe, flavor, targetCarbs);
+  renderRecipeGrid(recipe, flavor, base);
+  renderLabel(recipe, serving, targetCarbs, base);
+  renderCost(recipe, flavor, targetCarbs, base);
   updateRidePlanner(recipe.perGram);
 }
 
@@ -321,6 +388,16 @@ function initFlavorPresets() {
 // was given a fallback in readInputs() — could instead render silently at the
 // wrong salt level with no error. Building the options here removes the
 // drift entirely rather than only detecting it.
+// Built from CARB_BASES rather than hand-written <option>s, the same way the
+// flavouring and salt-profile selects are — markup that names a value the
+// model doesn't define is a drift bug waiting to happen.
+function initCarbBases() {
+  $('in-carb-base').innerHTML = Object.values(CARB_BASES)
+    .map((b) => `<option value="${b.id}">${b.shortName}</option>`)
+    .join('');
+  $('in-carb-base').value = DEFAULT_CARB_BASE;
+}
+
 function initSaltProfiles() {
   const select = $('in-salt-profile');
   select.innerHTML = Object.entries(SALT_PROFILES)
@@ -383,10 +460,12 @@ function initResearch() {
 // Food labels list ingredients in descending order by weight, so derive the
 // order from the batch rather than hardcoding it — changing the flavoring
 // ratio or salt profile can genuinely reorder them.
-function ingredientList(recipe) {
+// Names come from the base's own parts rather than a fixed map — a map keyed
+// to maltodextrin and fructose renders `undefined` in the ingredients list for
+// any other base, which on a printed nutrition label is not a cosmetic bug.
+function ingredientList(recipe, base) {
   const names = {
-    maltodextrin: 'Maltodextrin',
-    fructose: 'Fructose',
+    ...Object.fromEntries(base.parts.map((p) => [p.key, p.name])),
     flavoring: recipe.flavorName,
     salt: 'Sodium citrate',
   };
@@ -397,7 +476,7 @@ function ingredientList(recipe) {
     .join(', ');
 }
 
-function renderLabel(recipe, serving, targetCarbs) {
+function renderLabel(recipe, serving, targetCarbs, base) {
   $('lb-name').textContent = $('in-label-name').value || 'The Sauce';
   $('lb-flavor').textContent = $('in-label-flavor').value;
   $('lb-maker').textContent = $('in-label-maker').value;
@@ -410,7 +489,7 @@ function renderLabel(recipe, serving, targetCarbs) {
   $('lb-directions').textContent = serving.scoops !== null
     ? `One serving = one hour at ${targetCarbs} g carbs/hr, about ${formatCount(serving.scoops, 1)} scoops. Add powder to water.`
     : `One serving = one hour at ${targetCarbs} g carbs/hr. Add powder to water.`;
-  $('lb-ingredients').textContent = ingredientList(recipe);
+  $('lb-ingredients').textContent = ingredientList(recipe, base);
 
   const note = $('in-label-note').value.trim();
   const noteEl = $('lb-note');
@@ -601,16 +680,17 @@ function handleCalcFormChange() {
 function init() {
   initFlavorPresets();
   initSaltProfiles();
+  initCarbBases();
   initTuning();
   initProducts();
   initResearch();
   initOsmolalityNote();
   initLabel();
 
-  // Must run after initFlavorPresets()/initSaltProfiles() set both selects'
-  // options, and before the first recalculate() reads the form — otherwise a
-  // saved flavoring or salt profile would be overwritten by the select's own
-  // default.
+  // Must run after initFlavorPresets()/initSaltProfiles()/initCarbBases()
+  // set every select's options, and before the first recalculate() reads the
+  // form — otherwise a saved flavoring, salt profile or carb base would be
+  // overwritten by the select's own default.
   restoreCalcFormState();
 
   // in-target-carbs needs no listener of its own: it's a plain number input
@@ -620,7 +700,7 @@ function init() {
   // Selects need an explicit change listener. The form's 'input' listener
   // happens to cover them in current browsers, but relying on that made the
   // salt level silently not recalculate when driven programmatically.
-  ['in-flavor-preset', 'in-salt-profile'].forEach((id) =>
+  ['in-flavor-preset', 'in-salt-profile', 'in-carb-base'].forEach((id) =>
     $(id).addEventListener('change', handleCalcFormChange));
 
   recalculate();

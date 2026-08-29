@@ -28,6 +28,7 @@ const $ = (id) => document.getElementById(id);
 const NUMBER_FIELDS = [
   'in-malto',
   'in-fructose',
+  'in-sucrose',
   'in-flavoring',
   'in-salt',
   // The only field markup lets sit empty ("no limit"); everything else
@@ -39,7 +40,7 @@ const NUMBER_FIELDS = [
   'in-carb-ratio',
 ].map((f) => (typeof f === 'string' ? { id: f, allowEmpty: false } : f));
 
-const SELECT_FIELDS = ['in-flavor-preset', 'in-salt-profile'];
+const SELECT_FIELDS = ['in-flavor-preset', 'in-salt-profile', 'in-carb-base'];
 
 function selectOptionValues(id) {
   return [...$(id).options].map((o) => o.value);

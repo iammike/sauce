@@ -24,6 +24,7 @@ import { PRODUCTS, ASSOCIATES_TAG } from '../data/products.js';
 import { LABEL_SIZES } from '../data/label-sizes.js';
 import { SALT_PROFILES, DEFAULT_CARB_RATIO } from '../src/calculator.js';
 import { OSMOLALITY_NOTE, OSMOLALITY_SOURCE_ID } from '../data/costs.js';
+import { CARB_BASES } from '../data/carb-bases.js';
 import { FRUCTOSE_RATIO_MEASURED_BEST, FRUCTOSE_RATIO_SOURCE_ID } from '../src/hourly.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -490,6 +491,97 @@ describe('fructose ratio readout', () => {
 // OSMOLALITY_NOTE spent its whole life exported, unit-tested and unrendered:
 // tests/cost.test.js asserted its wording while nothing imported it into the
 // page. A string test can't tell you a string is on screen.
+describe('carb source mode', () => {
+  const shown = (key) => !document.querySelector(`[data-carb-part="${key}"]`).hidden;
+
+  it('offers exactly the bases CARB_BASES defines', () => {
+    const ids = [...$('in-carb-base').options].map((o) => o.value);
+    expect(ids).toEqual(Object.keys(CARB_BASES));
+  });
+
+  it('shows only the on-hand fields the chosen base uses', () => {
+    expect([shown('maltodextrin'), shown('fructose'), shown('sucrose')]).toEqual([true, true, false]);
+
+    setValue('in-carb-base', 'sucrose', 'change');
+    expect([shown('maltodextrin'), shown('fructose'), shown('sucrose')]).toEqual([false, false, true]);
+  });
+
+  // The carbs on the card grid must be the carbs the batch was computed from.
+  // A hardcoded row list rendered "Maltodextrin —" beside a sugar batch and
+  // left the sugar itself off the grid entirely.
+  it('weighs out the base actually chosen', () => {
+    setValue('in-carb-base', 'sucrose', 'change');
+    const rows = [...document.querySelectorAll('#recipe-grid .card')]
+      .map((c) => c.querySelector('.card__eyebrow').textContent);
+    expect(rows.join(' ')).toMatch(/Sugar/);
+    expect(rows.join(' ')).not.toMatch(/Maltodextrin|Fructose/);
+  });
+
+  // Keyed to a fixed name map, this rendered `undefined` into the printed
+  // ingredients list for any base but the original.
+  it('names the base on the label ingredients line', () => {
+    setValue('in-carb-base', 'sucrose', 'change');
+    expect($('lb-ingredients').textContent).toMatch(/Sugar/);
+    expect($('lb-ingredients').textContent).not.toMatch(/undefined/);
+  });
+
+  it('locks the ratio control for a base that fixes it', () => {
+    setValue('in-carb-base', 'sucrose', 'change');
+    expect($('in-carb-ratio').disabled).toBe(true);
+    expect($('ratio-readout').textContent).toMatch(/fixed by the carbohydrate/i);
+
+    setValue('in-carb-base', 'malto-fructose', 'change');
+    expect($('in-carb-ratio').disabled).toBe(false);
+  });
+
+  // Switching base must not destroy the ratio the user typed. It used to be
+  // overwritten with the base's fixed value, and handleCalcFormChange() saves
+  // immediately after recalculating — so merely looking at the sugar option
+  // reset a 0.5 batch to 1.0, in localStorage, permanently.
+  it('keeps the typed ratio through a round trip to a fixed base', () => {
+    setValue('in-carb-ratio', 0.5);
+    setValue('in-carb-base', 'sucrose', 'change');
+    setValue('in-carb-base', 'malto-fructose', 'change');
+    expect($('in-carb-ratio').value).toBe('0.5');
+  });
+
+  it('does not persist a ratio the user never chose', () => {
+    setValue('in-carb-ratio', 0.5);
+    setValue('in-carb-base', 'sucrose', 'change');
+    const saved = JSON.parse(localStorage.getItem('sauce.calcForm.v1'));
+    expect(saved['in-carb-ratio']).toBe('0.5');
+  });
+
+  // The guard lives in readInputs(), whose carbRatio isn't observable in any
+  // rendered output for a base that doesn't use it — so asserting on the
+  // field's value proved nothing about it. Spying on what computeRecipe()
+  // actually receives is the only way to see it, the same approach #19 uses
+  // for scoopGrams.
+  it('hands the batch the base\'s fixed ratio, not the stale field value', async () => {
+    let receivedCarbRatio;
+    vi.doMock('../src/calculator.js', async () => {
+      const actual = await vi.importActual('../src/calculator.js');
+      return {
+        ...actual,
+        computeRecipe: (inputs) => {
+          receivedCarbRatio = inputs.carbRatio;
+          return actual.computeRecipe(inputs);
+        },
+      };
+    });
+    try {
+      await loadApp();
+      setValue('in-carb-ratio', 0.3);
+      expect(receivedCarbRatio).toBe(0.3);
+
+      setValue('in-carb-base', 'sucrose', 'change');
+      expect(receivedCarbRatio).toBe(1);
+    } finally {
+      vi.doUnmock('../src/calculator.js');
+    }
+  });
+});
+
 describe('the osmolality note', () => {
   it('is actually rendered, not just exported', () => {
     expect($('osmolality-note').textContent).toContain(OSMOLALITY_NOTE);
@@ -1207,9 +1299,15 @@ describe('the bottle planner follows the batch on screen', () => {
   // both were on one page. recalculate() passes recipe.perGram in; without
   // that call it silently falls back to baseRecipeProfile() and quietly
   // stops reflecting the recipe above it.
+  // The lever used to be the carb ratio. Since #30 anchored salt to
+  // carbohydrate rather than to the reference carb, carbohydrate per gram of
+  // mix no longer moves with the ratio at all — salt rises and falls with the
+  // carbs, so the fraction is constant. That's correct, but it makes the
+  // ratio useless as a probe here. A flavouring that isn't all carbohydrate
+  // still shifts the density, so it is the lever now.
   it('changes its answer when the recipe changes', () => {
     const before = $('ride-answer').textContent;
-    setValue('in-carb-ratio', 0.2);
+    setValue('in-flavor-preset', 'kool-aid-unsweetened', 'change');
     expect($('ride-answer').textContent).not.toBe(before);
   });
 

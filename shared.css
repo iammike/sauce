@@ -511,6 +511,14 @@ main > .panel:last-child { padding-bottom: 0; }
   gap: 0.3rem;
 }
 
+/* [hidden] is display:none in the UA sheet, but `.field { display: flex }` is
+   more specific and wins — so hiding a field from JS silently did nothing.
+   Caught by looking at the page, not by the DOM test, which read the `hidden`
+   property and saw exactly what it had just set. */
+.field[hidden] { display: none; }
+
+
+
 /* The note and the field it describes must never split across rows — with an
    auto-fit grid they otherwise can, which would leave the arrow pointing at
    nothing. Pairing them makes the direction knowable, so the arrow can flip
@@ -581,6 +589,19 @@ main > .panel:last-child { padding-bottom: 0; }
   color: var(--ink);
 }
 
+/* A locked control has to read as locked. The ratio is disabled when the carb
+   base fixes it (sucrose is 1:1 by construction), and left looking editable it
+   just reads as a field that ignores you. Must come *after* the input/select
+   background rules above — equal specificity, so source order decides, and an
+   earlier copy of this rule silently lost. */
+.field input:not([type="file"]):disabled,
+.field select:disabled {
+  background: transparent;
+  border-style: dashed;
+  color: var(--ink-soft);
+  cursor: not-allowed;
+}
+
 .field--select select { font-family: 'Karla', sans-serif; }
 
 /* A ratio field carries its second term as a fixed label, so the control
@@ -597,6 +618,21 @@ main > .panel:last-child { padding-bottom: 0; }
 }
 
 .field__ratio input { flex: 1; min-width: 0; }
+
+/* Stands in for the input when the base fixes the ratio. Matches the input's
+   metrics so the row doesn't jump on a base switch. */
+.field__ratio-fixed {
+  flex: 1;
+  min-width: 0;
+  padding: 0.5rem 0.6rem;
+  border: 2px dashed var(--input-yellow-border);
+  border-radius: 2px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 1rem;
+  color: var(--ink-soft);
+}
+
+.field__ratio-fixed[hidden] { display: none; }
 
 .field__ratio-unit {
   font-family: 'IBM Plex Mono', monospace;

@@ -48,12 +48,26 @@ describe('solveSaltRatio', () => {
   const FORMULATION = { carbRatio: 0.65, flavorRatio: 0.2, flavorCarbFraction: 1 };
 
   it('reproduces the tested endurance profile from its own numbers', () => {
-    // 619 mg/hr at 75 g carbs is what the endurance profile (0.065) delivers.
-    // Solving backwards must return that ratio, or the algebra is wrong.
+    // Salt profiles are grams of salt per gram of carbohydrate (#30), while
+    // the solver answers in the raw per-reference-carb ratio the recipe uses,
+    // so the expectation is derived rather than quoted. Solving backwards
+    // from the sodium that profile delivers must return that raw ratio, or
+    // the algebra is wrong.
+    // 573 mg/hr at 75 g carbs is what every salt profile now delivers by
+    // construction, whatever the base or ratio. Pinned as a literal rather
+    // than derived from SALT_PROFILES: deriving it made this a round trip
+    // that passed with saltPerCarb set to anything at all, duplicating the
+    // round-trip test below instead of checking the algebra against a
+    // known-good number.
+    const carbSum = 1 + FORMULATION.carbRatio
+      + FORMULATION.flavorRatio * FORMULATION.flavorCarbFraction;
     const solved = solveSaltRatio({
-      targetSodiumPerHour: 619, targetCarbsPerHour: 75, ...FORMULATION,
+      targetSodiumPerHour: 573, targetCarbsPerHour: 75, ...FORMULATION,
     });
-    expect(solved.ratio).toBeCloseTo(SALT_PROFILES.endurance.ratio, 3);
+    expect(solved.ratio).toBeCloseTo(SALT_PROFILES.endurance.saltPerCarb * carbSum, 3);
+    expect(sodiumAtSaltRatio({
+      saltRatio: solved.ratio, targetCarbsPerHour: 75, ...FORMULATION,
+    })).toBeCloseTo(573, 0);
   });
 
   it('round-trips against sodiumAtSaltRatio', () => {

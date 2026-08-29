@@ -25,6 +25,8 @@ const STORAGE_KEY = 'sauce.calcForm.v1';
 const FIELDS = {
   'in-malto': { min: '0', step: '1', value: '1814' },
   'in-fructose': { min: '0', step: '1', value: '1361' },
+  'in-sucrose': { min: '0', step: '1', value: '1814' },
+  'in-carb-base': { tag: 'select', options: ['malto-fructose', 'sucrose'], value: 'malto-fructose' },
   'in-flavor-preset': { tag: 'select', options: ['strawberry', 'unflavored'], value: 'strawberry' },
   'in-flavoring': { min: '0', step: '1', value: '499' },
   'in-salt': { min: '0', step: '1', value: '397' },

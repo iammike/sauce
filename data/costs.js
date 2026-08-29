@@ -26,6 +26,12 @@ export const INGREDIENT_COSTS = {
     product: 'Now Foods Fructose Fruit Sugar',
     confidence: 'actual',
   },
+  sucrose: {
+    pricePerGram: 4.50 / 1814,
+    basis: '~$4.50 / 4 lb (1814 g)',
+    product: 'Granulated white sugar',
+    confidence: 'estimated',
+  },
   salt: {
     pricePerGram: 10 / 397,
     basis: '$10 / 14 oz (397 g)',

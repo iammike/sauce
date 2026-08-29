@@ -1,8 +1,15 @@
+import { CARB_BASES, DEFAULT_CARB_BASE, findCarbBase, baseIngredientKeys } from '../data/carb-bases.js';
+
+export { CARB_BASES, DEFAULT_CARB_BASE, findCarbBase };
+
 // Batch/recipe math for The Sauce hydration mix.
-// Ratios are "grams per 1 g of maltodextrin," taken from the tested recipe
+// Ratios are "grams per 1 g of the base's reference carb," taken from the
+// tested recipe
 // (see docs/recipe-source.md). Salt profile is one input that varies on a
 // fixed menu; flavoring is a free slot — any powder, any ratio, any sugar
-// content — since the recipe isn't tied to strawberry specifically.
+// content — since the recipe isn't tied to strawberry specifically. The carb
+// base itself varies too (see data/carb-bases.js), so nothing here may assume
+// maltodextrin and fructose are the carbs.
 
 // Maltodextrin is the reference unit (always 1). Fructose is expressed
 // relative to it and is a caller-supplied input, because the glucose:fructose
@@ -23,10 +30,25 @@ export const DEFAULT_FLAVOR_SUGAR_FRACTION = 0.6; // fraction of flavoring mass 
 // Notes describe what the level is for rather than a milligrams-per-scoop
 // figure — scoops are no longer the unit anywhere, and the actual sodium
 // depends on how much you drink per hour, which the batch can't know.
+// Expressed as grams of salt per gram of CARBOHYDRATE, not per gram of the
+// reference carb. You dose by carbohydrate, so that is the only definition
+// under which "Endurance" means the same sodium per hour whatever else moves.
+//
+// Per-reference-carb was the old definition and it drifted: raising the
+// fructose ratio 0.65 -> 0.8 quietly took endurance from 619 to 573 mg/hr,
+// and a single-carb base (table sugar, #30) would have jumped it to 955 —
+// same label on the select, 66% more salt in the jar. These values are
+// back-derived at the 0.8 default with the strawberry flavouring
+// (ratio 0.2, all carbohydrate), where carbSum is exactly 2.0 — so THAT batch
+// is unchanged to the milligram. Every other combination moved: unflavoured at
+// 0.8 went 636 -> 573 mg/hr, strawberry at 0.5 went 674 -> 573, unflavoured at
+// 0.5 went 764 -> 573, strawberry at 1.0 went 521 -> 573. That is the point of
+// the change — the old number drifted with the carb count — but it is a change
+// to a saved batch, not a no-op.
 export const SALT_PROFILES = {
-  moderate: { ratio: 0.046, label: 'Moderate', note: 'Least salty. Cool weather, shorter efforts.' },
-  endurance: { ratio: 0.065, label: 'Endurance', note: 'The tested default, and a sensible general-purpose batch.' },
-  hot: { ratio: 0.085, label: 'Hot / heavy sweat', note: 'As salty as the mix takes before you taste it.' },
+  moderate: { saltPerCarb: 0.0230, label: 'Moderate', note: 'Least salty. Cool weather, shorter efforts.' },
+  endurance: { saltPerCarb: 0.0325, label: 'Endurance', note: 'The tested default, and a sensible general-purpose batch.' },
+  hot: { saltPerCarb: 0.0425, label: 'Hot / heavy sweat', note: 'As salty as the mix takes before you taste it.' },
 };
 
 // Named rather than left as "the first key" — SALT_PROFILES is ordered by
@@ -43,24 +65,44 @@ export const SODIUM_MG_PER_G_SALT = 235;
 
 export const CALORIES_PER_G_CARB = 4;
 
-const INGREDIENTS = ['maltodextrin', 'fructose', 'flavoring', 'salt'];
+// The ingredient list is derived from the chosen carb base rather than fixed,
+// so a single-carb base (table sugar, #30) doesn't have to carry a phantom
+// second carb at ratio 0. Flavouring and salt apply to every base.
+function ingredientsFor(base) {
+  return [...baseIngredientKeys(base), 'flavoring', 'salt'];
+}
 
 // An explicit saltRatio wins over the named profile. That's how a solved
 // formulation (see src/sodium.js) gets in — the profiles become presets
 // rather than the only available salt levels.
-function ratiosFor(saltProfile, carbRatio, flavorRatio, saltRatio) {
+function ratiosFor(base, saltProfile, carbRatio, flavorRatio, saltRatio, flavorCarbFraction) {
   let salt = saltRatio;
+  let saltPerCarb = 0;
   if (typeof salt !== 'number' || !Number.isFinite(salt) || salt < 0) {
     const profile = SALT_PROFILES[saltProfile];
     if (!profile) throw new Error(`Unknown salt profile: ${saltProfile}`);
-    salt = profile.ratio;
+    saltPerCarb = profile.saltPerCarb;
+    salt = null;
   }
-  return {
-    maltodextrin: 1,
-    fructose: carbRatio,
-    flavoring: flavorRatio,
-    salt,
-  };
+
+  const ratios = { flavoring: flavorRatio };
+  for (const part of base.parts) {
+    // 'carbRatio' is the one ratio the user sets; the rest are the base's own.
+    ratios[part.key] = part.ratio === 'carbRatio' ? carbRatio : part.ratio;
+  }
+
+  // Salt scales with the carbohydrate the batch actually carries, so the
+  // profile delivers its sodium per gram of carb whatever the base or ratio.
+  // An explicit saltRatio (from the parked src/sodium.js solver) stays a raw
+  // per-reference-carb ratio and bypasses this.
+  ratios.salt = salt ?? carbSumFor(base, ratios, flavorCarbFraction) * saltPerCarb;
+  return ratios;
+}
+
+/** Carbohydrate per 1 g of the base's reference carb, flavouring included. */
+function carbSumFor(base, ratios, flavorCarbFraction) {
+  return base.parts.reduce((sum, p) => sum + ratios[p.key] * p.carbFraction, 0)
+    + ratios.flavoring * flavorCarbFraction;
 }
 
 /**
@@ -85,13 +127,20 @@ export function computeRecipe({
   saltRatio,
   maxBatchGrams,
   scoopGrams,
+  carbBase = DEFAULT_CARB_BASE,
   carbRatio = DEFAULT_CARB_RATIO,
   flavorName = 'Flavoring',
   flavorRatio = DEFAULT_FLAVOR_RATIO,
   flavorCarbFraction = DEFAULT_FLAVOR_CARB_FRACTION,
   flavorSugarFraction = DEFAULT_FLAVOR_SUGAR_FRACTION,
 }) {
-  const ratios = ratiosFor(saltProfile, carbRatio, flavorRatio, saltRatio);
+  // Resolved once here and threaded through, the same rule #16/#19/#20
+  // established for the flavouring, scoop size and salt profile: a second
+  // independent resolution can disagree with this one's fallback.
+  const base = findCarbBase(carbBase) ?? findCarbBase(DEFAULT_CARB_BASE);
+  const INGREDIENTS = ingredientsFor(base);
+
+  const ratios = ratiosFor(base, saltProfile, carbRatio, flavorRatio, saltRatio, flavorCarbFraction);
   const sumRatio = INGREDIENTS.reduce((sum, key) => sum + ratios[key], 0);
 
   const candidates = INGREDIENTS
@@ -117,9 +166,14 @@ export function computeRecipe({
 
   const totalScoops = scoopGrams > 0 ? actualBatch / scoopGrams : 0;
 
-  const carbsG = recipeGrams.maltodextrin + recipeGrams.fructose
+  // Summed from the base's own parts rather than named ingredients. Keying
+  // sugars to `fructose` was correct only while fructose was the only sugar
+  // in the jar — sucrose is entirely sugar, and getting this wrong is a
+  // nutrition-label error rather than a cosmetic one.
+  const carbsG = base.parts.reduce((sum, p) => sum + recipeGrams[p.key] * p.carbFraction, 0)
     + recipeGrams.flavoring * flavorCarbFraction;
-  const sugarsG = recipeGrams.fructose + recipeGrams.flavoring * flavorSugarFraction;
+  const sugarsG = base.parts.reduce((sum, p) => sum + recipeGrams[p.key] * p.sugarFraction, 0)
+    + recipeGrams.flavoring * flavorSugarFraction;
   const sodiumMg = recipeGrams.salt * SODIUM_MG_PER_G_SALT;
   const calories = carbsG * CALORIES_PER_G_CARB;
 
