@@ -1,14 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { computeRecipe } from '../src/calculator.js';
+import { computeRecipe, DEFAULT_SALT_PROFILE, DEFAULT_CARB_BASE } from '../src/calculator.js';
 import { batchCost, costPerGramCarb, compareAtCarbTarget } from '../src/cost.js';
 import { COMMERCIAL_PRODUCTS, commercialCostPerGramCarb, litresPerHour, HOMEMADE_LIMITATION, OSMOLALITY_NOTE } from '../data/costs.js';
-import { sodiumStatus, SODIUM_TARGET_RANGE } from '../src/hourly.js';
-import { FLAVORINGS, findFlavoring } from '../data/flavorings.js';
-import { TUNING } from '../data/tuning.js';
-import { DEFAULT_TARGET_CARBS } from '../src/hourly.js';
-import { DEFAULT_SALT_PROFILE, DEFAULT_CARB_BASE } from '../src/calculator.js';
+import { sodiumStatus, SODIUM_TARGET_RANGE, DEFAULT_TARGET_CARBS } from '../src/hourly.js';
+import { FLAVORINGS, findFlavoring, DEFAULT_FLAVORING_ID } from '../data/flavorings.js';
 import { CARB_BASES } from '../data/carb-bases.js';
-import { DEFAULT_FLAVORING_ID } from '../data/flavorings.js';
+import { TUNING } from '../data/tuning.js';
 
 const PANTRY = { maltodextrin: 2300, fructose: 2000, flavoring: 500, salt: 400 };
 const strawberry = findFlavoring('strawberry');
