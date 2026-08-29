@@ -81,13 +81,25 @@
 
       <form id="calc-form" novalidate>
         <div class="input-grid">
-          <div class="field">
+          <div class="field field--select">
+            <label for="in-carb-base">Carb source</label>
+            <select id="in-carb-base"></select>
+            <span class="field-hint" id="carb-base-note"></span>
+          </div>
+          <!-- Only the chosen base's carbs are shown; app.js hides the rest,
+               because an on-hand box for an ingredient the recipe doesn't use
+               is just a field that does nothing. -->
+          <div class="field" data-carb-part="maltodextrin">
             <label for="in-malto">Maltodextrin on hand (g)</label>
             <input type="number" id="in-malto" min="0" step="1" value="1814" inputmode="decimal">
           </div>
-          <div class="field">
+          <div class="field" data-carb-part="fructose">
             <label for="in-fructose">Fructose on hand (g)</label>
             <input type="number" id="in-fructose" min="0" step="1" value="1361" inputmode="decimal">
+          </div>
+          <div class="field" data-carb-part="sucrose">
+            <label for="in-sucrose">Table sugar on hand (g)</label>
+            <input type="number" id="in-sucrose" min="0" step="1" value="1814" inputmode="decimal">
           </div>
           <div class="field field--select">
             <label for="in-flavor-preset">Flavoring</label>

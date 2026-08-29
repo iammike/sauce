@@ -42,6 +42,11 @@ describe('computeRecipe', () => {
       maxBatchGrams: 1800,
       scoopGrams: 46,
       carbRatio: 0.65,
+      // The sheet's salt was a flat 0.065 g per gram of maltodextrin. Salt
+      // profiles are now defined per gram of carbohydrate (#30), so the named
+      // profile no longer reproduces the sheet — an explicit saltRatio, the
+      // same escape hatch src/sodium.js uses, does.
+      saltRatio: 0.065,
     });
 
     expect(result.totalScoops).toBeCloseTo(39.1, 1);

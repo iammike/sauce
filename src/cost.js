@@ -13,12 +13,16 @@ import { INGREDIENT_COSTS, COMMERCIAL_PRODUCTS, commercialCostPerGramCarb, litre
  * @param flavorPricePerGram - price of the chosen flavoring (varies hugely)
  */
 export function batchCost(recipeGrams, flavorPricePerGram = 0) {
-  const perIngredient = {
-    maltodextrin: recipeGrams.maltodextrin * INGREDIENT_COSTS.maltodextrin.pricePerGram,
-    fructose: recipeGrams.fructose * INGREDIENT_COSTS.fructose.pricePerGram,
-    flavoring: recipeGrams.flavoring * flavorPricePerGram,
-    salt: recipeGrams.salt * INGREDIENT_COSTS.salt.pricePerGram,
-  };
+  // Driven by what the batch actually contains rather than a fixed list of
+  // four, since the carb base decides which carbs are in it (#30). Flavouring
+  // is priced from the caller because that slot's price varies enormously.
+  const perIngredient = {};
+  for (const [key, grams] of Object.entries(recipeGrams)) {
+    const price = key === 'flavoring'
+      ? flavorPricePerGram
+      : INGREDIENT_COSTS[key]?.pricePerGram ?? 0;
+    perIngredient[key] = grams * price;
+  }
 
   const total = Object.values(perIngredient).reduce((sum, v) => sum + v, 0);
 
