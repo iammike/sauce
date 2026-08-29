@@ -415,16 +415,42 @@ describe('fructose ratio readout', () => {
     expect($('ratio-readout').textContent).toMatch(expected);
   });
 
-  // The market has two conventions and they are not interchangeable: 0.5 is
-  // sold as 2:1 and never as 1:0.5, 0.8 is sold as 1:0.8. One computed
-  // glucose-first form gets one of them wrong, so only real names are printed.
-  it('names a ratio the way the market names it, not by formula', () => {
+  // Deleting the aria-label left the whole suite green while the accessible
+  // name silently reverted to a bare "Glucose : fructose" — a ratio-named
+  // field holding one number, the exact defect an earlier review fixed. The
+  // visible label must be contained verbatim at the start, or WCAG 2.5.3
+  // (Label in Name) fails for voice control.
+  it('names the ratio field for a screen reader without breaking voice control', () => {
+    const input = $('in-carb-ratio');
+    const label = document.querySelector('label[for="in-carb-ratio"]').textContent.trim();
+    const name = input.getAttribute('aria-label');
+
+    expect(name.startsWith(label)).toBe(true);
+    expect(name.length).toBeGreaterThan(label.length);
+    expect(input.getAttribute('aria-describedby')).toBe('ratio-readout');
+  });
+
+  // The fixed term is decoration and aria-hidden, so DOM order is the only
+  // thing making the row read as "1 : 0.8" rather than "0.8 : 1".
+  it('puts the fixed 1 before the field, not after it', () => {
+    const row = $('in-carb-ratio').closest('.field__ratio');
+    const kids = [...row.children];
+    const unit = row.querySelector('.field__ratio-unit');
+    expect(unit.textContent.trim()).toBe('1 :');
+    expect(kids.indexOf(unit)).toBeLessThan(kids.indexOf($('in-carb-ratio')));
+  });
+
+  // The control itself now reads glucose-first (1 : 0.8), which is the form
+  // products are labelled with — so the readout only names the market where
+  // the market disagrees with that. 0.5 is the one that does: universally
+  // sold as 2:1, never as 1:0.5.
+  it('names a ratio only where the market disagrees with the control', () => {
     setValue('in-carb-ratio', 0.5);
     expect($('ratio-readout').textContent).toMatch(/the classic 2:1/);
     expect($('ratio-readout').textContent).not.toMatch(/1:0\.5/);
 
     setValue('in-carb-ratio', FRUCTOSE_RATIO_MEASURED_BEST);
-    expect($('ratio-readout').textContent).toMatch(/sold as 1:0\.8/);
+    expect($('ratio-readout').textContent).not.toMatch(/sold as/);
   });
 
   // Every other value has no market name, and inventing one is the bug above.
@@ -523,6 +549,16 @@ describe('carb source mode', () => {
     setValue('in-carb-base', 'sucrose', 'change');
     expect($('lb-ingredients').textContent).toMatch(/Sugar/);
     expect($('lb-ingredients').textContent).not.toMatch(/undefined/);
+  });
+
+  // role="img" suppresses the text content, so the number a sighted user can
+  // read has to be in the name as well — otherwise the fixed state announces
+  // that the ratio is fixed without ever saying what to.
+  it('announces what the locked ratio is fixed at', () => {
+    setValue('in-carb-base', 'sucrose', 'change');
+    const fixed = $('carb-ratio-fixed');
+    expect(fixed.textContent).toBe('1');
+    expect(fixed.getAttribute('aria-label')).toMatch(/1 to 1/);
   });
 
   it('locks the ratio control for a base that fixes it', () => {

@@ -22,7 +22,6 @@ describe('CARB_BASES', () => {
       expect(base.id).toBe(id);
       expect(base.shortName).toEqual(expect.any(String));
       expect(base.note).toEqual(expect.any(String));
-      expect(base.ratioHint).toEqual(expect.any(String));
       expect(base.parts.length).toBeGreaterThan(0);
     }
   });

@@ -128,30 +128,35 @@
             <input type="number" id="in-target-carbs" min="10" max="200" step="5" value="75">
             <span class="field-hint">Doesn't change the mix — it defines one serving as an hour at this rate, for the label and the facts panel.</span>
           </div>
-          <div class="field-pair">
-            <div class="field field--note">
-              <span class="field__note-title">Advanced</span>
-              <!-- Filled from the chosen base's ratioHint on every render; a literal
-                   copy here would be dead text that drifts unnoticed. -->
-              <span class="field-hint" id="carb-ratio-note"></span>
+          <div class="field">
+            <label for="in-carb-ratio">Glucose : fructose</label>
+            <div class="field__ratio">
+              <!-- Glucose-first with the 1 fixed, because that is the
+                   convention a packet uses — "1:0.8", "1:1". Not every ratio:
+                   a 0.5 mix is sold as 2:1, which is why RATIO_MARKET_NAMES
+                   still exists. Reading the way people already know it is
+                   what let the explanatory note go. The stored number is
+                   unchanged either way round: 0.8 is the fructose side of
+                   both 0.8:1 and 1:0.8. -->
+              <span class="field__ratio-unit" aria-hidden="true">1 :</span>
+              <!-- The "1 :" is decoration, so the accessible name would be a
+                   bare "Glucose : fructose" — a ratio-named field holding one
+                   number. aria-label supplies the missing term, and repeats
+                   the visible label verbatim so WCAG 2.5.3 (Label in Name)
+                   still holds for voice control. -->
+              <input type="number" id="in-carb-ratio" min="0" max="1.5" step="0.05" value="0.8" inputmode="decimal"
+                     aria-label="Glucose : fructose — grams of fructose per 1 g of glucose"
+                     aria-describedby="ratio-readout">
+              <!-- Shown in the input's place when the base fixes the ratio.
+                   The input is never overwritten with the fixed value: it
+                   holds the user's own number, and saveCalcFormState() runs
+                   on the same event that would have clobbered it. -->
+              <!-- Labelled in its own right: when it stands in for the input,
+                   the <label for> above points at a hidden element, which
+                   would leave the visible "1 : 1" with no accessible name. -->
+              <span class="field__ratio-fixed" id="carb-ratio-fixed" role="img" hidden></span>
             </div>
-            <div class="field">
-              <label for="in-carb-ratio">Fructose : glucose</label>
-              <div class="field__ratio">
-                <!-- The ": 1" is decoration; the accessible name is just
-                     "Fructose : glucose", which on its own leaves a
-                     ratio-named field holding a single number. aria-describedby
-                     points at the note that supplies the missing term. -->
-                <input type="number" id="in-carb-ratio" min="0" max="1.5" step="0.05" value="0.8" inputmode="decimal" aria-describedby="carb-ratio-note">
-                <!-- Shown in the input's place when the base fixes the ratio.
-                     The input is never overwritten with the fixed value: it
-                     holds the user's own number, and saveCalcFormState() runs
-                     on the same event that would have clobbered it. -->
-                <span class="field__ratio-fixed" id="carb-ratio-fixed" hidden></span>
-                <span class="field__ratio-unit" aria-hidden="true">: 1</span>
-              </div>
-              <span class="field-hint" id="ratio-readout"></span>
-            </div>
+            <span class="field-hint" id="ratio-readout"></span>
           </div>
         </div>
         <p class="field-hint" id="calc-limiting"></p>

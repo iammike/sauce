@@ -64,10 +64,10 @@ export const DUAL_TRANSPORT_TRAINED = 120;
 // Encompasses both common formulations: 2:1 glucose:fructose (0.5) sits just
 // below it, and 1:0.8 (0.8) sits inside.
 //
-// The literature writes it fructose-first with glucose held at 1 (0.8:1) —
-// the number the calculator stores. Product labels write the same thing
-// glucose-first (1:0.8). The control reads the literature's way, the readout
-// translates.
+// The literature writes it fructose-first with glucose held at 1 (0.8:1),
+// which is the number the calculator stores. Product labels write the same
+// thing glucose-first (1:0.8), and so does the control — the value is
+// identical either way round, only the fixed term swaps sides.
 export const FRUCTOSE_RATIO_OPTIMAL = { min: 0.6, max: 1.0 };
 
 // 0.8 is the only point inside Morton's band tried against its neighbours
