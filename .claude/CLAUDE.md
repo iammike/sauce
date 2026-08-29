@@ -34,6 +34,8 @@
 
 ## Write it flat
 - State the fact and stop. No "three questions, one answer", no "from a batch that won't mix to a stomach that won't settle", no explaining why a sentence is about to be useful
+- **A number or a UI label in copy needs a test or it will go stale.** `data/tuning.js`'s `cheapest-mix` quotes two prices and two option names; `tests/cost.test.js` derives both prices from the cost model and asserts both names are real `shortName`s. Build the derivation out of named defaults (`DEFAULT_TARGET_CARBS`, `DEFAULT_SALT_PROFILE`, `DEFAULT_CARB_BASE`, `DEFAULT_FLAVORING_ID`), never literals — a first version hardcoded `* 75` and moving `DEFAULT_TARGET_CARBS` to 90 left the page rendering $0.30 while the prose still said $0.25, all green
+- Check a cost claim against the rendered breakdown before writing it. Three claims in that entry were wrong on the first pass: the flavouring was called "the expensive part" when maltodextrin is the largest line (37% vs 30%), the saving was attributed mostly to dropping the flavouring when the carb swap is the bigger lever (41% vs 28%), and a sodium sentence read as "the salt level doesn't matter" when what's constant is *a given profile* across bases
 - Counts in copy go stale — "three questions" survived a fourth input being added. Prefer no count to a wrong one
 - Trim, don't gut: the substance in the cost catches and troubleshooting entries is the point; it's the framing around it that goes
 

@@ -44,6 +44,12 @@ export const TUNING = [
     why: 'The osmolality argument against sugar is weaker than it looks here. Maltodextrin counts as one particle while carrying many glucose units, but free fructose is a single particle just as glucose is — so at the standard 0.8 ratio the fructose supplies most of the count and the mix lands at about 286 mOsm/L against sucrose at 292. Level. The gap only opens if you drop the ratio toward 0.5, where the mix reaches 238 and sugar cannot follow. What you actually buy by weighing two powders is the ability to move that ratio, sodium already in the jar, and a drink that is a sixth to two thirds less sweet at the same carbohydrate.',
   },
   {
+    id: 'cheapest-mix',
+    symptom: 'You want the cheapest thing that works',
+    fix: 'Table sugar and sodium citrate, nothing else. Pick Table sugar as the carb source and Unflavored as the flavouring: about $0.25 an hour against $1.30 for the full mix, and cheaper than anything you can buy ready-made.',
+    why: 'Two levers, and the carbohydrate is the bigger one — swapping maltodextrin and fructose for sucrose saves more than dropping the flavouring does, though you want both. The salt is the part not to cut: sugar carries none of its own, and whichever level you pick delivers the same sodium per gram of carbohydrate here as it does in the full mix. Expect it to taste like sweet salty water; lemon or lime juice goes in the bottle rather than the jar, so it costs nothing to add on the day.',
+  },
+  {
     id: 'flavor-weak',
     symptom: 'Flavor too weak or too strong',
     fix: 'Adjust the flavoring ratio directly — it is the one ingredient you can change freely without touching the fueling math.',
