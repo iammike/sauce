@@ -28,13 +28,13 @@ export const TUNING = [
   {
     id: 'too-sweet',
     symptom: 'Too sweet, or cloying late in a ride',
-    fix: 'Move toward maltodextrin: drop the fructose ratio (try 0.65 → 0.5). If it is still too much, dilute — same scoops, more water.',
+    fix: 'Move toward maltodextrin: drop the fructose ratio (try 0.8 → 0.65). If it is still too much, dilute — same scoops, more water.',
     why: 'Maltodextrin is a long glucose chain and barely registers as sweet; fructose is the sweetest common sugar. Nearly all perceived sweetness comes from the fructose and the flavoring, so the ratio is the real sweetness dial. Palate fatigue also worsens as a ride goes on, so a mix that tastes right in the kitchen can taste sickly at hour four — test it tired.',
   },
   {
     id: 'not-sweet-enough',
     symptom: 'Flat, watery, or hard to drink',
-    fix: 'Raise the fructose ratio a little, or add more flavoring. A pinch more salt also helps more than people expect.',
+    fix: 'Raise the flavoring, or add a pinch more salt — it helps more than people expect. The fructose ratio is the other dial, but 0.8 is already the best-evidenced point in the band.',
     why: 'Salt suppresses bitterness and lifts perceived sweetness, which is why a mix that tastes flat is sometimes under-salted rather than under-sweetened. Try the salt first — it is the cheaper change nutritionally.',
   },
   {

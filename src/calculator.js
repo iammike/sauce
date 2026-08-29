@@ -8,7 +8,11 @@
 // relative to it and is a caller-supplied input, because the glucose:fructose
 // ratio is the main lever for how many carbs/hr the gut can absorb — see
 // data/recipes.js and docs/recipe-source.md.
-export const DEFAULT_CARB_RATIO = 0.65; // g fructose per 1g maltodextrin
+//
+// 0.8 rather than the 0.65 originally mixed: O'Brien et al. 2013 rode 0.5, 0.8
+// and 1.25 head to head at 90 g/hr and 0.8 won. 1.25 placed between the other
+// two, so 0.8 is a peak, not a floor — don't drift the default above it.
+export const DEFAULT_CARB_RATIO = 0.8; // g fructose per 1g maltodextrin
 
 // Defaults match the tested recipe's strawberry powder, but every one of
 // these is a caller-supplied input, not a fixed constant.

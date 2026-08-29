@@ -119,11 +119,18 @@
           <div class="field-pair">
             <div class="field field--note">
               <span class="field__note-title">Advanced</span>
-              <span class="field-hint">The tested recipe is 0.65 g of fructose per gram of maltodextrin. There's rarely a reason to move it.</span>
+              <span class="field-hint" id="carb-ratio-note">Grams of fructose per gram of maltodextrin, which digests to glucose. The research writes the ratio this way round.</span>
             </div>
             <div class="field">
-              <label for="in-carb-ratio">Fructose ratio <span class="field-hint">per 1 g malto</span></label>
-              <input type="number" id="in-carb-ratio" min="0" max="1.5" step="0.05" value="0.65" inputmode="decimal">
+              <label for="in-carb-ratio">Fructose : glucose</label>
+              <div class="field__ratio">
+                <!-- The ": 1" is decoration; the accessible name is just
+                     "Fructose : glucose", which on its own leaves a
+                     ratio-named field holding a single number. aria-describedby
+                     points at the note that supplies the missing term. -->
+                <input type="number" id="in-carb-ratio" min="0" max="1.5" step="0.05" value="0.8" inputmode="decimal" aria-describedby="carb-ratio-note">
+                <span class="field__ratio-unit" aria-hidden="true">: 1</span>
+              </div>
               <span class="field-hint" id="ratio-readout"></span>
             </div>
           </div>

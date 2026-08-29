@@ -4,7 +4,8 @@ import { findResearch, RESEARCH } from '../data/research.js';
 
 const findResearchRoles = () => RESEARCH.map((r) => r.role);
 import { planForCarbTarget, CARB_INTAKE_TIERS, ratioStatus,
-  FRUCTOSE_RATIO_OPTIMAL } from '../src/hourly.js';
+  FRUCTOSE_RATIO_OPTIMAL, FRUCTOSE_RATIO_MEASURED_BEST,
+  FRUCTOSE_RATIO_SOURCE_ID } from '../src/hourly.js';
 
 const recipe = computeRecipe({
   onHand: { maltodextrin: 2300, fructose: 2000, flavoring: 500, salt: 400 },
@@ -108,6 +109,21 @@ describe('ratioStatus', () => {
 
   it('flags ratios past the optimal band', () => {
     expect(ratioStatus(1.4)).toBe('above');
+  });
+});
+
+describe('the measured-best fructose ratio', () => {
+  // The app singles this ratio out as better-evidenced than the rest of the
+  // band. If it ever fell outside the band the page would contradict itself.
+  it('sits inside the optimal band', () => {
+    expect(ratioStatus(FRUCTOSE_RATIO_MEASURED_BEST)).toBe('optimal');
+  });
+
+  // Same door tests/flavorings.test.js closes on DEFAULT_FLAVORING_ID: a
+  // constant that names a source is only worth anything if the source exists,
+  // and the readout renders it as an #ref- anchor either way.
+  it('names a source that is actually on the page', () => {
+    expect(findResearch(FRUCTOSE_RATIO_SOURCE_ID)).toBeDefined();
   });
 });
 

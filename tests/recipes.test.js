@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { computeRecipe } from '../src/calculator.js';
+import { computeRecipe, DEFAULT_CARB_RATIO } from '../src/calculator.js';
 import { RECIPES, findRecipe } from '../data/recipes.js';
 import { findFlavoring } from '../data/flavorings.js';
 import { SALT_PROFILES } from '../src/calculator.js';
@@ -82,8 +82,8 @@ describe('carbRatio parameter', () => {
     expect(high.recipeGrams.maltodextrin).toBeLessThan(low.recipeGrams.maltodextrin);
   });
 
-  it('defaults to the tested 0.65 when not supplied', () => {
-    const explicit = computeRecipe({ onHand: PANTRY, saltProfile: 'endurance', scoopGrams: 46, maxBatchGrams: 1800, carbRatio: 0.65 });
+  it('defaults to DEFAULT_CARB_RATIO when not supplied', () => {
+    const explicit = computeRecipe({ onHand: PANTRY, saltProfile: 'endurance', scoopGrams: 46, maxBatchGrams: 1800, carbRatio: DEFAULT_CARB_RATIO });
     const implicit = computeRecipe({ onHand: PANTRY, saltProfile: 'endurance', scoopGrams: 46, maxBatchGrams: 1800 });
 
     expect(implicit.recipeGrams.fructose).toBeCloseTo(explicit.recipeGrams.fructose, 5);

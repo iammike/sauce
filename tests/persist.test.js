@@ -31,7 +31,7 @@ const FIELDS = {
   'in-salt-profile': { tag: 'select', options: ['moderate', 'endurance', 'hot'], value: 'endurance' },
   'in-cap': { min: '0', step: '1', value: '1900' },
   'in-target-carbs': { min: '10', max: '200', step: '5', value: '75' },
-  'in-carb-ratio': { min: '0', max: '1.5', step: '0.05', value: '0.65' },
+  'in-carb-ratio': { min: '0', max: '1.5', step: '0.05', value: '0.8' },
 };
 
 function buildFixture() {
@@ -79,7 +79,7 @@ describe('saveCalcFormState', () => {
       'in-salt-profile': 'endurance',
       'in-cap': '1900',
       'in-target-carbs': '75',
-      'in-carb-ratio': '0.65',
+      'in-carb-ratio': '0.8',
     });
   });
 
@@ -244,7 +244,7 @@ describe('restoreCalcFormState', () => {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({ 'in-carb-ratio': '3' }));
       const { restoreCalcFormState } = await loadPersist();
       restoreCalcFormState();
-      expect($('in-carb-ratio').value).toBe('0.65');
+      expect($('in-carb-ratio').value).toBe('0.8');
     });
 
     it('a value that was in range at module load but isn\'t any more', async () => {
@@ -254,7 +254,7 @@ describe('restoreCalcFormState', () => {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({ 'in-carb-ratio': '1.3' }));
       const { restoreCalcFormState } = await loadPersist();
       restoreCalcFormState();
-      expect($('in-carb-ratio').value).toBe('0.65');
+      expect($('in-carb-ratio').value).toBe('0.8');
     });
 
     it('a non-numeric amount', async () => {

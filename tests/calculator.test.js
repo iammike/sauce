@@ -31,12 +31,17 @@ describe('computeRecipe', () => {
       + result.recipeGrams.flavoring + result.recipeGrams.salt).toBeCloseTo(1800, 5);
   });
 
+  // The source spreadsheet was built at a 0.65 carb ratio, so this passes it
+  // explicitly rather than leaning on DEFAULT_CARB_RATIO. The point is that
+  // the port still agrees with the sheet; moving the shipped default is a
+  // separate decision and must not make this look like a maths regression.
   it('matches the reference sheet numbers for a capped 1800g endurance batch', () => {
     const result = computeRecipe({
       onHand: { maltodextrin: 2300, fructose: 2000, flavoring: 500, salt: 400 },
       saltProfile: 'endurance',
       maxBatchGrams: 1800,
       scoopGrams: 46,
+      carbRatio: 0.65,
     });
 
     expect(result.totalScoops).toBeCloseTo(39.1, 1);
