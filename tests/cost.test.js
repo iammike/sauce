@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { computeRecipe, DEFAULT_SALT_PROFILE, DEFAULT_CARB_BASE } from '../src/calculator.js';
 import { batchCost, costPerGramCarb, mixCostPerGramCarb, compareAtCarbTarget } from '../src/cost.js';
-import { COMMERCIAL_PRODUCTS, commercialCostPerGramCarb, litresPerHour, HOMEMADE_LIMITATION, OSMOLALITY_NOTE } from '../data/costs.js';
+import { COMMERCIAL_PRODUCTS, commercialCostPerGramCarb, litresPerHour, HOMEMADE_LIMITATION } from '../data/costs.js';
 import { sodiumStatus, SODIUM_TARGET_RANGE, DEFAULT_TARGET_CARBS } from '../src/hourly.js';
 import { FLAVORINGS, findFlavoring, DEFAULT_FLAVORING_ID } from '../data/flavorings.js';
 import { CARB_BASES } from '../data/carb-bases.js';
@@ -336,8 +336,13 @@ describe('sodium is judged, not just reported', () => {
     expect(sodiumStatus(endurance.sodiumMgPerGramCarb * 75)).not.toBe('low');
   });
 
+  // The mechanism used to have a standalone note on the panel. It was more
+  // than a cost comparison needs, so it went — but the reason regular
+  // Gatorade can't be concentrated into a fuel still has to be a mechanism
+  // rather than a symptom, and that lives in its own limitation now.
   it('explains the osmolality mechanism, not just the symptom', () => {
-    expect(OSMOLALITY_NOTE).toMatch(/osmolality/i);
-    expect(OSMOLALITY_NOTE).toMatch(/particle/i);
+    const regular = COMMERCIAL_PRODUCTS.find((p) => p.id === 'gatorade-regular');
+    expect(regular.limitation).toMatch(/osmotic|osmolality/i);
+    expect(regular.limitation).toMatch(/mOsm/);
   });
 });
