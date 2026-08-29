@@ -517,51 +517,6 @@ main > .panel:last-child { padding-bottom: 0; }
    property and saw exactly what it had just set. */
 .field[hidden] { display: none; }
 
-
-
-/* The note and the field it describes must never split across rows — with an
-   auto-fit grid they otherwise can, which would leave the arrow pointing at
-   nothing. Pairing them makes the direction knowable, so the arrow can flip
-   when they stack. */
-.field-pair {
-  grid-column: span 2;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-}
-
-@media (max-width: 700px) {
-  .field-pair {
-    grid-column: span 1;
-    grid-template-columns: 1fr;
-  }
-}
-
-/* A cell that carries context rather than an input, so it keeps the grid's
-   rhythm instead of interrupting it with a box. */
-.field--note {
-  justify-content: flex-start;
-  padding-top: 1.35rem;
-  position: relative;
-}
-
-.field__note-title::after {
-  content: ' →';
-  font-family: 'IBM Plex Mono', monospace;
-}
-
-@media (max-width: 700px) {
-  .field__note-title::after { content: ' ↓'; }
-}
-
-.field__note-title {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--strawberry);
-}
-
 .field label {
   font-size: 0.8rem;
   font-weight: 700;
@@ -604,9 +559,9 @@ main > .panel:last-child { padding-bottom: 0; }
 
 .field--select select { font-family: 'Karla', sans-serif; }
 
-/* A ratio field carries its second term as a fixed label, so the control
-   reads the way the literature writes it (0.8 : 1) rather than as a bare
-   number. min-width: 0 is defensive rather than demonstrated: a flex item's
+/* A ratio field carries its fixed term as a label beside the input, so the
+   control reads as the ratio itself (1 : 0.8 — the form printed on every
+   product) rather than as a bare number. min-width: 0 is defensive rather than demonstrated: a flex item's
    default minimum is its content width, but Chromium shrinks this input below
    that on its own, and e2e/mobile-overflow.spec.js passes at every width with
    the declaration removed. Kept because the failure it guards against is the

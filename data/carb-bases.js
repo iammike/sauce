@@ -29,7 +29,6 @@ export const CARB_BASES = {
     // hold in a ratio.
     adjustableRatio: true,
     note: 'The tested base. Two powders, and the glucose:fructose ratio is yours to set.',
-    ratioHint: 'Grams of fructose per gram of maltodextrin, which digests to glucose. The research writes the ratio this way round.',
     parts: [
       { key: 'maltodextrin', name: 'Maltodextrin', ratio: 1, carbFraction: 1, sugarFraction: 0 },
       { key: 'fructose', name: 'Fructose', ratio: 'carbRatio', carbFraction: 1, sugarFraction: 1 },
@@ -47,7 +46,6 @@ export const CARB_BASES = {
     // a hardcoded sentence about sucrose a lie.
     fixedRatioNote: 'Fixed by the carbohydrate — sucrose is one glucose bonded to one fructose.',
     note: 'One ingredient, glucose and fructose bonded 1:1. Cheapest by a distance, but it carries no sodium and the ratio is not yours to move.',
-    ratioHint: 'Sucrose is one glucose bonded to one fructose, so the ratio is a property of the molecule rather than something you weigh out. Switch to maltodextrin + fructose to move it.',
     parts: [
       { key: 'sucrose', name: 'Sugar (sucrose)', ratio: 1, carbFraction: 1, sugarFraction: 1 },
     ],

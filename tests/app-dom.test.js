@@ -415,16 +415,17 @@ describe('fructose ratio readout', () => {
     expect($('ratio-readout').textContent).toMatch(expected);
   });
 
-  // The market has two conventions and they are not interchangeable: 0.5 is
-  // sold as 2:1 and never as 1:0.5, 0.8 is sold as 1:0.8. One computed
-  // glucose-first form gets one of them wrong, so only real names are printed.
-  it('names a ratio the way the market names it, not by formula', () => {
+  // The control itself now reads glucose-first (1 : 0.8), which is the form
+  // products are labelled with — so the readout only names the market where
+  // the market disagrees with that. 0.5 is the one that does: universally
+  // sold as 2:1, never as 1:0.5.
+  it('names a ratio only where the market disagrees with the control', () => {
     setValue('in-carb-ratio', 0.5);
     expect($('ratio-readout').textContent).toMatch(/the classic 2:1/);
     expect($('ratio-readout').textContent).not.toMatch(/1:0\.5/);
 
     setValue('in-carb-ratio', FRUCTOSE_RATIO_MEASURED_BEST);
-    expect($('ratio-readout').textContent).toMatch(/sold as 1:0\.8/);
+    expect($('ratio-readout').textContent).not.toMatch(/sold as/);
   });
 
   // Every other value has no market name, and inventing one is the bug above.

@@ -232,10 +232,12 @@ function statusPillClass(status) {
 // sold as 2:1 and never as 1:0.5, while a 0.8 mix is sold as 1:0.8. Deriving
 // one label for every value printed ratios nobody uses, so the readout names
 // the landmarks and stays quiet between them.
+// Only where the market's name differs from what the control already shows.
+// The control reads glucose-first (1 : 0.8), which IS how a 0.8 or a 1:1 mix
+// is printed on a packet — repeating it back would be noise. 0.5 is the one
+// that disagrees: it is universally sold as 2:1, never as 1:0.5.
 const RATIO_MARKET_NAMES = {
   0.5: 'the classic 2:1',
-  0.8: 'sold as 1:0.8',
-  1: 'sold as 1:1',
 };
 
 // The control asks for the ratio the way the research writes it — fructose
@@ -254,8 +256,6 @@ function renderCarbBase(base) {
     el.hidden = !used.has(el.dataset.carbPart);
   }
   $('carb-base-note').textContent = base.note;
-
-  $('carb-ratio-note').textContent = base.ratioHint;
 
   // The input keeps the user's own number whatever the base — writing the
   // fixed value into it destroyed that number, and because
