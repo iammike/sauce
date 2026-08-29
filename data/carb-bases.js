@@ -20,8 +20,11 @@
 export const CARB_BASES = {
   'malto-fructose': {
     id: 'malto-fructose',
-    label: 'Maltodextrin + fructose',
-    shortName: 'Maltodextrin + fructose',
+    // shortName is what the <select> shows and must fit the control — a
+    // native select doesn't ellipsize, it runs the label under the arrow.
+    // "Maltodextrin + fructose" measured 170px against a 136px content box
+    // at 1024. Detail belongs in the hint, not the option text.
+    shortName: 'Malto + fructose',
     // The ratio control only means something when there are two carbs to
     // hold in a ratio.
     adjustableRatio: true,
@@ -34,13 +37,15 @@ export const CARB_BASES = {
   },
   sucrose: {
     id: 'sucrose',
-    label: 'Table sugar only',
     shortName: 'Table sugar',
     // Sucrose IS glucose+fructose bonded 1:1. There is no ratio to set —
     // the molecule fixes it — so the control is shown locked rather than
     // hidden, because "why can't I change this" is the obvious question.
     adjustableRatio: false,
     fixedCarbRatio: 1,
+    // On the base rather than in app.js: a second fixed-ratio base would make
+    // a hardcoded sentence about sucrose a lie.
+    fixedRatioNote: 'Fixed by the carbohydrate — sucrose is one glucose bonded to one fructose.',
     note: 'One ingredient, glucose and fructose bonded 1:1. Cheapest by a distance, but it carries no sodium and the ratio is not yours to move.',
     ratioHint: 'Sucrose is one glucose bonded to one fructose, so the ratio is a property of the molecule rather than something you weigh out. Switch to maltodextrin + fructose to move it.',
     parts: [

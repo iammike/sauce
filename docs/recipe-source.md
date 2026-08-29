@@ -13,16 +13,47 @@ below; everything else still comes from it.
 | Maltodextrin | 1.000 | Primary carb (complex), the reference unit |
 | Fructose | 0.800 | Second carb transporter (glucose/fructose co-transport). Was 0.650 in the batch originally mixed |
 | Flavoring | varies | Free slot — see `data/flavorings.js`. Strawberry freeze-dried powder (ratio 0.2) is the only ratio that's been tested in a real batch |
-| Salt (sodium citrate dihydrate) | 0.046 / 0.065 / 0.085 | moderate / endurance / hot profile |
+| Salt (sodium citrate dihydrate) | see below | moderate / endurance / hot profile |
 
 `src/calculator.js` finds whichever ingredient runs out first (scaled by
 these ratios), and builds the largest batch possible from what's on hand —
 optionally capped by a max batch size.
 
+### Salt is per gram of carbohydrate
+
+Salt profiles are **grams of sodium citrate per gram of carbohydrate**, not per
+gram of maltodextrin: 0.0230 moderate, 0.0325 endurance, 0.0425 hot. You dose
+by carbohydrate, so that is the only definition under which a named profile
+delivers the same mg/hr whatever else moves.
+
+The old per-maltodextrin definition (0.046 / 0.065 / 0.085) drifted with
+anything that changed the carbohydrate beside it. Raising the fructose ratio
+0.65 → 0.8 quietly took endurance from 619 to 573 mg/hr, and the table-sugar
+base would have jumped it to 955 — the same word on the select, 66% more salt
+in the jar.
+
+The new values are back-derived at the 0.8 default with the strawberry
+flavouring, where the two definitions agree exactly. Elsewhere they don't, and
+a batch saved under the old model changes:
+
+| saved settings (endurance) | before | after |
+|---|---|---|
+| strawberry, ratio 0.8 | 573 mg/hr | 573 — unchanged |
+| unflavoured, ratio 0.8 | 636 | 573 |
+| strawberry, ratio 0.5 | 674 | 573 |
+| unflavoured, ratio 0.5 | 764 | 573 |
+| strawberry, ratio 1.0 | 521 | 573 |
+
+An explicit `saltRatio` — how the parked `src/sodium.js` solver gets in — is
+still a raw per-maltodextrin ratio and bypasses the profile entirely.
+
 ## Nutrition math
 
-- **Carbs (g)** = maltodextrin + fructose + (flavoring × flavor carb fraction)
-- **Sugars (g)** = fructose + (flavoring × flavor sugar fraction)
+- **Carbs (g)** = Σ(carb part × its carb fraction) + (flavoring × flavor carb
+  fraction) — the parts come from the chosen base, see `data/carb-bases.js`
+- **Sugars (g)** = Σ(carb part × its sugar fraction) + (flavoring × flavor
+  sugar fraction). Maltodextrin's sugar fraction is 0 (it is a glucose
+  polymer); fructose and sucrose are both 1
 - **Sodium (mg)** = salt (g) × 235 mg Na/g — the sodium content of *sodium
   citrate dihydrate*, not table salt (NaCl, ~393 mg Na/g). An earlier version
   of the source spreadsheet used the NaCl figure and overstated sodium by

@@ -121,7 +121,15 @@ function renderCost(recipe, flavor, targetCarbs, base) {
 
   const rows = [
     {
-      name: 'The Sauce', perHour: mine, mine: true, confidence: 'actual',
+      // Only as confident as its least confident ingredient — the sugar base
+      // is priced 'estimated', and claiming 'actual' over it would be the
+      // same overstatement the rest of this panel is careful to avoid.
+      name: 'The Sauce',
+      perHour: mine,
+      mine: true,
+      confidence: base.parts.every((p) => INGREDIENT_COSTS[p.key]?.confidence === 'actual')
+        ? 'actual'
+        : 'estimated',
       note: `Your mix, at ${money(cost.total)} for the whole ${formatGrams(recipe.actualBatch)} batch.`,
       sodiumMgPerHour: mineSodium,
       litresPerHour: null,
@@ -249,9 +257,18 @@ function renderCarbBase(base) {
 
   $('carb-ratio-note').textContent = base.ratioHint;
 
+  // The input keeps the user's own number whatever the base — writing the
+  // fixed value into it destroyed that number, and because
+  // handleCalcFormChange() saves right after recalculating, the overwrite
+  // reached localStorage on the same event. Merely looking at the sugar
+  // option permanently reset a 0.5 batch to 1.0. The fixed value is shown
+  // in a separate element instead, and the input is swapped out for it.
   const ratio = $('in-carb-ratio');
+  const fixed = $('carb-ratio-fixed');
+  ratio.hidden = !base.adjustableRatio;
   ratio.disabled = !base.adjustableRatio;
-  if (!base.adjustableRatio) ratio.value = String(base.fixedCarbRatio);
+  fixed.hidden = base.adjustableRatio;
+  fixed.textContent = base.adjustableRatio ? '' : String(base.fixedCarbRatio);
 }
 
 function renderRatioReadout(base) {
@@ -277,7 +294,7 @@ function renderRatioReadout(base) {
   // A base that fixes the ratio gets a statement, not advice: nudging toward
   // 0.8 is useless when the molecule decides and the control is disabled.
   if (!base.adjustableRatio) {
-    readout.textContent = `Fixed by the carbohydrate — sucrose is 1:1 by construction.`;
+    readout.textContent = base.fixedRatioNote;
     return;
   }
 

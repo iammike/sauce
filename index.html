@@ -32,7 +32,7 @@
       <div>
         <p class="kicker">Homemade endurance hydration mix</p>
         <h1 class="headline">Fuel you <em>mix yourself</em>.</h1>
-        <p class="dek">An endurance drink mix you make yourself, for about a third of what the commercial stuff costs. Mixing maltodextrin with fructose lets you absorb more carbs an hour than sugar alone.</p>
+        <p class="dek">An endurance drink mix you make yourself, for about a third of what the commercial stuff costs. Two transportable carbohydrates instead of one, so you can absorb more per hour.</p>
         <p class="dek">Enter what you have on hand for a recipe. Already made a batch? The <a href="#planner" class="dek__link">bottle planner</a> says what to pack.</p>
       </div>
 
@@ -121,7 +121,7 @@
           <div class="field">
             <label for="in-cap">Container size (g)</label>
             <input type="number" id="in-cap" min="0" step="1" value="1900" placeholder="no limit" inputmode="decimal">
-            <span class="field-hint">The empty 4 lb maltodextrin tub holds about this much — deliberately under what it could take, since it needs a third empty to <a href="#tune-uneven-batch">shake properly</a>. Clear the field for no limit.</span>
+            <span class="field-hint">An empty 4 lb ingredient tub holds about this much — deliberately under what it could take, since it needs a third empty to <a href="#tune-uneven-batch">shake properly</a>. Clear the field for no limit.</span>
           </div>
           <div class="field">
             <label for="in-target-carbs">Serving basis (g carbs/hr)</label>
@@ -131,7 +131,9 @@
           <div class="field-pair">
             <div class="field field--note">
               <span class="field__note-title">Advanced</span>
-              <span class="field-hint" id="carb-ratio-note">Grams of fructose per gram of maltodextrin, which digests to glucose. The research writes the ratio this way round.</span>
+              <!-- Filled from the chosen base's ratioHint on every render; a literal
+                   copy here would be dead text that drifts unnoticed. -->
+              <span class="field-hint" id="carb-ratio-note"></span>
             </div>
             <div class="field">
               <label for="in-carb-ratio">Fructose : glucose</label>
@@ -141,6 +143,11 @@
                      ratio-named field holding a single number. aria-describedby
                      points at the note that supplies the missing term. -->
                 <input type="number" id="in-carb-ratio" min="0" max="1.5" step="0.05" value="0.8" inputmode="decimal" aria-describedby="carb-ratio-note">
+                <!-- Shown in the input's place when the base fixes the ratio.
+                     The input is never overwritten with the fixed value: it
+                     holds the user's own number, and saveCalcFormState() runs
+                     on the same event that would have clobbered it. -->
+                <span class="field__ratio-fixed" id="carb-ratio-fixed" hidden></span>
                 <span class="field__ratio-unit" aria-hidden="true">: 1</span>
               </div>
               <span class="field-hint" id="ratio-readout"></span>

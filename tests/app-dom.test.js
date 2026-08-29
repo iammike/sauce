@@ -534,12 +534,51 @@ describe('carb source mode', () => {
     expect($('in-carb-ratio').disabled).toBe(false);
   });
 
-  // A locked control's value is ignored rather than trusted: a stale 0.3 left
-  // in the field by persist.js must not build a sugar batch at 0.3.
-  it('ignores a stale ratio left in the locked field', () => {
-    setValue('in-carb-ratio', 0.3);
+  // Switching base must not destroy the ratio the user typed. It used to be
+  // overwritten with the base's fixed value, and handleCalcFormChange() saves
+  // immediately after recalculating — so merely looking at the sugar option
+  // reset a 0.5 batch to 1.0, in localStorage, permanently.
+  it('keeps the typed ratio through a round trip to a fixed base', () => {
+    setValue('in-carb-ratio', 0.5);
     setValue('in-carb-base', 'sucrose', 'change');
-    expect($('in-carb-ratio').value).toBe('1');
+    setValue('in-carb-base', 'malto-fructose', 'change');
+    expect($('in-carb-ratio').value).toBe('0.5');
+  });
+
+  it('does not persist a ratio the user never chose', () => {
+    setValue('in-carb-ratio', 0.5);
+    setValue('in-carb-base', 'sucrose', 'change');
+    const saved = JSON.parse(localStorage.getItem('sauce.calcForm.v1'));
+    expect(saved['in-carb-ratio']).toBe('0.5');
+  });
+
+  // The guard lives in readInputs(), whose carbRatio isn't observable in any
+  // rendered output for a base that doesn't use it — so asserting on the
+  // field's value proved nothing about it. Spying on what computeRecipe()
+  // actually receives is the only way to see it, the same approach #19 uses
+  // for scoopGrams.
+  it('hands the batch the base\'s fixed ratio, not the stale field value', async () => {
+    let receivedCarbRatio;
+    vi.doMock('../src/calculator.js', async () => {
+      const actual = await vi.importActual('../src/calculator.js');
+      return {
+        ...actual,
+        computeRecipe: (inputs) => {
+          receivedCarbRatio = inputs.carbRatio;
+          return actual.computeRecipe(inputs);
+        },
+      };
+    });
+    try {
+      await loadApp();
+      setValue('in-carb-ratio', 0.3);
+      expect(receivedCarbRatio).toBe(0.3);
+
+      setValue('in-carb-base', 'sucrose', 'change');
+      expect(receivedCarbRatio).toBe(1);
+    } finally {
+      vi.doUnmock('../src/calculator.js');
+    }
   });
 });
 

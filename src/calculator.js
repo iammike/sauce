@@ -38,7 +38,13 @@ export const DEFAULT_FLAVOR_SUGAR_FRACTION = 0.6; // fraction of flavoring mass 
 // fructose ratio 0.65 -> 0.8 quietly took endurance from 619 to 573 mg/hr,
 // and a single-carb base (table sugar, #30) would have jumped it to 955 —
 // same label on the select, 66% more salt in the jar. These values are the
-// shipped ones back-derived at the 0.8 default, so today's batch is unchanged.
+// values are back-derived at the 0.8 default with the strawberry flavouring
+// (ratio 0.2, all carbohydrate), where carbSum is exactly 2.0 — so THAT batch
+// is unchanged to the milligram. Every other combination moved: unflavoured at
+// 0.8 went 636 -> 573 mg/hr, strawberry at 0.5 went 674 -> 573, unflavoured at
+// 0.5 went 764 -> 573, strawberry at 1.0 went 521 -> 573. That is the point of
+// the change — the old number drifted with the carb count — but it is a change
+// to a saved batch, not a no-op.
 export const SALT_PROFILES = {
   moderate: { saltPerCarb: 0.0230, label: 'Moderate', note: 'Least salty. Cool weather, shorter efforts.' },
   endurance: { saltPerCarb: 0.0325, label: 'Endurance', note: 'The tested default, and a sensible general-purpose batch.' },

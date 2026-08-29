@@ -31,6 +31,9 @@ describe('CARB_BASES', () => {
     for (const base of Object.values(CARB_BASES)) {
       for (const part of base.parts) {
         expect(part.name).toEqual(expect.any(String));
+        // A missing ratio resolves to undefined in ratiosFor() and takes the
+        // whole batch to NaN rather than failing anywhere visible.
+        if (part.ratio !== 'carbRatio') expect(part.ratio).toBeGreaterThan(0);
         expect(part.carbFraction).toBeGreaterThan(0);
         expect(part.sugarFraction).toBeGreaterThanOrEqual(0);
         expect(part.sugarFraction).toBeLessThanOrEqual(part.carbFraction);
@@ -64,7 +67,17 @@ describe('CARB_BASES', () => {
 
   it('only marks a base non-adjustable if it says what the ratio is', () => {
     for (const base of Object.values(CARB_BASES)) {
-      if (!base.adjustableRatio) expect(base.fixedCarbRatio).toEqual(expect.any(Number));
+      if (base.adjustableRatio) continue;
+      expect(base.fixedCarbRatio).toEqual(expect.any(Number));
+      expect(base.fixedRatioNote).toEqual(expect.any(String));
+    }
+  });
+
+  // An adjustable base with no 'carbRatio' part ignores the control silently.
+  it('gives an adjustable base exactly one user-set part', () => {
+    for (const base of Object.values(CARB_BASES)) {
+      const userSet = base.parts.filter((p) => p.ratio === 'carbRatio');
+      expect(userSet).toHaveLength(base.adjustableRatio ? 1 : 0);
     }
   });
 });
