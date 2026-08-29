@@ -131,11 +131,13 @@
           <div class="field">
             <label for="in-carb-ratio">Glucose : fructose</label>
             <div class="field__ratio">
-              <!-- Glucose-first with the 1 fixed, because that is how every
-                   product prints it — "1:0.8" on the packet. Reading the way
-                   people already know it is what let the explanatory note go.
-                   The stored number is unchanged either way round: 0.8 is the
-                   fructose side of both 0.8:1 and 1:0.8. -->
+              <!-- Glucose-first with the 1 fixed, because that is the
+                   convention a packet uses — "1:0.8", "1:1". Not every ratio:
+                   a 0.5 mix is sold as 2:1, which is why RATIO_MARKET_NAMES
+                   still exists. Reading the way people already know it is
+                   what let the explanatory note go. The stored number is
+                   unchanged either way round: 0.8 is the fructose side of
+                   both 0.8:1 and 1:0.8. -->
               <span class="field__ratio-unit" aria-hidden="true">1 :</span>
               <!-- The "1 :" is decoration, so the accessible name would be a
                    bare "Glucose : fructose" — a ratio-named field holding one
@@ -152,8 +154,7 @@
               <!-- Labelled in its own right: when it stands in for the input,
                    the <label for> above points at a hidden element, which
                    would leave the visible "1 : 1" with no accessible name. -->
-              <span class="field__ratio-fixed" id="carb-ratio-fixed" role="img"
-                    aria-label="Glucose : fructose, fixed by the carbohydrate" hidden></span>
+              <span class="field__ratio-fixed" id="carb-ratio-fixed" role="img" hidden></span>
             </div>
             <span class="field-hint" id="ratio-readout"></span>
           </div>

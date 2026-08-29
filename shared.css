@@ -560,8 +560,8 @@ main > .panel:last-child { padding-bottom: 0; }
 .field--select select { font-family: 'Karla', sans-serif; }
 
 /* A ratio field carries its fixed term as a label beside the input, so the
-   control reads as the ratio itself (1 : 0.8 — the form printed on every
-   product) rather than as a bare number.
+   control reads as the ratio itself (1 : 0.8 — the glucose-first form a
+   packet uses) rather than as a bare number.
 
    min-width: 0 is defensive rather than demonstrated: a flex item's default
    minimum is its content width, but Chromium shrinks this input below that on

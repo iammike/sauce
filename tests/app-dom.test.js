@@ -551,6 +551,16 @@ describe('carb source mode', () => {
     expect($('lb-ingredients').textContent).not.toMatch(/undefined/);
   });
 
+  // role="img" suppresses the text content, so the number a sighted user can
+  // read has to be in the name as well — otherwise the fixed state announces
+  // that the ratio is fixed without ever saying what to.
+  it('announces what the locked ratio is fixed at', () => {
+    setValue('in-carb-base', 'sucrose', 'change');
+    const fixed = $('carb-ratio-fixed');
+    expect(fixed.textContent).toBe('1');
+    expect(fixed.getAttribute('aria-label')).toMatch(/1 to 1/);
+  });
+
   it('locks the ratio control for a base that fixes it', () => {
     setValue('in-carb-base', 'sucrose', 'change');
     expect($('in-carb-ratio').disabled).toBe(true);

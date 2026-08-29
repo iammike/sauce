@@ -263,6 +263,11 @@ function renderCarbBase(base) {
   ratio.disabled = !base.adjustableRatio;
   fixed.hidden = base.adjustableRatio;
   fixed.textContent = base.adjustableRatio ? '' : String(base.fixedCarbRatio);
+  // role="img" means the text content isn't read, so the name has to carry
+  // the number too — otherwise a screen-reader user is told the ratio is
+  // fixed but never what it's fixed at.
+  fixed.setAttribute('aria-label', base.adjustableRatio ? ''
+    : `Glucose : fructose, fixed at 1 to ${base.fixedCarbRatio} by the carbohydrate`);
 }
 
 function renderRatioReadout(base) {
