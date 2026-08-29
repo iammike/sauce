@@ -147,7 +147,7 @@ describe('honest comparison', () => {
     expect(HOMEMADE_LIMITATION.length).toBeGreaterThan(20);
   });
 
-  it('shows the cheapest option needs impractical fluid volume', () => {
+  it('shows regular Gatorade needs impractical fluid volume', () => {
     // This is the whole point: cheapest per carb is a hydration drink you'd
     // have to drink ~2 L/hr of. If this stops being surfaced, the cost panel
     // becomes misleading.
@@ -165,15 +165,44 @@ describe('honest comparison', () => {
     expect(litresPerHour(endurance, 75)).toBeNull();
   });
 
+  // Table sugar carries no sodium, which is a fact about it rather than
+  // missing data — so the blanket `> 0` this used to assert had to go. But
+  // relaxing it to `>= 0` for everything made it vacuous: hard-wiring
+  // sodiumMgPerHour to 0 in src/cost.js left the whole suite green. Exempt
+  // the known-zero product instead of weakening the predicate.
   it('reports sodium per hour alongside cost', () => {
     const { commercial } = compareAtCarbTarget(0.017, 75);
+    expect(commercial.length).toBeGreaterThan(1);
     for (const c of commercial) {
-      expect(c.sodiumMgPerHour).toBeGreaterThan(0);
+      const source = COMMERCIAL_PRODUCTS.find((p) => p.name === c.name);
+      expect(Number.isFinite(c.sodiumMgPerHour)).toBe(true);
+      if (source.sodiumMgPerGramCarb > 0) {
+        expect(c.sodiumMgPerHour).toBeGreaterThan(0);
+      } else {
+        expect(c.sodiumMgPerHour).toBe(0);
+      }
     }
+  });
+
+  // The figure has to actually track the target, not just be non-zero.
+  it('scales sodium with the carb target', () => {
+    const at60 = compareAtCarbTarget(0.017, 60).commercial
+      .find((c) => c.name === 'Gatorade Endurance Formula');
+    const at120 = compareAtCarbTarget(0.017, 120).commercial
+      .find((c) => c.name === 'Gatorade Endurance Formula');
+    expect(at120.sodiumMgPerHour).toBeCloseTo(at60.sodiumMgPerHour * 2, 6);
   });
 });
 
 describe('sodium is judged, not just reported', () => {
+  // Sugar's zero is the whole reason it needs a salt source beside it, so it
+  // has to read as a judged shortfall rather than a blank.
+  it('flags table sugar as carrying no sodium at all', () => {
+    const sugar = COMMERCIAL_PRODUCTS.find((p) => p.id === 'table-sugar');
+    expect(sugar.sodiumMgPerGramCarb).toBe(0);
+    expect(sodiumStatus(0)).toBe('low');
+  });
+
   it('flags Maurten as under the replacement target', () => {
     // ~250 mg per 80 g carbs is well under half the 500-1000 mg/hr range,
     // which is the point the cost figure alone would hide.

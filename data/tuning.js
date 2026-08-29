@@ -38,6 +38,12 @@ export const TUNING = [
     why: 'Salt suppresses bitterness and lifts perceived sweetness, which is why a mix that tastes flat is sometimes under-salted rather than under-sweetened. Try the salt first — it is the cheaper change nutritionally.',
   },
   {
+    id: 'just-use-sugar',
+    symptom: 'You want to just use table sugar',
+    fix: 'You can, at moderate intakes, with a salt source alongside it. Sucrose is glucose and fructose bonded 1:1, which lands inside the optimal ratio band on its own, and it is the cheapest carbohydrate there is.',
+    why: 'The osmolality argument against sugar is weaker than it looks here. Maltodextrin counts as one particle while carrying many glucose units, but free fructose is a single particle just as glucose is — so at the standard 0.8 ratio the fructose supplies most of the count and the mix lands at about 286 mOsm/L against sucrose at 292. Level. The gap only opens if you drop the ratio toward 0.5, where the mix reaches 238 and sugar cannot follow. What you actually buy by weighing two powders is the ability to move that ratio, sodium already in the jar, and a drink that is a sixth to two thirds less sweet at the same carbohydrate.',
+  },
+  {
     id: 'flavor-weak',
     symptom: 'Flavor too weak or too strong',
     fix: 'Adjust the flavoring ratio directly — it is the one ingredient you can change freely without touching the fueling math.',
