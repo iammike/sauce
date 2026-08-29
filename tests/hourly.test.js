@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import { computeRecipe } from '../src/calculator.js';
 import { findResearch, RESEARCH } from '../data/research.js';
-
-const findResearchRoles = () => RESEARCH.map((r) => r.role);
 import { planForCarbTarget, CARB_INTAKE_TIERS, ratioStatus,
   FRUCTOSE_RATIO_OPTIMAL, FRUCTOSE_RATIO_MEASURED_BEST,
   FRUCTOSE_RATIO_SOURCE_ID } from '../src/hourly.js';
+
+const findResearchRoles = () => RESEARCH.map((r) => r.role);
 
 const recipe = computeRecipe({
   onHand: { maltodextrin: 2300, fructose: 2000, flavoring: 500, salt: 400 },
