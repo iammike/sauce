@@ -143,12 +143,17 @@
                    the visible label verbatim so WCAG 2.5.3 (Label in Name)
                    still holds for voice control. -->
               <input type="number" id="in-carb-ratio" min="0" max="1.5" step="0.05" value="0.8" inputmode="decimal"
-                     aria-label="Glucose : fructose — grams of fructose per 1 g of glucose">
+                     aria-label="Glucose : fructose — grams of fructose per 1 g of glucose"
+                     aria-describedby="ratio-readout">
               <!-- Shown in the input's place when the base fixes the ratio.
                    The input is never overwritten with the fixed value: it
                    holds the user's own number, and saveCalcFormState() runs
                    on the same event that would have clobbered it. -->
-              <span class="field__ratio-fixed" id="carb-ratio-fixed" hidden></span>
+              <!-- Labelled in its own right: when it stands in for the input,
+                   the <label for> above points at a hidden element, which
+                   would leave the visible "1 : 1" with no accessible name. -->
+              <span class="field__ratio-fixed" id="carb-ratio-fixed" role="img"
+                    aria-label="Glucose : fructose, fixed by the carbohydrate" hidden></span>
             </div>
             <span class="field-hint" id="ratio-readout"></span>
           </div>

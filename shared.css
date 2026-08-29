@@ -561,11 +561,13 @@ main > .panel:last-child { padding-bottom: 0; }
 
 /* A ratio field carries its fixed term as a label beside the input, so the
    control reads as the ratio itself (1 : 0.8 — the form printed on every
-   product) rather than as a bare number. min-width: 0 is defensive rather than demonstrated: a flex item's
-   default minimum is its content width, but Chromium shrinks this input below
-   that on its own, and e2e/mobile-overflow.spec.js passes at every width with
-   the declaration removed. Kept because the failure it guards against is the
-   one that already bit .panel--collapsible > summary's bare 1fr track. */
+   product) rather than as a bare number.
+
+   min-width: 0 is defensive rather than demonstrated: a flex item's default
+   minimum is its content width, but Chromium shrinks this input below that on
+   its own, and e2e/mobile-overflow.spec.js passes at every width with the
+   declaration removed. Kept because the failure it guards against is the one
+   that already bit .panel--collapsible > summary's bare 1fr track. */
 .field__ratio {
   display: flex;
   align-items: center;

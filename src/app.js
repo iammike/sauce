@@ -227,25 +227,19 @@ function statusPillClass(status) {
   return `status-pill status-pill--${status}`;
 }
 
-// How the market writes each ratio, but only where it actually writes one.
-// There is no single mechanical glucose-first form to compute: a 0.5 mix is
-// sold as 2:1 and never as 1:0.5, while a 0.8 mix is sold as 1:0.8. Deriving
-// one label for every value printed ratios nobody uses, so the readout names
-// the landmarks and stays quiet between them.
-// Only where the market's name differs from what the control already shows.
-// The control reads glucose-first (1 : 0.8), which IS how a 0.8 or a 1:1 mix
-// is printed on a packet — repeating it back would be noise. 0.5 is the one
-// that disagrees: it is universally sold as 2:1, never as 1:0.5.
+// Named only where the market disagrees with what the control already shows.
+// The control reads glucose-first (1 : 0.8), which is how a 0.8 or a 1:1 mix
+// is printed on a packet, so repeating it back would be noise. 0.5 is the
+// one that disagrees: universally sold as 2:1, never as 1:0.5.
 const RATIO_MARKET_NAMES = {
   0.5: 'the classic 2:1',
 };
 
-// The control asks for the ratio the way the research writes it — fructose
-// first, glucose held at 1 — so the readout carries what the control can't:
-// where the number sits against the evidence, and what it's called on a
-// product label if it's called anything. 0.8 is named separately from
-// Morton's band because it's the only ratio in that band with a head-to-head
-// result behind it.
+// The control shows the ratio itself, so the readout carries what it can't:
+// where the number sits against the evidence, plus a market name on the one
+// value whose market name differs from that rendering. 0.8 is called out
+// separately from Morton's band because it's the only ratio in that band
+// with a head-to-head result behind it.
 // Shows only the on-hand boxes the chosen base actually uses, and locks the
 // ratio control when the base fixes it. Locked rather than hidden: "why can't
 // I change this" is the obvious question, and a disabled field with a reason

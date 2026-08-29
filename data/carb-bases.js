@@ -9,7 +9,9 @@
 // Each part carries:
 //   key           the recipeGrams / onHand key, and the INGREDIENT_COSTS key
 //   ratio         grams per 1 g of the reference part, or 'carbRatio' to take
-//                 the user's fructose:glucose value
+//                 the user's ratio. Stored fructose-first (0.8 means 0.8 g
+//                 fructose per 1 g glucose) though the control shows it the
+//                 other way round as 1 : 0.8
 //   carbFraction  fraction of the part's mass that is carbohydrate
 //   sugarFraction fraction of the part's mass that is sugar, for the label's
 //                 "of which sugars" line. Maltodextrin is a glucose polymer
@@ -28,7 +30,7 @@ export const CARB_BASES = {
     // The ratio control only means something when there are two carbs to
     // hold in a ratio.
     adjustableRatio: true,
-    note: 'The tested base. Two powders, and the glucose:fructose ratio is yours to set.',
+    note: 'The tested base. Two powders — maltodextrin digests to glucose — and the glucose:fructose ratio is yours to set.',
     parts: [
       { key: 'maltodextrin', name: 'Maltodextrin', ratio: 1, carbFraction: 1, sugarFraction: 0 },
       { key: 'fructose', name: 'Fructose', ratio: 'carbRatio', carbFraction: 1, sugarFraction: 1 },
