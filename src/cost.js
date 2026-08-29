@@ -48,6 +48,31 @@ export function costPerGramCarb(totalCost, totalCarbsG) {
  * Cost comparison at a given hourly carb intake — "what does an hour of
  * fueling cost, this way versus buying it".
  */
+/**
+ * What the homemade mix costs per gram of carbohydrate, per-bottle flavourings
+ * included.
+ *
+ * Extracted from renderCost() so there is one implementation rather than two.
+ * A test that recomputed this inline omitted the per-bottle term and still
+ * claimed to follow "the same path the page uses" — true for the current
+ * defaults, since neither is perBottle, and silently false the moment
+ * DEFAULT_FLAVORING_ID names one. Two independent computations of the same
+ * number disagreeing is the failure this codebase keeps meeting.
+ *
+ * @param costTotal - batchCost(...).total for the batch
+ * @param carbsG - carbohydrate in the whole batch
+ * @param flavor - the resolved flavouring; a perBottle one adds nothing to the
+ *   jar but isn't free, so it is amortised over an hour's carbohydrate
+ */
+export function mixCostPerGramCarb({ costTotal, carbsG, flavor, targetCarbsPerHour }) {
+  // Roughly a bottle an hour, which is what the planner assumes too.
+  const perBottleCostPerHour = flavor.perBottle
+    ? flavor.perBottleMl * flavor.pricePerMl
+    : 0;
+  return costPerGramCarb(costTotal, carbsG)
+    + (targetCarbsPerHour > 0 ? perBottleCostPerHour / targetCarbsPerHour : 0);
+}
+
 export function compareAtCarbTarget(mixCostPerGramCarb, targetCarbsPerHour) {
   const mine = mixCostPerGramCarb * targetCarbsPerHour;
 

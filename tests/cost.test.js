@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { computeRecipe, DEFAULT_SALT_PROFILE, DEFAULT_CARB_BASE } from '../src/calculator.js';
-import { batchCost, costPerGramCarb, compareAtCarbTarget } from '../src/cost.js';
+import { batchCost, costPerGramCarb, mixCostPerGramCarb, compareAtCarbTarget } from '../src/cost.js';
 import { COMMERCIAL_PRODUCTS, commercialCostPerGramCarb, litresPerHour, HOMEMADE_LIMITATION, OSMOLALITY_NOTE } from '../data/costs.js';
 import { sodiumStatus, SODIUM_TARGET_RANGE, DEFAULT_TARGET_CARBS } from '../src/hourly.js';
 import { FLAVORINGS, findFlavoring, DEFAULT_FLAVORING_ID } from '../data/flavorings.js';
@@ -207,6 +207,37 @@ describe('honest comparison', () => {
 // hardcoded `* 75`: moving DEFAULT_TARGET_CARBS to 90 made the page render
 // $0.30 and $1.56 while the prose still said $0.25 and $1.30, with all of
 // these green.
+// A per-bottle flavouring (citrus juice) never enters the jar, so batchCost()
+// alone reports it as free. It isn't — you buy it by the bottle — and
+// renderCost() amortises it over an hour's carbohydrate. That term lived only
+// inside renderCost() until it was extracted, where no unit test could reach
+// it and a test that recomputed the same figure silently omitted it.
+describe('mixCostPerGramCarb', () => {
+  const batchFlavour = findFlavoring(DEFAULT_FLAVORING_ID);
+  const bottleFlavour = FLAVORINGS.find((f) => f.perBottle);
+  const args = { costTotal: 10, carbsG: 1000, targetCarbsPerHour: 75 };
+
+  it('charges for a per-bottle flavouring the batch never contains', () => {
+    const withBottle = mixCostPerGramCarb({ ...args, flavor: bottleFlavour });
+    const plain = costPerGramCarb(args.costTotal, args.carbsG);
+    expect(withBottle).toBeGreaterThan(plain);
+    expect(withBottle - plain).toBeCloseTo(
+      (bottleFlavour.perBottleMl * bottleFlavour.pricePerMl) / args.targetCarbsPerHour, 10,
+    );
+  });
+
+  it('adds nothing for a flavouring that goes in the jar', () => {
+    expect(mixCostPerGramCarb({ ...args, flavor: batchFlavour }))
+      .toBeCloseTo(costPerGramCarb(args.costTotal, args.carbsG), 10);
+  });
+
+  // targetCarbsPerHour of 0 is reachable — the field can be emptied.
+  it('does not divide by a zero carb target', () => {
+    const r = mixCostPerGramCarb({ ...args, flavor: bottleFlavour, targetCarbsPerHour: 0 });
+    expect(Number.isFinite(r)).toBe(true);
+  });
+});
+
 describe('the cheapest-mix answer quotes figures that are still true', () => {
   const perHour = (carbBase, flavoringId) => {
     const flavor = findFlavoring(flavoringId);
@@ -221,7 +252,15 @@ describe('the cheapest-mix answer quotes figures that are still true', () => {
       flavorSugarFraction: flavor.sugarFraction,
     });
     const cost = batchCost(recipe.recipeGrams, flavor.pricePerGram ?? 0);
-    return costPerGramCarb(cost.total, recipe.totals.carbsG) * DEFAULT_TARGET_CARBS;
+    // The page's own function, not a reimplementation of it. Recomputing this
+    // inline dropped the per-bottle flavouring term — invisible while no
+    // default is perBottle, and wrong the moment one is.
+    return mixCostPerGramCarb({
+      costTotal: cost.total,
+      carbsG: recipe.totals.carbsG,
+      flavor,
+      targetCarbsPerHour: DEFAULT_TARGET_CARBS,
+    }) * DEFAULT_TARGET_CARBS;
   };
 
   const cheapest = () => perHour('sucrose', 'unflavored');

@@ -8,7 +8,7 @@ import { FLAVORINGS, findFlavoring, DEFAULT_FLAVORING_ID } from '../data/flavori
 import { TUNING } from '../data/tuning.js';
 import { PRODUCTS } from '../data/products.js';
 import { RESEARCH, findResearch } from '../data/research.js';
-import { batchCost, costPerGramCarb, compareAtCarbTarget } from './cost.js';
+import { batchCost, mixCostPerGramCarb, compareAtCarbTarget } from './cost.js';
 import { PRICED_AS_OF, INGREDIENT_COSTS, HOMEMADE_LIMITATION, OSMOLALITY_NOTE,
   OSMOLALITY_SOURCE_ID } from '../data/costs.js';
 import { SALT_PROFILES, DEFAULT_SALT_PROFILE } from './calculator.js';
@@ -107,13 +107,12 @@ const money = (v) => `$${v.toFixed(2)}`;
 
 function renderCost(recipe, flavor, targetCarbs, base) {
   const cost = batchCost(recipe.recipeGrams, flavor.pricePerGram);
-  // A per-bottle flavouring adds nothing to the batch but isn't free to use.
-  // Assume roughly a bottle an hour, which is what the planner assumes too.
-  const perBottleCostPerHour = flavor.perBottle
-    ? flavor.perBottleMl * flavor.pricePerMl
-    : 0;
-  const perGramCarb = costPerGramCarb(cost.total, recipe.totals.carbsG)
-    + (targetCarbs > 0 ? perBottleCostPerHour / targetCarbs : 0);
+  const perGramCarb = mixCostPerGramCarb({
+    costTotal: cost.total,
+    carbsG: recipe.totals.carbsG,
+    flavor,
+    targetCarbsPerHour: targetCarbs,
+  });
   const { mine, commercial } = compareAtCarbTarget(perGramCarb, targetCarbs);
 
   const mineSodium = recipe.perGram.carbsG > 0
