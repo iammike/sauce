@@ -23,6 +23,7 @@ import { TUNING } from '../data/tuning.js';
 import { PRODUCTS, ASSOCIATES_TAG } from '../data/products.js';
 import { LABEL_SIZES } from '../data/label-sizes.js';
 import { SALT_PROFILES, DEFAULT_CARB_RATIO } from '../src/calculator.js';
+import { OSMOLALITY_NOTE, OSMOLALITY_SOURCE_ID } from '../data/costs.js';
 import { FRUCTOSE_RATIO_MEASURED_BEST, FRUCTOSE_RATIO_SOURCE_ID } from '../src/hourly.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -483,6 +484,28 @@ describe('fructose ratio readout', () => {
     const link = $('ratio-readout').querySelector('a');
     expect(link.getAttribute('href')).toBe(`#ref-${FRUCTOSE_RATIO_SOURCE_ID}`);
     expect(document.getElementById(link.getAttribute('href').slice(1))).not.toBeNull();
+  });
+});
+
+// OSMOLALITY_NOTE spent its whole life exported, unit-tested and unrendered:
+// tests/cost.test.js asserted its wording while nothing imported it into the
+// page. A string test can't tell you a string is on screen.
+describe('the osmolality note', () => {
+  it('is actually rendered, not just exported', () => {
+    expect($('osmolality-note').textContent).toContain(OSMOLALITY_NOTE);
+  });
+
+  it('carries the corrected figures, not the ones that flattered the recipe', () => {
+    const text = $('osmolality-note').textContent;
+    expect(text).not.toMatch(/nearer 1000|isotonic at ~?290/);
+    expect(text).toMatch(/about 500/);
+  });
+
+  // Numbers on the page need a source on the page, not in a code comment.
+  it('anchors its figures to a reference that exists', () => {
+    const link = $('osmolality-note').querySelector('a');
+    expect(link.getAttribute('href')).toBe(`#ref-${OSMOLALITY_SOURCE_ID}`);
+    expect(document.getElementById(`ref-${OSMOLALITY_SOURCE_ID}`)).not.toBeNull();
   });
 });
 

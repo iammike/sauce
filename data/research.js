@@ -60,6 +60,14 @@ export const RESEARCH = [
     note: 'The evidence behind intakes above 90 g/hr. Oxidation keeps rising at 120 g/hr with maltodextrin plus fructose, and the gut adapts to repeated exposure — though field intakes of 120–200 g/hr still outpace the evidence, and measured performance gains taper above roughly 78 g/hr in recreationally trained riders.',
   },
   {
+    id: 'gisolfi-2001',
+    role: 'What osmolality actually costs you',
+    name: 'Intestinal fluid absorption during exercise: role of sport drink osmolality and [Na+]',
+    source: 'Gisolfi, Lambert & Summers · Med Sci Sports Exerc, 2001',
+    url: 'https://pubmed.ncbi.nlm.nih.gov/11404655/',
+    note: 'The source for the osmolality note on the cost panel. Six cyclists rode on 6% carbohydrate drinks built from different glucose, sucrose, fructose and maltodextrin combinations to span 169–283 mOsm/kg — the same lever this mix pulls. Worth reading for what it did not find: gastric emptying and fluid absorption were no different across that range, so the case for a low-osmolality drink is about headroom to add carbohydrate, not about a hypotonic drink absorbing faster.',
+  },
+  {
     id: 'gastric-emptying',
     role: 'How much you can actually drink',
     name: 'Gastric emptying and intestinal absorption during cycling',

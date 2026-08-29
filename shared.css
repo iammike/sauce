@@ -766,13 +766,24 @@ html { scroll-behavior: smooth; }
   max-width: 46rem;
 }
 
-/* Four abreast on one line — this is a comparison, and it only works if you
-   can see all four at once. auto-fit was dropping the fourth to its own row. */
+/* One line, all of them — this is a comparison, and it only works if you can
+   see every option at once. auto-fit was dropping the last to its own row.
+   The count is explicit and must track COMMERCIAL_PRODUCTS + the homemade
+   row: adding table sugar (#27) left a five-card grid in four columns, with
+   the last card orphaned on row two. Nothing catches this automatically —
+   jsdom doesn't lay out, and the e2e checks horizontal overflow only. */
 #cost-grid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
-@media (max-width: 1080px) {
+/* Five doesn't divide evenly below full width, so the steps are chosen to
+   keep the number of rows down rather than to keep them even: 3 columns
+   gives 3+2, where 2 would give 2+2+1 and strand a card on its own. */
+@media (max-width: 1180px) {
+  #cost-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (max-width: 860px) {
   #cost-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 

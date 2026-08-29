@@ -8,7 +8,8 @@ import { TUNING } from '../data/tuning.js';
 import { PRODUCTS } from '../data/products.js';
 import { RESEARCH, findResearch } from '../data/research.js';
 import { batchCost, costPerGramCarb, compareAtCarbTarget } from './cost.js';
-import { PRICED_AS_OF, INGREDIENT_COSTS, HOMEMADE_LIMITATION } from '../data/costs.js';
+import { PRICED_AS_OF, INGREDIENT_COSTS, HOMEMADE_LIMITATION, OSMOLALITY_NOTE,
+  OSMOLALITY_SOURCE_ID } from '../data/costs.js';
 import { SALT_PROFILES, DEFAULT_SALT_PROFILE } from './calculator.js';
 import { initDisclosureAnimation } from './disclosure.js';
 import { initRidePlanner, updateRidePlanner } from './ride-app.js';
@@ -344,6 +345,19 @@ function initProducts() {
   $('equipment-grid').innerHTML = renderProductCards(equipment);
 }
 
+// OSMOLALITY_NOTE was written, exported and unit-tested but never rendered —
+// nothing imported it, so tests/cost.test.js was asserting the wording of a
+// string that was never on screen. It's the mechanism behind half the
+// limitations in the cost grid (and the answer to "why not just table
+// sugar"), so it belongs under them. It states figures on the page, so it
+// carries a Source anchor like every other numeric claim here — the note is
+// a constant in our own data file, never user input, so innerHTML is safe.
+function initOsmolalityNote() {
+  const source = findResearch(OSMOLALITY_SOURCE_ID);
+  $('osmolality-note').innerHTML =
+    `${OSMOLALITY_NOTE} <a href="#ref-${source.id}">Source</a>`;
+}
+
 function initResearch() {
   // A bibliography, not a card grid — the title is the link, so there's no
   // separate call-to-action line, and the role reads as the heading.
@@ -583,6 +597,7 @@ function init() {
   initTuning();
   initProducts();
   initResearch();
+  initOsmolalityNote();
   initLabel();
 
   // Must run after initFlavorPresets()/initSaltProfiles() set both selects'
