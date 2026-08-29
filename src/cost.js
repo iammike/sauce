@@ -45,10 +45,6 @@ export function costPerGramCarb(totalCost, totalCarbsG) {
 }
 
 /**
- * Cost comparison at a given hourly carb intake — "what does an hour of
- * fueling cost, this way versus buying it".
- */
-/**
  * What the homemade mix costs per gram of carbohydrate, per-bottle flavourings
  * included.
  *
@@ -73,8 +69,17 @@ export function mixCostPerGramCarb({ costTotal, carbsG, flavor, targetCarbsPerHo
     + (targetCarbsPerHour > 0 ? perBottleCostPerHour / targetCarbsPerHour : 0);
 }
 
-export function compareAtCarbTarget(mixCostPerGramCarb, targetCarbsPerHour) {
-  const mine = mixCostPerGramCarb * targetCarbsPerHour;
+/**
+ * Cost comparison at a given hourly carb intake — "what does an hour of
+ * fueling cost, this way versus buying it".
+ *
+ * Takes the figure, not the function: `mixPerGramCarb` rather than
+ * `mixCostPerGramCarb`, which is now the name of the export above it — and
+ * not the bare `perGramCarb`, which the product map below declares for
+ * itself.
+ */
+export function compareAtCarbTarget(mixPerGramCarb, targetCarbsPerHour) {
+  const mine = mixPerGramCarb * targetCarbsPerHour;
 
   const commercial = COMMERCIAL_PRODUCTS.map((product) => {
     const perGramCarb = commercialCostPerGramCarb(product);
