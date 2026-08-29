@@ -1,9 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { computeRecipe } from '../src/calculator.js';
-import { batchCost, costPerGramCarb, compareAtCarbTarget } from '../src/cost.js';
+import { computeRecipe, DEFAULT_SALT_PROFILE, DEFAULT_CARB_BASE } from '../src/calculator.js';
+import { batchCost, costPerGramCarb, mixCostPerGramCarb, compareAtCarbTarget } from '../src/cost.js';
 import { COMMERCIAL_PRODUCTS, commercialCostPerGramCarb, litresPerHour, HOMEMADE_LIMITATION, OSMOLALITY_NOTE } from '../data/costs.js';
-import { sodiumStatus, SODIUM_TARGET_RANGE } from '../src/hourly.js';
-import { FLAVORINGS, findFlavoring } from '../data/flavorings.js';
+import { sodiumStatus, SODIUM_TARGET_RANGE, DEFAULT_TARGET_CARBS } from '../src/hourly.js';
+import { FLAVORINGS, findFlavoring, DEFAULT_FLAVORING_ID } from '../data/flavorings.js';
+import { CARB_BASES } from '../data/carb-bases.js';
+import { TUNING } from '../data/tuning.js';
 
 const PANTRY = { maltodextrin: 2300, fructose: 2000, flavoring: 500, salt: 400 };
 const strawberry = findFlavoring('strawberry');
@@ -191,6 +193,123 @@ describe('honest comparison', () => {
     const at120 = compareAtCarbTarget(0.017, 120).commercial
       .find((c) => c.name === 'Gatorade Endurance Formula');
     expect(at120.sodiumMgPerHour).toBeCloseTo(at60.sodiumMgPerHour * 2, 6);
+  });
+});
+
+// data/tuning.js's cheapest-mix entry quotes two dollar figures and two UI
+// labels. Prices move — the whole cost panel is built around saying so — and
+// a number sitting in prose has nothing to keep it honest. These derive the
+// figures from the cost model by the same path the page uses, so a price
+// refresh, a different default intake, or a renamed option that leaves the
+// copy behind fails here rather than shipping a confident wrong number.
+//
+// Every input is a named default rather than a literal. A first version
+// hardcoded `* 75`: moving DEFAULT_TARGET_CARBS to 90 made the page render
+// $0.30 and $1.56 while the prose still said $0.25 and $1.30, with all of
+// these green.
+// A per-bottle flavouring (citrus juice) never enters the jar, so batchCost()
+// alone reports it as free. It isn't — you buy it by the bottle — and
+// renderCost() amortises it over an hour's carbohydrate. That term lived only
+// inside renderCost() until it was extracted, where no unit test could reach
+// it and a test that recomputed the same figure silently omitted it.
+describe('mixCostPerGramCarb', () => {
+  const batchFlavour = findFlavoring(DEFAULT_FLAVORING_ID);
+  const bottleFlavour = FLAVORINGS.find((f) => f.perBottle);
+  const args = { costTotal: 10, carbsG: 1000, targetCarbsPerHour: 75 };
+
+  it('charges for a per-bottle flavouring the batch never contains', () => {
+    const withBottle = mixCostPerGramCarb({ ...args, flavor: bottleFlavour });
+    const plain = costPerGramCarb(args.costTotal, args.carbsG);
+    expect(withBottle).toBeGreaterThan(plain);
+    expect(withBottle - plain).toBeCloseTo(
+      (bottleFlavour.perBottleMl * bottleFlavour.pricePerMl) / args.targetCarbsPerHour, 10,
+    );
+  });
+
+  it('adds nothing for a flavouring that goes in the jar', () => {
+    expect(mixCostPerGramCarb({ ...args, flavor: batchFlavour }))
+      .toBeCloseTo(costPerGramCarb(args.costTotal, args.carbsG), 10);
+  });
+
+  // targetCarbsPerHour of 0 is reachable — the field can be emptied.
+  it('does not divide by a zero carb target', () => {
+    const r = mixCostPerGramCarb({ ...args, flavor: bottleFlavour, targetCarbsPerHour: 0 });
+    expect(Number.isFinite(r)).toBe(true);
+  });
+});
+
+describe('the cheapest-mix answer quotes figures that are still true', () => {
+  const perHour = (carbBase, flavoringId) => {
+    const flavor = findFlavoring(flavoringId);
+    const recipe = computeRecipe({
+      // Deliberately unconstrained: cost per gram of carbohydrate is
+      // scale-invariant, so the batch size is not load-bearing here.
+      onHand: { maltodextrin: 1e6, fructose: 1e6, sucrose: 1e6, flavoring: 1e6, salt: 1e6 },
+      saltProfile: DEFAULT_SALT_PROFILE,
+      carbBase,
+      flavorRatio: flavor.ratio,
+      flavorCarbFraction: flavor.carbFraction,
+      flavorSugarFraction: flavor.sugarFraction,
+    });
+    const cost = batchCost(recipe.recipeGrams, flavor.pricePerGram ?? 0);
+    // The page's own function, not a reimplementation of it. Recomputing this
+    // inline dropped the per-bottle flavouring term — invisible while no
+    // default is perBottle, and wrong the moment one is.
+    return mixCostPerGramCarb({
+      costTotal: cost.total,
+      carbsG: recipe.totals.carbsG,
+      flavor,
+      targetCarbsPerHour: DEFAULT_TARGET_CARBS,
+    }) * DEFAULT_TARGET_CARBS;
+  };
+
+  const cheapest = () => perHour('sucrose', 'unflavored');
+  const full = () => perHour(DEFAULT_CARB_BASE, DEFAULT_FLAVORING_ID);
+
+  const entry = TUNING.find((t) => t.id === 'cheapest-mix');
+  const quoted = () => [...entry.fix.matchAll(/\$(\d+\.\d{2})/g)].map((m) => Number(m[1]));
+  const cents = (n) => Number(n.toFixed(2));
+
+  it('quotes exactly two prices, cheapest first', () => {
+    expect(quoted()).toHaveLength(2);
+    expect(quoted()[0]).toBeLessThan(quoted()[1]);
+  });
+
+  it('matches what sugar and salt actually costs', () => {
+    expect(quoted()[0]).toBe(cents(cheapest()));
+  });
+
+  it('matches what the full mix actually costs', () => {
+    expect(quoted()[1]).toBe(cents(full()));
+  });
+
+  // "cheaper than anything you can buy ready-made" — table sugar is excluded
+  // on purpose and the wording is what makes that honest: a bag of sugar is
+  // bought, and it IS cheaper ($0.19 against $0.25), but it isn't ready-made
+  // and carries no sodium, which is its own entry's stated limitation. If the
+  // copy ever drops "ready-made", this exclusion stops being defensible.
+  it('is cheaper than every ready-made option', () => {
+    expect(entry.fix).toMatch(/ready-made/);
+    const readyMade = COMMERCIAL_PRODUCTS
+      .filter((p) => p.id !== 'table-sugar')
+      .map((p) => commercialCostPerGramCarb(p) * DEFAULT_TARGET_CARBS);
+    expect(cheapest()).toBeLessThan(Math.min(...readyMade));
+  });
+
+  // The `why` claims the carb swap saves more than dropping the flavouring.
+  // A first version said the opposite, which was wrong by a wide margin.
+  it('attributes the bigger saving to the lever that actually carries it', () => {
+    const dropFlavour = full() - perHour(DEFAULT_CARB_BASE, 'unflavored');
+    const swapCarb = full() - perHour('sucrose', DEFAULT_FLAVORING_ID);
+    expect(swapCarb).toBeGreaterThan(dropFlavour);
+  });
+
+  // The copy names two options by the label the select shows. Those are
+  // shortNames, which CLAUDE.md says get shortened whenever they don't fit
+  // the control — so they are actively expected to change.
+  it('names the options by labels the page actually shows', () => {
+    expect(entry.fix).toContain(CARB_BASES.sucrose.shortName);
+    expect(entry.fix).toContain(findFlavoring('unflavored').shortName);
   });
 });
 
