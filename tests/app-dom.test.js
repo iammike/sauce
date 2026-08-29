@@ -23,7 +23,6 @@ import { TUNING } from '../data/tuning.js';
 import { PRODUCTS, ASSOCIATES_TAG } from '../data/products.js';
 import { LABEL_SIZES } from '../data/label-sizes.js';
 import { SALT_PROFILES, DEFAULT_CARB_RATIO } from '../src/calculator.js';
-import { OSMOLALITY_NOTE, OSMOLALITY_SOURCE_ID } from '../data/costs.js';
 import { CARB_BASES } from '../data/carb-bases.js';
 import { FRUCTOSE_RATIO_MEASURED_BEST, FRUCTOSE_RATIO_SOURCE_ID } from '../src/hourly.js';
 
@@ -514,9 +513,6 @@ describe('fructose ratio readout', () => {
   });
 });
 
-// OSMOLALITY_NOTE spent its whole life exported, unit-tested and unrendered:
-// tests/cost.test.js asserted its wording while nothing imported it into the
-// page. A string test can't tell you a string is on screen.
 describe('carb source mode', () => {
   const shown = (key) => !document.querySelector(`[data-carb-part="${key}"]`).hidden;
 
@@ -615,25 +611,6 @@ describe('carb source mode', () => {
     } finally {
       vi.doUnmock('../src/calculator.js');
     }
-  });
-});
-
-describe('the osmolality note', () => {
-  it('is actually rendered, not just exported', () => {
-    expect($('osmolality-note').textContent).toContain(OSMOLALITY_NOTE);
-  });
-
-  it('carries the corrected figures, not the ones that flattered the recipe', () => {
-    const text = $('osmolality-note').textContent;
-    expect(text).not.toMatch(/nearer 1000|isotonic at ~?290/);
-    expect(text).toMatch(/about 500/);
-  });
-
-  // Numbers on the page need a source on the page, not in a code comment.
-  it('anchors its figures to a reference that exists', () => {
-    const link = $('osmolality-note').querySelector('a');
-    expect(link.getAttribute('href')).toBe(`#ref-${OSMOLALITY_SOURCE_ID}`);
-    expect(document.getElementById(`ref-${OSMOLALITY_SOURCE_ID}`)).not.toBeNull();
   });
 });
 

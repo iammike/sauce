@@ -9,8 +9,7 @@ import { TUNING } from '../data/tuning.js';
 import { PRODUCTS } from '../data/products.js';
 import { RESEARCH, findResearch } from '../data/research.js';
 import { batchCost, mixCostPerGramCarb, compareAtCarbTarget } from './cost.js';
-import { PRICED_AS_OF, INGREDIENT_COSTS, HOMEMADE_LIMITATION, OSMOLALITY_NOTE,
-  OSMOLALITY_SOURCE_ID } from '../data/costs.js';
+import { PRICED_AS_OF, INGREDIENT_COSTS, HOMEMADE_LIMITATION } from '../data/costs.js';
 import { SALT_PROFILES, DEFAULT_SALT_PROFILE } from './calculator.js';
 import { initDisclosureAnimation } from './disclosure.js';
 import { initRidePlanner, updateRidePlanner } from './ride-app.js';
@@ -420,26 +419,6 @@ function initProducts() {
   $('equipment-grid').innerHTML = renderProductCards(equipment);
 }
 
-// OSMOLALITY_NOTE was written, exported and unit-tested but never rendered —
-// nothing imported it, so tests/cost.test.js was asserting the wording of a
-// string that was never on screen. It's the mechanism behind half the
-// limitations in the cost grid (and the answer to "why not just table
-// sugar"), so it belongs under them. It states figures on the page, so it
-// carries a Source anchor like every other numeric claim here.
-//
-// Built as nodes rather than innerHTML, and the id is used directly rather
-// than read back off findResearch() — a missing entry would otherwise throw
-// mid-init and leave every panel below it blank, which is the failure this
-// repo already has a dom-contract test for. A bad id now degrades to a dead
-// anchor, which the test catches loudly instead.
-function initOsmolalityNote() {
-  const el = $('osmolality-note');
-  const link = document.createElement('a');
-  link.href = `#ref-${OSMOLALITY_SOURCE_ID}`;
-  link.textContent = 'Source';
-  el.replaceChildren(`${OSMOLALITY_NOTE} `, link);
-}
-
 function initResearch() {
   // A bibliography, not a card grid — the title is the link, so there's no
   // separate call-to-action line, and the role reads as the heading.
@@ -682,7 +661,6 @@ function init() {
   initTuning();
   initProducts();
   initResearch();
-  initOsmolalityNote();
   initLabel();
 
   // Must run after initFlavorPresets()/initSaltProfiles()/initCarbBases()

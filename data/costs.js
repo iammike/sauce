@@ -119,25 +119,6 @@ export const COMMERCIAL_PRODUCTS = [
 // every other product here has its drawback spelled out.
 export const HOMEMADE_LIMITATION = 'Nothing checks your work — get the sodium wrong and there is no label to catch it. Ingredients come in kilogram bags, so the up-front cost is high and you commit to four of them before knowing whether you like it. Ride on a batch before it matters.';
 
-// Why the mix leans on maltodextrin rather than sugar. Osmolality depends on
-// particle count, not mass: maltodextrin is a polymer, so each molecule
-// carries many glucose units while counting once osmotically.
-//
-// The numbers here were wrong until #27 and both errors flattered the recipe:
-// 9% glucose was given as ~1000 mOsm (it is ~500 — 90 g/L over 180 g/mol, and
-// D10W's documented 505 mOsm/L agrees — that is 10% dextrose *monohydrate*,
-// i.e. 9.1% anhydrous glucose, 100 g/L over 198.17 g/mol, so anyone
-// re-deriving it from 100/180 will get 555 and think this is wrong), and 9%
-// maltodextrin as "roughly isotonic
-// at ~290" (a DE 10 maltodextrin averages ~10 glucose units, so ~1639 g/mol
-// and ~55 mOsm/L — strongly hypotonic, which is better than isotonic, not
-// worse). The honest version also has to admit where the headroom goes: free
-// fructose is a single molecule like glucose, so it dominates the count.
-export const OSMOLALITY_NOTE = 'Osmolality depends on how many particles are dissolved, not what they weigh. Maltodextrin is a chain of glucose units, so it counts once while delivering many: at 9% it contributes roughly 55–110 mOsm/L depending on chain length, where 9% glucose contributes about 500 and plasma sits near 290. That headroom is what makes a carb-dense drink possible at all. Free fructose spends it — one molecule, one particle — so at the standard ratio around two thirds of this mix\'s osmoles are fructose and well under a fifth is maltodextrin.';
-
-// The note states numbers on the page, so the page has to carry the source —
-// this repo has been bitten before by a claim that lived only in a comment.
-export const OSMOLALITY_SOURCE_ID = 'gisolfi-2001';
 
 /** Litres of fluid needed per hour to hit a carb target at label dilution. */
 export function litresPerHour(product, targetCarbsPerHour) {
