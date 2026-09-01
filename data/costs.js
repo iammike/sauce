@@ -65,7 +65,7 @@ export const COMMERCIAL_PRODUCTS = [
     basis: '$38.99 / 32 oz (907 g); 24 g serving = 22 g carbs, 300 mg sodium',
     confidence: 'actual',
     note: 'Purpose-built endurance fuel and the closest commercial equivalent to this mix. Multiple carb sources, and the only option here that covers a serious sweat rate without added salt. Figures are from the label and a real purchase price.',
-    limitation: 'About 2.5x the cost of mixing it yourself, and the carb-to-sodium ratio is fixed — on a cool day you take the same sodium load regardless, since the only way to take less is to take fewer carbs.',
+    limitation: 'The carb-to-sodium ratio is fixed — on a cool day you take the same sodium load regardless, since the only way to take less is to take fewer carbs.',
   },
   {
     id: 'maurten-320',

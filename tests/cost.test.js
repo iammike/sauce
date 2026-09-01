@@ -313,6 +313,36 @@ describe('the cheapest-mix answer quotes figures that are still true', () => {
   });
 });
 
+// The multiple was computed and never rendered, while a stale copy of it sat
+// in one product's `limitation` prose — "About 2.5x the cost of mixing it
+// yourself" against a real 2.70x, drifted when #26 moved the carb ratio.
+// It is rendered now, so no copy should carry its own version of the figure.
+describe('no product states its own cost multiple in prose', () => {
+  it('leaves the comparison to the computed figure', () => {
+    for (const product of COMMERCIAL_PRODUCTS) {
+      expect(product.limitation).not.toMatch(/[\d.]+\s*[x×]\s*(the\s+)?cost/i);
+      expect(product.note ?? '').not.toMatch(/[\d.]+\s*[x×]\s*(the\s+)?cost/i);
+    }
+  });
+
+  it('still computes a multiple for every commercial product', () => {
+    const { commercial } = compareAtCarbTarget(0.017, DEFAULT_TARGET_CARBS);
+    for (const c of commercial) {
+      expect(c.multiple).toBeGreaterThan(0);
+      expect(Number.isFinite(c.multiple)).toBe(true);
+    }
+  });
+
+  // Don't rig the comparison: below 1 means the shop-bought option really is
+  // cheaper, and there are two of those.
+  it('reports a multiple below 1 where the shop wins', () => {
+    const { commercial } = compareAtCarbTarget(0.017, DEFAULT_TARGET_CARBS);
+    const cheaper = commercial.filter((c) => c.multiple < 1).map((c) => c.id);
+    expect(cheaper).toContain('gatorade-regular');
+    expect(cheaper).toContain('table-sugar');
+  });
+});
+
 describe('sodium is judged, not just reported', () => {
   // Sugar's zero is the whole reason it needs a salt source beside it, so it
   // has to read as a judged shortfall rather than a blank.

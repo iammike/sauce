@@ -145,6 +145,7 @@ function renderCost(recipe, flavor, targetCarbs, base) {
       <p class="card__eyebrow">${r.name}${r.confidence === 'estimated' ? ' · estimated' : ''}</p>
       <p class="card__value data">${money(r.perHour)}<span class="card__unit"> / hour</span></p>
       <p class="field-hint">${money((r.perGramCarb ?? perGramCarb) * 100)} per 100 g of carbohydrate</p>
+      ${r.mine ? '' : `<p class="field-hint">${formatMultiple(r.multiple)} your mix</p>`}
       <p class="field-hint">${formatMg(r.sodiumMgPerHour)} sodium/hr <span class="${statusPillClass(sodiumStatus(r.sodiumMgPerHour))}">${sodiumStatus(r.sodiumMgPerHour)}</span></p>
       <p class="cost-card__note">${r.note ?? ''}</p>
       <p class="field-hint cost-card__limitation"><strong>Catch:</strong> ${r.limitation}</p>
@@ -219,6 +220,15 @@ function renderRecipeGrid(recipe, flavor, base) {
   $('calc-limiting').textContent = recipe.limiting === 'cap'
     ? `Sized to your ${formatGrams(recipe.actualBatch)} container. You have enough of every ingredient for more than one batch.`
     : `${limitLabel} is the limiting ingredient — everything else is scaled to match it.`;
+}
+
+// Rendered from the computed figure rather than written into each product's
+// copy. Two significant figures throughout rather than a fixed decimal place:
+// 1dp reads fine at 2.7x but turns table sugar's 0.14 into "0.1", a 40%
+// relative error on the cheapest thing in the grid, which is where the
+// comparison is most worth being honest about.
+function formatMultiple(multiple) {
+  return `${Number(multiple.toPrecision(2))}×`;
 }
 
 function statusPillClass(status) {

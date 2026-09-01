@@ -95,8 +95,11 @@ export function compareAtCarbTarget(mixPerGramCarb, targetCarbsPerHour) {
       litresPerHour: litresPerHour(product, targetCarbsPerHour),
       sodiumMgPerHour: product.sodiumMgPerGramCarb * targetCarbsPerHour,
       // How many times more expensive than making it yourself. Below 1 means
-      // the commercial option is actually cheaper — true for regular Gatorade,
-      // and worth showing rather than hiding.
+      // the commercial option is actually cheaper — true for regular Gatorade
+      // and for a bag of sugar — and it is rendered rather than hidden, which
+      // this comment claimed for a while before it was true: the figure was
+      // computed here and a stale copy of it lived in one product's
+      // `limitation` prose, where it drifted to 2.5x against a real 2.7x.
       multiple: mine > 0 ? perHour / mine : 0,
     };
   }).sort((a, b) => a.perHour - b.perHour);
