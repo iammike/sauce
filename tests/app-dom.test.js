@@ -844,6 +844,52 @@ describe('cost panel', () => {
   it('marks the homemade mix as the active card', () => {
     expect($('cost-grid').querySelectorAll('.card--active')).toHaveLength(1);
   });
+
+  // The multiple was computed by compareAtCarbTarget() and rendered nowhere,
+  // while a hand-written copy of it sat in one product's prose and drifted to
+  // 2.5x against a real 2.70x. tests/cost.test.js can only see the data; a
+  // string test cannot tell you a string is on screen, which is exactly how
+  // that one survived. This is the half that can.
+  const multiples = () => [...$('cost-grid').querySelectorAll('.card')]
+    .map((c) => [...c.querySelectorAll('.field-hint')]
+      .find((h) => h.textContent.includes('your mix'))?.textContent.trim());
+
+  it('renders a cost multiple on every commercial card', () => {
+    const shown = multiples();
+    // One per card except the homemade one, which has nothing to compare to.
+    expect(shown.filter(Boolean)).toHaveLength(shown.length - 1);
+    for (const text of shown.filter(Boolean)) {
+      expect(text).toMatch(/^\d+(\.\d+)?× your mix$/);
+    }
+  });
+
+  it('does not compare the homemade mix to itself', () => {
+    const active = $('cost-grid').querySelector('.card--active');
+    expect(active.textContent).not.toMatch(/your mix/);
+  });
+
+  // Not just present, but the right number and following the batch: raising
+  // the carb target scales both sides equally, so the multiple must not move.
+  // A hardcoded string would sail through the assertion above.
+  it('renders the computed figure, and holds it as the batch changes', () => {
+    const shownFor = (name) => [...$('cost-grid').querySelectorAll('.card')]
+      .find((c) => c.textContent.includes(name))
+      .textContent.match(/([\d.]+)× your mix/)?.[1];
+
+    setValue('in-target-carbs', 75);
+    const before = shownFor('Gatorade Endurance');
+    expect(Number(before)).toBeGreaterThan(1);
+
+    // Raising the target scales both sides equally, so the ratio must not
+    // move — where a hardcoded string would also survive. What separates
+    // them is the fructose ratio, which changes the mix's cost per gram of
+    // carbohydrate and so must change the multiple.
+    setValue('in-target-carbs', 120);
+    expect(shownFor('Gatorade Endurance')).toBe(before);
+
+    setValue('in-carb-ratio', 0.4);
+    expect(shownFor('Gatorade Endurance')).not.toBe(before);
+  });
 });
 
 // The populated-regions check proves the label renders. It does not prove each

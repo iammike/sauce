@@ -223,10 +223,15 @@ function renderRecipeGrid(recipe, flavor, base) {
 }
 
 // Rendered from the computed figure rather than written into each product's
-// copy. Two significant figures throughout rather than a fixed decimal place:
+// copy. Rounded to two significant figures rather than a fixed decimal place:
 // 1dp reads fine at 2.7x but turns table sugar's 0.14 into "0.1", a 40%
 // relative error on the cheapest thing in the grid, which is where the
 // comparison is most worth being honest about.
+//
+// Number() then drops a trailing zero, so this rounds to two significant
+// figures without always printing two — 1.0 renders as "1", 0.10 as "0.1".
+// That is the intended reading (nobody writes "1.0x your mix") and loses no
+// precision, since the trailing zero carries none.
 function formatMultiple(multiple) {
   return `${Number(multiple.toPrecision(2))}×`;
 }

@@ -319,9 +319,13 @@ describe('the cheapest-mix answer quotes figures that are still true', () => {
 // It is rendered now, so no copy should carry its own version of the figure.
 describe('no product states its own cost multiple in prose', () => {
   it('leaves the comparison to the computed figure', () => {
+    // Any "<number>x" at all, not just one followed by the word "cost" — a
+    // first version anchored on "cost" and would have let "2.5x your mix"
+    // through, which is the same drift in the same place.
+    const statesAMultiple = /\d+(\.\d+)?\s*[x×]\b/i;
     for (const product of COMMERCIAL_PRODUCTS) {
-      expect(product.limitation).not.toMatch(/[\d.]+\s*[x×]\s*(the\s+)?cost/i);
-      expect(product.note ?? '').not.toMatch(/[\d.]+\s*[x×]\s*(the\s+)?cost/i);
+      expect(product.limitation).not.toMatch(statesAMultiple);
+      expect(product.note ?? '').not.toMatch(statesAMultiple);
     }
   });
 
