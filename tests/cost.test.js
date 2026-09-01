@@ -317,15 +317,41 @@ describe('the cheapest-mix answer quotes figures that are still true', () => {
 // in one product's `limitation` prose — "About 2.5x the cost of mixing it
 // yourself" against a real 2.70x, drifted when #26 moved the carb ratio.
 // It is rendered now, so no copy should carry its own version of the figure.
+// Both spellings. `[x×]\b` looks like it covers them and does not: \b needs a
+// word character on one side, and × is not one, so "2.5× your mix" — the exact
+// form the page renders — slipped straight through. The x arm keeps its
+// boundary so a dimension like "4x6" isn't flagged.
+const STATES_A_MULTIPLE = /\d+(\.\d+)?\s*(x\b|×)/i;
+
+// The guard needs its own guard: two versions of this regex were wrong in
+// ways the products' current copy could not reveal, because none of them
+// states a multiple — which is the whole point. These examples are what make
+// the assertion below mean something.
+describe('the multiple-in-prose guard', () => {
+  it.each([
+    'About 2.5x the cost of mixing it yourself',
+    '2.5x your mix',
+    '2.5× your mix',
+    '2.5 × your mix',
+    'roughly 3× what you would pay',
+  ])('catches %s', (copy) => {
+    expect(copy).toMatch(STATES_A_MULTIPLE);
+  });
+
+  it.each([
+    'about a quarter the fluid regular Gatorade needs',
+    'Sodium is under half the replacement target at any realistic intake',
+    '80 g in 500 ml',
+  ])('leaves ordinary copy alone: %s', (copy) => {
+    expect(copy).not.toMatch(STATES_A_MULTIPLE);
+  });
+});
+
 describe('no product states its own cost multiple in prose', () => {
   it('leaves the comparison to the computed figure', () => {
-    // Any "<number>x" at all, not just one followed by the word "cost" — a
-    // first version anchored on "cost" and would have let "2.5x your mix"
-    // through, which is the same drift in the same place.
-    const statesAMultiple = /\d+(\.\d+)?\s*[x×]\b/i;
     for (const product of COMMERCIAL_PRODUCTS) {
-      expect(product.limitation).not.toMatch(statesAMultiple);
-      expect(product.note ?? '').not.toMatch(statesAMultiple);
+      expect(product.limitation).not.toMatch(STATES_A_MULTIPLE);
+      expect(product.note ?? '').not.toMatch(STATES_A_MULTIPLE);
     }
   });
 
