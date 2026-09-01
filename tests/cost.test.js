@@ -313,6 +313,66 @@ describe('the cheapest-mix answer quotes figures that are still true', () => {
   });
 });
 
+// The multiple was computed and never rendered, while a stale copy of it sat
+// in one product's `limitation` prose — "About 2.5x the cost of mixing it
+// yourself" against a real 2.70x, drifted when #26 moved the carb ratio.
+// It is rendered now, so no copy should carry its own version of the figure.
+// Both spellings. `[x×]\b` looks like it covers them and does not: \b needs a
+// word character on one side, and × is not one, so "2.5× your mix" — the exact
+// form the page renders — slipped straight through. The x arm keeps its
+// boundary so a dimension like "4x6" isn't flagged.
+const STATES_A_MULTIPLE = /\d+(\.\d+)?\s*(x\b|×)/i;
+
+// The guard needs its own guard: two versions of this regex were wrong in
+// ways the products' current copy could not reveal, because none of them
+// states a multiple — which is the whole point. These examples are what make
+// the assertion below mean something.
+describe('the multiple-in-prose guard', () => {
+  it.each([
+    'About 2.5x the cost of mixing it yourself',
+    '2.5x your mix',
+    '2.5× your mix',
+    '2.5 × your mix',
+    'roughly 3× what you would pay',
+  ])('catches %s', (copy) => {
+    expect(copy).toMatch(STATES_A_MULTIPLE);
+  });
+
+  it.each([
+    'about a quarter the fluid regular Gatorade needs',
+    'Sodium is under half the replacement target at any realistic intake',
+    '80 g in 500 ml',
+  ])('leaves ordinary copy alone: %s', (copy) => {
+    expect(copy).not.toMatch(STATES_A_MULTIPLE);
+  });
+});
+
+describe('no product states its own cost multiple in prose', () => {
+  it('leaves the comparison to the computed figure', () => {
+    for (const product of COMMERCIAL_PRODUCTS) {
+      expect(product.limitation).not.toMatch(STATES_A_MULTIPLE);
+      expect(product.note ?? '').not.toMatch(STATES_A_MULTIPLE);
+    }
+  });
+
+  it('still computes a multiple for every commercial product', () => {
+    const { commercial } = compareAtCarbTarget(0.017, DEFAULT_TARGET_CARBS);
+    for (const c of commercial) {
+      expect(c.multiple).toBeGreaterThan(0);
+      expect(Number.isFinite(c.multiple)).toBe(true);
+    }
+  });
+
+  // Don't rig the comparison: below 1 means the shop-bought option really is
+  // cheaper, and there are two of those.
+  it('reports a multiple below 1 where the shop wins', () => {
+    const { commercial } = compareAtCarbTarget(0.017, DEFAULT_TARGET_CARBS);
+    const cheaper = commercial.filter((c) => c.multiple < 1).map((c) => c.id);
+    expect(cheaper).toContain('gatorade-regular');
+    expect(cheaper).toContain('table-sugar');
+  });
+});
+
 describe('sodium is judged, not just reported', () => {
   // Sugar's zero is the whole reason it needs a salt source beside it, so it
   // has to read as a judged shortfall rather than a blank.

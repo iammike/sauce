@@ -43,7 +43,7 @@ export const RECIPES = [
     targetCarbsPerHour: 75,
     confidence: 'variant',
     bestFor: 'Heat, humidity, or if you finish rides with salt crust on your face.',
-    why: 'Identical carbs to the Classic, salt bumped from 6.5% to 8.5% of the maltodextrin weight. Heavy sweaters can lose 1000+ mg sodium/hr; the standard profile undershoots that.',
+    why: 'Identical carbs to the Classic, salt bumped from the endurance level to the hot one. (Those were percentages of maltodextrin weight when this was written; #30 redefined salt profiles as grams per gram of carbohydrate, so naming the levels rather than the numbers is what stays true.) Heavy sweaters can lose 1000+ mg sodium/hr; the standard profile undershoots that.',
   },
   {
     id: 'big-day',
@@ -79,7 +79,7 @@ export const RECIPES = [
     targetCarbsPerHour: 75,
     confidence: 'tested',
     bestFor: 'Mixing into something that is already flavored, or cutting cost.',
-    why: 'The Classic minus the flavoring. Freeze-dried fruit powder is ~11% of the mix by weight but roughly a third of the cost, so dropping it is the single biggest lever on price per hour.',
+    why: 'The Classic minus the flavoring. Freeze-dried fruit powder is around a tenth of the mix by weight but roughly a third of the cost, so dropping it is the single biggest lever on price per hour.',
   },
 ];
 
