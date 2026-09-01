@@ -145,7 +145,7 @@ function renderCost(recipe, flavor, targetCarbs, base) {
       <p class="card__eyebrow">${r.name}${r.confidence === 'estimated' ? ' · estimated' : ''}</p>
       <p class="card__value data">${money(r.perHour)}<span class="card__unit"> / hour</span></p>
       <p class="field-hint">${money((r.perGramCarb ?? perGramCarb) * 100)} per 100 g of carbohydrate</p>
-      ${r.mine ? '' : `<p class="field-hint">${formatMultiple(r.multiple)} your mix</p>`}
+      ${showMultiple(r) ? `<p class="field-hint">${formatMultiple(r.multiple)} your mix</p>` : ''}
       <p class="field-hint">${formatMg(r.sodiumMgPerHour)} sodium/hr <span class="${statusPillClass(sodiumStatus(r.sodiumMgPerHour))}">${sodiumStatus(r.sodiumMgPerHour)}</span></p>
       <p class="cost-card__note">${r.note ?? ''}</p>
       <p class="field-hint cost-card__limitation"><strong>Catch:</strong> ${r.limitation}</p>
@@ -220,6 +220,15 @@ function renderRecipeGrid(recipe, flavor, base) {
   $('calc-limiting').textContent = recipe.limiting === 'cap'
     ? `Sized to your ${formatGrams(recipe.actualBatch)} container. You have enough of every ingredient for more than one batch.`
     : `${limitLabel} is the limiting ingredient — everything else is scaled to match it.`;
+}
+
+// The homemade row has nothing to compare itself to, and compareAtCarbTarget()
+// reports 0 when the mix costs nothing — reachable by clearing the on-hand
+// fields, which makes the batch and so its cost zero. The ratio is undefined
+// there, not zero, and "0× your mix" reads as though the shop were giving it
+// away. Say nothing instead.
+function showMultiple(row) {
+  return !row.mine && Number.isFinite(row.multiple) && row.multiple > 0;
 }
 
 // Rendered from the computed figure rather than written into each product's

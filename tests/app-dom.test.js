@@ -868,6 +868,17 @@ describe('cost panel', () => {
     expect(active.textContent).not.toMatch(/your mix/);
   });
 
+  // Clearing the on-hand fields makes the batch, and so its cost, zero — at
+  // which point the ratio is undefined rather than zero. Every card used to
+  // read "0× your mix", which says the shop is giving it away.
+  it('says nothing rather than 0x when the mix costs nothing', () => {
+    for (const id of ['in-malto', 'in-fructose', 'in-flavoring', 'in-salt']) {
+      setValue(id, 0);
+    }
+    expect($('cost-grid').textContent).toMatch(/Gatorade/);
+    expect($('cost-grid').textContent).not.toMatch(/your mix/);
+  });
+
   // Not just present, but the right number and following the batch: raising
   // the carb target scales both sides equally, so the multiple must not move.
   // A hardcoded string would sail through the assertion above.
